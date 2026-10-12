@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, DefaultOnToggle, FreeText, OptionSet, PerGameCommonOptions, Range, Toggle
+from Options import Choice, DefaultOnToggle, FreeText, NamedRange, OptionSet, PerGameCommonOptions, Range, Toggle
 
 from .museum import CHECK_DONATE, CHECK_FIND
 from .villagers import PERSONALITIES, VILLAGERS
@@ -273,39 +273,44 @@ class Goal(OptionSet):
     default = frozenset({"Statue", "Museum"})
 
 
-class LoanAmount(Range):
+class LoanAmount(NamedRange):
     range_start = 1000
-    range_end = 9999999
+    range_end = 999999
 
 
 class StartingLoan(LoanAmount):
     """The loan for your starting house. Vanilla: 17,400."""
     display_name = "Starting Loan"
     default = 5000
+    special_range_names = {"default": 5000, "vanilla": 17400}
 
 
 class MediumLoan(LoanAmount):
     """The loan for the first house upgrade (bigger main floor). Vanilla: 148,000."""
     display_name = "Medium House Loan"
     default = 10000
+    special_range_names = {"default": 10000, "vanilla": 148000}
 
 
 class BasementLoan(LoanAmount):
     """The loan for the basement (the second upgrade). Vanilla: 49,800."""
     display_name = "Basement Loan"
     default = 10000
+    special_range_names = {"default": 10000, "vanilla": 49800}
 
 
 class LargeLoan(LoanAmount):
     """The loan for the third house upgrade (biggest main floor). Vanilla: 398,000."""
     display_name = "Large House Loan"
     default = 20000
+    special_range_names = {"default": 20000, "vanilla": 398000}
 
 
 class UpperLoan(LoanAmount):
     """The loan for the upper floor (the last upgrade). Vanilla: 798,000."""
     display_name = "Upper Floor Loan"
     default = 30000
+    special_range_names = {"default": 30000, "vanilla": 798000}
 
 
 class Loansanity(DefaultOnToggle):
