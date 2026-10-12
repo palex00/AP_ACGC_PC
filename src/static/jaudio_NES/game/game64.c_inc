@@ -3313,7 +3313,11 @@ extern void Na_SysLevStart(u8 id) {
     for (j = 0; j < ARRAY_COUNT(sou_sys_lev); j++) {
         //! BUG: `i` will be ARRAY_COUNT(sou_sys_lev) if we get to this point,
         // and we will be incrementing out of bounds
+#ifndef BUGFIXES
         sou_sys_lev[i]._1++;
+#else
+        sou_sys_lev[j]._1++;
+#endif
     }
 
 offset_jmp:

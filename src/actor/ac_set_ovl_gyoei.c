@@ -1660,8 +1660,15 @@ static int aSOG_gyoei_check_water_unit_in_block(SET_MANAGER* set_manager) {
   if (collision_data != NULL) {
     int x, z;
 
+#ifndef BUGFIXES
     for (z = 0; z < mFI_UT_WORLDSIZE_Z; z++) {
       for (x = 0; x < mFI_UT_WORLDSIZE_X; x++) {
+#else
+    // mFI_UT_WORLDSIZE_* is a unit's world size (40), not units per block (16): read 1600
+    // units of a 256-unit block, into the next blocks' collision
+    for (z = 0; z < UT_Z_NUM; z++) {
+      for (x = 0; x < UT_X_NUM; x++) {
+#endif
         if (mCoBG_CheckWaterAttribute_OutOfSea(collision_data->data.unit_attribute) == TRUE) {
           return TRUE;
         }

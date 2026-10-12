@@ -13,7 +13,13 @@ typedef struct actor_set_manager_s SET_MANAGER;
 
 #define aSetMgr_SET_OVERLAY_BUF_SIZE 0x4000
 
+#ifndef BUGFIXES
 #define aSetMgr_INSECT_SPAWN_INFO_COUNT 43
+#else
+// July->August transition, 8AM-4PM: 21 + 21 + 3 extra entries (aSOI_ins_make_range_data) = 45,
+// which overflowed into now_month/now_term/info_num and gyoei_keep
+#define aSetMgr_INSECT_SPAWN_INFO_COUNT 45
+#endif
 
 /* sizeof(aSOI_insect_spawn_info_f_c) == 0xC */
 typedef struct insect_spawn_info_f_s {
