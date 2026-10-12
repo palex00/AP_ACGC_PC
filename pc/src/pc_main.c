@@ -13,6 +13,7 @@
 #include "m_kankyo.h"
 #include "ap_archipelago.h"
 #include "pc_ap_logic.h"
+#include "pc_crash.h"
 
 // Single implementation of the vendored ini.h (pc/lib/ini) for the exe
 #define INI_IMPLEMENTATION
@@ -296,6 +297,8 @@ static void pc_chdir_to_exe(void) {
 }
 
 int main(int argc, char* argv[]) {
+    int crash_test = 0;
+    pc_crash_init();
     pc_chdir_to_exe();
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
@@ -309,6 +312,7 @@ int main(int argc, char* argv[]) {
             printf("  --date M/D[/Y]      Override in-game date (e.g. 7/4, 12/24/2026)\n");
             printf("  --rain [intensity]  Force rainy weather; intensity is light, normal, or heavy\n");
             printf("  --uber-shader       Disable shader specialization (single uber shader)\n");
+            printf("  --crash-test        Crash on purpose after startup, to check the crash report\n");
             printf("  --help, -h          Show this help message\n");
             return 0;
         } else if (strcmp(argv[i], "--framelimit") == 0) {
@@ -357,6 +361,8 @@ int main(int argc, char* argv[]) {
                 if (y >= 2000) g_pc_date_year = y;
             }
             i++;
+        } else if (strcmp(argv[i], "--crash-test") == 0) {
+            crash_test = 1;
         } else if (strcmp(argv[i], "--rain") == 0) {
             g_pc_weather_override = mEnv_WEATHER_RAIN;
             g_pc_weather_intensity_override = mEnv_WEATHER_INTENSITY_HEAVY;
@@ -432,6 +438,10 @@ int main(int argc, char* argv[]) {
     }
     pc_keybindings_load();
     pc_platform_init();
+    pc_crash_init_info();
+    if (crash_test) {
+        pc_crash_test();
+    }
     pc_disc_init();
     if (!pc_assets_init()) {
         const char* msg =

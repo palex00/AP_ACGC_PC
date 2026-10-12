@@ -41,6 +41,9 @@ AP_LOG_API void ap_log_write(const char * level, const char* fmt, ...) AP_LOG_PR
 // Copies up to max_count of the most recent entries.
 // into out, newest first. Returns the number written.
 AP_LOG_API size_t ap_log_get(size_t max_count, struct ApLogEntry* out);
+// Same, but gives up (returns 0) if the log stays locked for ~50ms. For the crash
+// handler, where the crashed thread may be the one holding the lock.
+AP_LOG_API size_t ap_log_try_get(size_t max_count, struct ApLogEntry* out);
 
 #ifdef __cplusplus
 }

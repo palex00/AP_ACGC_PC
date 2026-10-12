@@ -10,6 +10,7 @@
 #include "pc_ap_overlay.h"
 #include "pc_ap_strings.h"
 #include "pc_ap_weather.h"
+#include "pc_crash.h"
 #include "ap_archipelago.h"
 #include "ap_slotdata.h"
 #include "m_common_data.h"
@@ -576,6 +577,7 @@ static void pc_ap_time_reload_update(void) {
 }
 
 void pc_ap_tick(GAME_PLAY* play) {
+  pc_crash_note_frame(play);
   pc_ap_time_tick(play); // before the gate: a blocked request is dropped with a toast
   // Not while paused (Game_play_move returns first), so the pause menu sees the last frame's
   g_ap.time.change_allowed = g_ap.time.reload == PC_AP_RELOAD_NONE && pc_ap_time_change_allowed(play);
