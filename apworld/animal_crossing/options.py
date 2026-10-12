@@ -561,8 +561,8 @@ class CritterSpawns(Choice):
     Which bugs and fish spawn. Works without Museumsanity too.
     Vanilla: the game's odds.
     Normalized: every bug and fish that can spawn is equally likely.
-    Dynamic: bugs and fish whose check isn't sent yet (or, with no checks, that are missing from the journal or
-    the museum) spawn more often.
+    Dynamic: like Normalized, but bugs and fish whose check isn't sent yet (or, with no checks, that are missing
+    from the journal or the museum) are 4 times as likely.
     """
     display_name = "Critter Spawns"
     option_vanilla = 0

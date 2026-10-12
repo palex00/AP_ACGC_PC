@@ -88,7 +88,8 @@ void pc_ap_museumsanity_critter_wanted(const pc_ap_museumsanity* m, int cat, con
 // critter_spawns on the game's spawn list right before the weighted draw, in
 // place. Only the species' weights change (whale, trash, spirits, island "nothing"
 // rows untouched) and their total stays the same, so the "nothing spawns" chance
-// stays vanilla. Normalized: equal per species. Dynamic: wanted ones x PC_AP_SPAWN_BOOST.
+// stays vanilla. Normalized: equal per species. Dynamic: normalized, then wanted ones
+// x PC_AP_SPAWN_BOOST.
 void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                     aSOG_gyoei_spawn_info_weight_f_c* rows, int n);
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],

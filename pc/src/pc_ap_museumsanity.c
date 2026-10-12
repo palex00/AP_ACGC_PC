@@ -264,28 +264,24 @@ void pc_ap_museumsanity_critter_wanted(const pc_ap_museumsanity* m, int cat, con
 }
 
 // One multiplier per species from its total weight in the list (sum 0 = not in
-// the list). The total of all species stays the same.
+// the list). The total of all species stays the same, split into equal shares:
+// one per species, PC_AP_SPAWN_BOOST for a wanted one when dynamic.
 static void pc_ap_spawn_factors(int mode, const f32 sum[PC_AP_CRITTER_NUM], const u8 wanted[PC_AP_CRITTER_NUM],
                                 f32 factor[PC_AP_CRITTER_NUM]) {
-  f32 total = 0.0f;   // all species
-  f32 boosted = 0.0f; // all species, wanted ones boosted
-  int species = 0;
+  int share[PC_AP_CRITTER_NUM];
+  f32 total = 0.0f; // all species
+  int shares = 0;   // all species
   for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
+    share[s] = mode == AP_CRITTER_SPAWNS_DYNAMIC && wanted[s] ? PC_AP_SPAWN_BOOST : 1;
     if(sum[s] > 0.0f) {
       total += sum[s];
-      boosted += sum[s] * (wanted[s] ? PC_AP_SPAWN_BOOST : 1);
-      species++;
+      shares += share[s];
     }
   }
   for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
     factor[s] = 1.0f;
-    if(sum[s] <= 0.0f) {
-      continue;
-    }
-    if(mode == AP_CRITTER_SPAWNS_NORMALIZED) {
-      factor[s] = total / species / sum[s];
-    } else if(mode == AP_CRITTER_SPAWNS_DYNAMIC) {
-      factor[s] = (wanted[s] ? PC_AP_SPAWN_BOOST : 1) * total / boosted;
+    if(sum[s] > 0.0f && mode != AP_CRITTER_SPAWNS_VANILLA) {
+      factor[s] = total * share[s] / shares / sum[s];
     }
   }
 }
