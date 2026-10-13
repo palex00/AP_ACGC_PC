@@ -481,7 +481,7 @@ class NoCockroaches(DefaultOnToggle):
     display_name = "No Cockroaches"
 
 
-class ShopsAlwaysOpen(Toggle):
+class ShopsAlwaysOpen(DefaultOnToggle):
     """Shops are open at any hour."""
     display_name = "Shops Always Open"
 
@@ -588,7 +588,7 @@ class CatalogPools(Range):
     display_name = "Catalog Pools"
     range_start = 1
     range_end = 100
-    default = 10
+    default = 5
 
 
 class CatalogPoolSize(Range):
@@ -599,7 +599,7 @@ class CatalogPoolSize(Range):
     display_name = "Catalog Pool Size"
     range_start = 1
     range_end = 100
-    default = 10
+    default = 15
 
 
 class NewItemChance(Range):

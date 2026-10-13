@@ -27,7 +27,7 @@
   "train_station": -1,
   "town_day": 0,
   "no_cockroaches": 1,
-  "shops_always_open": 0,
+  "shops_always_open": 1,
   "no_weeds": 0,
   "more_favors": 1,
   "villagers_dont_leave": 0,
