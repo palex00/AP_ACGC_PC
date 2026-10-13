@@ -55,6 +55,33 @@ int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c) {
   return n;
 }
 
+int pc_ap_catalogsanity_pool_items(const pc_ap_catalogsanity* c, int pool, mActor_name_t* out, int max) {
+  int n = 0;
+  for(int i = 0; i < c->count && n < max; i++) {
+    if(c->pool[i] != pool) {
+      continue;
+    }
+    // Insertion sort by id
+    int k = n++;
+    while(k > 0 && out[k - 1] > c->items[i]) {
+      out[k] = out[k - 1];
+      k--;
+    }
+    out[k] = c->items[i];
+  }
+  return n;
+}
+
+int pc_ap_catalogsanity_first_unfinished(const pc_ap_catalogsanity* c, int open) {
+  int first = -1;
+  for(int i = 0; i < c->count; i++) {
+    if(c->pool[i] < open && !mSP_CollectCheck(c->items[i]) && (first < 0 || c->pool[i] < first)) {
+      first = c->pool[i];
+    }
+  }
+  return first >= 0 ? first : 0;
+}
+
 int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, int* it) {
   while(*it < c->count) {
     int i = (*it)++;

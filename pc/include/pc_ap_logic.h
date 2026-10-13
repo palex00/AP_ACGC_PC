@@ -156,6 +156,10 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap);
 // Tracker: Catalog Pools open (at most total) and in total; total 0 = Catalogsanity off
 int pc_ap_catalog_pools_open(void);
 int pc_ap_catalog_pools_total(void);
+// Catalog page: items of pool (0-based) sorted by id, how many; 0 for a locked pool
+int pc_ap_catalog_pool_items(int pool, mActor_name_t* out, int max);
+// Catalog page: first open pool with an item not in the current player's catalog, 0 if none
+int pc_ap_catalog_first_unfinished_pool(void);
 
 // Who is asking for random catalog items now (PC_AP_CATALOG_SOURCE_NOOK or an
 // AP_CATALOG_SOURCE_* bit; PC_AP_CATALOG_SOURCE_NONE = nobody): set around a

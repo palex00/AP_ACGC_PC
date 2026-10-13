@@ -389,6 +389,18 @@ int pc_ap_catalog_pools_total(void) {
   return pc_ap_catalogsanity_pool_count(&g_ap.catalog);
 }
 
+int pc_ap_catalog_pool_items(int pool, mActor_name_t* out, int max) {
+  // Locked pools stay a surprise
+  if(pool < 0 || pool >= pc_ap_catalog_pools_open()) {
+    return 0;
+  }
+  return pc_ap_catalogsanity_pool_items(&g_ap.catalog, pool, out, max);
+}
+
+int pc_ap_catalog_first_unfinished_pool(void) {
+  return pc_ap_catalogsanity_first_unfinished(&g_ap.catalog, pc_ap_catalog_pools_open());
+}
+
 void pc_ap_catalog_source(int source) {
   g_ap.catalog_source = source;
 }

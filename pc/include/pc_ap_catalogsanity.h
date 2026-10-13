@@ -54,6 +54,10 @@ void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd);
 int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c);
 // Pools in the seed (0 without catalogsanity)
 int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c);
+// Items of pool (0-based) into out[0..max), sorted by id; returns how many
+int pc_ap_catalogsanity_pool_items(const pc_ap_catalogsanity* c, int pool, mActor_name_t* out, int max);
+// First of the `open` pools with an item not in the current player's catalog, 0 if none
+int pc_ap_catalogsanity_first_unfinished(const pc_ap_catalogsanity* c, int open);
 // Next "Catalog: X" id of an item in the first `open` pools that is in the
 // current player's catalog (mSP_CollectCheck), -1 when done. Start *it at 0.
 // Includes ones already sent: the DLL drops repeats.

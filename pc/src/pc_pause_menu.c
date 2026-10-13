@@ -4,6 +4,7 @@
 #include "pc_menu_util.h"
 #include "pc_text_draw.h"
 #include "pc_ap_time_menu.h"
+#include "pc_ap_catalog_menu.h"
 #include "pc_ap_logic.h"
 #include "pc_ap_overlay.h"
 
@@ -31,14 +32,57 @@ typedef enum {
     PAGE_SETTINGS = 1,
     PAGE_CONFIRM_QUIT = 2,
     PAGE_TIME = 3,
+    PAGE_CATALOG = 4,
 } PauseMenuPage;
 
-#define MAIN_ITEM_COUNT     4
+// Main page entries; which ones show is decided by main_update
+typedef enum {
+    MAIN_RESUME,
+    MAIN_TIME,
+    MAIN_CATALOG, // Catalogsanity only
+    MAIN_SETTINGS,
+    MAIN_QUIT,
+    MAIN_MAX,
+} MainItem;
+
 #define CONFIRM_ITEM_COUNT  2
 
 static PauseMenuPage cur_page = PAGE_MAIN;
-static int main_sel = 0;    /* 0=Resume, 1=Date & Time, 2=Settings, 3=Quit Game */
+static MainItem main_items[MAIN_MAX];
+static int main_count = 0;
+static int main_sel = 0;    /* index into main_items */
 static int confirm_sel = 0; /* 0=No (default), 1=Yes */
+
+// Rebuilds the main page entries (Catalogsanity can turn on while paused on the title)
+static void main_update(void) {
+    main_count = 0;
+    main_items[main_count++] = MAIN_RESUME;
+    main_items[main_count++] = MAIN_TIME;
+    if (pc_ap_catalog_pools_total() > 0) {
+        main_items[main_count++] = MAIN_CATALOG;
+    }
+    main_items[main_count++] = MAIN_SETTINGS;
+    main_items[main_count++] = MAIN_QUIT;
+    if (main_sel >= main_count) main_sel = 0;
+}
+
+static const char* main_label(MainItem item) {
+    switch (item) {
+        case MAIN_RESUME:   return "Resume";
+        case MAIN_TIME:     return "Date & Time";
+        case MAIN_CATALOG:  return "Catalog";
+        case MAIN_SETTINGS: return "Settings";
+        case MAIN_QUIT:     return "Quit Game";
+        default:            return "";
+    }
+}
+
+// Greyed out where it can't open
+static int main_disabled(MainItem item) {
+    if (item == MAIN_TIME)    return !pc_ap_time_change_allowed_now();
+    if (item == MAIN_CATALOG) return !pc_ap_accepting();
+    return 0;
+}
 
 int pc_pause_menu_submenu_open(void) {
     return g_pc_paused && cur_page != PAGE_MAIN;
@@ -59,11 +103,11 @@ void pc_pause_menu_toggle(void) {
 /* Input */
 
 static void main_activate(void) {
-    switch (main_sel) {
-        case 0: /* Resume */
+    switch (main_items[main_sel]) {
+        case MAIN_RESUME:
             pc_pause_menu_toggle();
             break;
-        case 1: /* Date & Time, only where the gate allows it */
+        case MAIN_TIME: /* only where the gate allows it */
             if (pc_ap_time_change_allowed_now()) {
                 cur_page = PAGE_TIME;
                 pc_ap_time_menu_enter();
@@ -71,13 +115,23 @@ static void main_activate(void) {
                 pc_ap_overlay_toast("Date & Time: only outdoors in your own town");
             }
             break;
-        case 2: /* Settings */
+        case MAIN_CATALOG: /* needs a loaded save (the catalog is the player's) */
+            if (pc_ap_accepting()) {
+                cur_page = PAGE_CATALOG;
+                pc_ap_catalog_menu_enter();
+            } else {
+                pc_ap_overlay_toast("Catalog: load your save first");
+            }
+            break;
+        case MAIN_SETTINGS:
             cur_page = PAGE_SETTINGS;
             pc_settings_menu_enter();
             break;
-        case 3: /* Quit Game -> confirm page (default to No) */
+        case MAIN_QUIT: /* -> confirm page (default to No) */
             cur_page = PAGE_CONFIRM_QUIT;
             confirm_sel = 0;
+            break;
+        default:
             break;
     }
 }
@@ -142,9 +196,23 @@ static void handle_action(MenuAction act) {
         return;
     }
 
+    /* Catalog page is driven by pc_ap_catalog_menu; only cancel leaves it. */
+    if (cur_page == PAGE_CATALOG) {
+        switch (act) {
+            case ACT_UP:     pc_ap_catalog_menu_up();    break;
+            case ACT_DOWN:   pc_ap_catalog_menu_down();  break;
+            case ACT_LEFT:   pc_ap_catalog_menu_left();  break;
+            case ACT_RIGHT:  pc_ap_catalog_menu_right(); break;
+            case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
+            default: break;
+        }
+        return;
+    }
+
     /* Pages owned here (Main, Quit-confirm). */
+    main_update();
     {
-        int item_count = (cur_page == PAGE_MAIN) ? MAIN_ITEM_COUNT : CONFIRM_ITEM_COUNT;
+        int item_count = (cur_page == PAGE_MAIN) ? main_count : CONFIRM_ITEM_COUNT;
         int* sel       = (cur_page == PAGE_MAIN) ? &main_sel : &confirm_sel;
 
         switch (act) {
@@ -244,22 +312,20 @@ int pc_pause_menu_handle_event(const SDL_Event* e) {
 /* Drawing */
 
 static void draw_main_page(struct game_s* game) {
-    static const char* items[MAIN_ITEM_COUNT] = { "Resume", "Date & Time", "Settings", "Quit Game" };
-
+    main_update();
     pc_menu_draw_centered(game, "- Paused -", 80.0f, 255, 255, 255, 255, 1.0f);
 
     f32 y = 110.0f;
     f32 line_h = 18.0f;
-    for (int i = 0; i < MAIN_ITEM_COUNT; i++) {
+    for (int i = 0; i < main_count; i++) {
         int r, g, b, a;
         int selected = (i == main_sel);
         pc_menu_row_colors(selected, &r, &g, &b, &a);
-        if (i == 1 && !pc_ap_time_change_allowed_now()) {
-            /* Date & Time greyed out where the gate fails */
+        if (main_disabled(main_items[i])) {
             r = g = b = 120;
             a = selected ? 220 : 160;
         }
-        pc_menu_draw_centered(game, items[i], y + i * line_h, r, g, b, a,
+        pc_menu_draw_centered(game, main_label(main_items[i]), y + i * line_h, r, g, b, a,
                               selected ? PC_MENU_SCALE_SELECTED : 1.0f);
     }
 }
@@ -286,6 +352,8 @@ void pc_pause_menu_draw(struct game_s* game) {
         if (!pc_settings_menu_active()) cur_page = PAGE_MAIN;
     } else if (cur_page == PAGE_TIME) {
         pc_ap_time_menu_draw(game);
+    } else if (cur_page == PAGE_CATALOG) {
+        pc_ap_catalog_menu_draw(game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
         if (cur_page == PAGE_MAIN)              draw_main_page(game);
