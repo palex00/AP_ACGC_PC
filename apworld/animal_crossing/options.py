@@ -568,6 +568,41 @@ class StartingTime(Choice):
     default = "random"
 
 
+class Catalogsanity(DefaultOnToggle):
+    """
+    Catalog items are split into pools. Getting an item of an unlocked pool into your catalog (picking it up,
+    wearing it, ...) sends a check. Pool 1 is open from the start, each Progressive Catalog Pool unlocks the next.
+    """
+    display_name = "Catalogsanity"
+
+
+class CatalogPools(Range):
+    """With Catalogsanity, the number of pools. Pools times Pool Size can be at most 651 (every eligible item)."""
+    display_name = "Catalog Pools"
+    range_start = 1
+    range_end = 100
+    default = 10
+
+
+class CatalogPoolSize(Range):
+    """With Catalogsanity, the number of items (and checks) in each pool."""
+    display_name = "Catalog Pool Size"
+    range_start = 1
+    range_end = 100
+    default = 10
+
+
+class NewItemChance(Range):
+    """
+    With Catalogsanity, the chance (percent) that a random item you get (from Nook's shop and other sources) is one
+    you still need from an unlocked pool, when there is one left.
+    """
+    display_name = "New Item Chance"
+    range_start = 0
+    range_end = 100
+    default = 75
+
+
 class Museumsanity(DefaultOnToggle):
     """
     Museum donations are items: your own donations never fill the museum, it shows the donation items
@@ -713,6 +748,10 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     timesanity: Timesanity
     starting_month: StartingMonth
     starting_time: StartingTime
+    catalogsanity: Catalogsanity
+    catalog_pools: CatalogPools
+    catalog_pool_size: CatalogPoolSize
+    new_item_chance: NewItemChance
     museumsanity: Museumsanity
     bug_checks: BugChecks
     fish_checks: FishChecks

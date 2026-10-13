@@ -8,8 +8,9 @@ from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule, set_rule
 
-from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOOK_STORE_UPGRADES, PROGRESSIVE_HOUSE,
-                    PROGRESSIVE_NOOK_STORE, SHOVEL, TIME_SLOTS, TOOLS)
+from .catalog import CATALOG_ELIGIBLE, catalog_location_name, make_pools
+from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOOK_STORE_UPGRADES,
+                    PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_HOUSE, PROGRESSIVE_NOOK_STORE, SHOVEL, TIME_SLOTS, TOOLS)
 from .locations import LOANS, LOCATION_NAME_TO_ID, favor_location_name, loan_location_name, split_loan_checks
 from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
                      MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS,
@@ -94,6 +95,12 @@ class AnimalCrossingWeb(WebWorld):
             options.Timesanity,
             options.StartingMonth,
             options.StartingTime,
+        ]),
+        OptionGroup("Catalogsanity", [
+            options.Catalogsanity,
+            options.CatalogPools,
+            options.CatalogPoolSize,
+            options.NewItemChance,
         ]),
         OptionGroup("Museumsanity", [
             options.Museumsanity,
@@ -218,7 +225,19 @@ class AnimalCrossingWorld(World):
             self.store_thresholds = [self.options.nook_n_go_catalog.value, self.options.nookway_catalog.value,
                                      self.options.nookingtons_catalog.value]
 
+        # Catalogsanity: pools of game item ids; pool k (0-based) needs k Progressive Catalog Pool
+        self.catalog_pools = []
+        if self.options.catalogsanity:
+            pools, size = self.options.catalog_pools.value, self.options.catalog_pool_size.value
+            if pools * size > CATALOG_ELIGIBLE:
+                raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Catalog Pools x Catalog Pool Size is "
+                                  f"{pools * size}, at most {CATALOG_ELIGIBLE} (with {pools} pools: size at most "
+                                  f"{CATALOG_ELIGIBLE // pools}).")
+            self.catalog_pools = make_pools(self.random, pools, size)
+        self.catalog_pool_items = max(len(self.catalog_pools) - 1, 0)
+
         locations = sum(self.loan_checks) + self.options.favorsanity.value + len(self.museum_locations)
+        locations += sum(len(pool) for pool in self.catalog_pools)
         if locations == 0:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favorsanity must be "
                               f"at least 1.")
@@ -226,7 +245,7 @@ class AnimalCrossingWorld(World):
         items = len(LOANS) - 1 if self.options.loansanity else 0
         if self.options.timesanity:
             items += len(MONTHS) + len(TIME_SLOTS) - 2
-        items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items
+        items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items + self.catalog_pool_items
         if locations < items:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Total checks at {locations}, it must be at "
                               f"least {items} with these options. Raise optional checks such as Favorsanity.")
@@ -236,6 +255,7 @@ class AnimalCrossingWorld(World):
         names = [loan_location_name(k, j) for k in range(len(LOANS)) for j in range(1, self.loan_checks[k] + 1)]
         names += [favor_location_name(n) for n in range(1, self.options.favorsanity.value + 1)]
         names += self.museum_locations
+        names += [catalog_location_name(item_id) for pool in self.catalog_pools for item_id in pool]
         menu.add_locations({name: LOCATION_NAME_TO_ID[name] for name in names}, AnimalCrossingLocation)
         self.multiworld.regions.append(menu)
 
@@ -255,6 +275,7 @@ class AnimalCrossingWorld(World):
         pool += [self.create_item(name) for name in self.museum_item_names]
         pool += [self.create_item(name) for name in self.pool_tools]
         pool += [self.create_item(PROGRESSIVE_NOOK_STORE) for _ in range(self.store_items)]
+        pool += [self.create_item(PROGRESSIVE_CATALOG_POOL) for _ in range(self.catalog_pool_items)]
         if self.starting_tool:
             self.multiworld.push_precollected(self.create_item(self.starting_tool))
         # Everything else is filler. Bell credit amounts are set in fill_slot_data from what was actually placed,
@@ -264,7 +285,7 @@ class AnimalCrossingWorld(World):
         self.multiworld.itempool += pool
 
     def create_item(self, name: str) -> AnimalCrossingItem:
-        if name == PROGRESSIVE_HOUSE or name in MONTHS or name in TIME_SLOTS:
+        if name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL) or name in MONTHS or name in TIME_SLOTS:
             classification = ItemClassification.progression
         elif name in MUSEUM_ITEM_NAME_TO_ID and "Museum" in self.options.goal.value:
             classification = ItemClassification.progression
@@ -292,6 +313,17 @@ class AnimalCrossingWorld(World):
                     set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_HOUSE, self.player, k))
                 # Paying needs bells, and selling needs an open shop: no shop is surely open in Morning
                 # (only Nook 'n' Go, from 7), every other slot has at least one open hour (Night: 21)
+                if self.options.timesanity and not self.options.shops_always_open:
+                    add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
+                                                                   self.player))
+
+        # Catalog pool k (0-based) needs k Progressive Catalog Pool. Nook's shop is the one source that's always
+        # on: with Timesanity it needs a slot with the store open (as for loans above)
+        for k, pool in enumerate(self.catalog_pools):
+            for item_id in pool:
+                location = self.multiworld.get_location(catalog_location_name(item_id), self.player)
+                if k > 0:
+                    set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_CATALOG_POOL, self.player, k))
                 if self.options.timesanity and not self.options.shops_always_open:
                     add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
                                                                    self.player))
@@ -411,6 +443,10 @@ class AnimalCrossingWorld(World):
             "timesanity": self.options.timesanity.value,
             "starting_month": self.options.starting_month.value,
             "starting_time": self.options.starting_time.value,
+            "catalogsanity": self.options.catalogsanity.value,
+            # Game item ids per pool; [] without Catalogsanity
+            "catalog_pools": self.catalog_pools,
+            "new_item_chance": self.options.new_item_chance.value,
             "museumsanity": self.options.museumsanity.value,
             # Effective modes: 0 without Museumsanity
             "bug_checks": self.museum_modes[MUSEUM_BUG],

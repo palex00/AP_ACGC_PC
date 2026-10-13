@@ -1,4 +1,5 @@
 # Location names and ids. The table is static (ids never depend on options); each seed uses a subset.
+from .catalog import CATALOG_LOCATION_NAME_TO_ID
 from .museum import MUSEUM_LOCATION_NAME_TO_ID
 
 # Loans in the order they happen (house upgrades go Medium -> Basement -> Large -> Upper).
@@ -9,7 +10,7 @@ FAVORS_MAX = 100       # favorsanity max
 
 LOAN_BASE_ID = 0x10000  # loan k, check j (1-based): LOAN_BASE_ID + k * 0x1000 + j
 FAVOR_BASE_ID = 0x20000  # favor n (1-based): FAVOR_BASE_ID + n
-# Museum locations: 0x30000+, see museum.py
+# Museum locations: 0x30000+, see museum.py. Catalog locations: 0x40000+, see catalog.py
 
 
 def loan_location_name(loan: int, check: int) -> str:
@@ -27,6 +28,7 @@ for _k in range(len(LOANS)):
 for _n in range(1, FAVORS_MAX + 1):
     LOCATION_NAME_TO_ID[favor_location_name(_n)] = FAVOR_BASE_ID + _n
 LOCATION_NAME_TO_ID.update(MUSEUM_LOCATION_NAME_TO_ID)
+LOCATION_NAME_TO_ID.update(CATALOG_LOCATION_NAME_TO_ID)
 
 
 def split_loan_checks(loans: list[int], total: int) -> list[int]:
