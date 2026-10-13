@@ -988,6 +988,10 @@ static void aQMgr_order_decide_trade_common_item(aQMgr_SELECT_RND_ITEM_PROC sel_
             mQst_GetGoods_common(&itemNo, &animal->id, cat, l_normal_info.trade_items, 2, list);
         }
 
+#ifdef TARGET_PC
+        /* AP Catalogsanity: no pool item not in the catalog (house furniture) */
+        itemNo = pc_ap_catalog_safe_item(itemNo, AP_CATALOG_SOURCE_TRADES);
+#endif
         l_normal_info.trade_items[1 + i] = itemNo;
         mQst_SetItemNameStr(itemNo, mMsg_ITEM_STR1 + i);
         cat_table++;

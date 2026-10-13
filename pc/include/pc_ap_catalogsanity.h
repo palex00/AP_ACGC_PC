@@ -72,6 +72,11 @@ int pc_ap_catalogsanity_is_source(const pc_ap_catalogsanity* c, int source);
 void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
                               mActor_name_t* out, int n);
 
+// Nonzero if the game may hand out item: anything but a pool item that isn't in
+// the current player's catalog (all items with catalogsanity off). Furniture
+// counts in any facing, stationery in any stack size.
+int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item);
+
 // Wisp's reward from his lists (the game's table, EMPTY_NO-terminated each).
 // As a source with a new open-pool item left: a random one (any category).
 // Otherwise his own rule over the lists without pool items that aren't in the

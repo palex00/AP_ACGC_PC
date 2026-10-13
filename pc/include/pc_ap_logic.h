@@ -161,6 +161,12 @@ void pc_ap_catalog_source(int source);
 // lists = the category's shop lists (mSP_goods_seg_inf[category])
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,
                        int list_type, int unowned_only, mActor_name_t** lists);
+// Passwords: 0 if item is a pool item not in the current player's catalog (the game
+// treats the password as invalid), else 1. Always 1 with Catalogsanity off.
+int pc_ap_catalog_item_allowed(mActor_name_t item);
+// Villager hand-overs (favor rewards, trade offers): item if allowed, else a roll of
+// the same shop category as source (AP_CATALOG_SOURCE_*); a starter shirt if that's empty
+mActor_name_t pc_ap_catalog_safe_item(mActor_name_t item, int source);
 // aEGH_not_collect_get (Wisp's reward): 1 = handled, *item from his lists (the game's
 // table) by Catalog Sources; EMPTY_NO if they're empty. 0 = vanilla (Catalogsanity off).
 int pc_ap_wisp_item(mActor_name_t* const* lists, int list_count, mActor_name_t* item);

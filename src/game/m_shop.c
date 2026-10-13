@@ -778,7 +778,11 @@ extern int mSP_SearchItemCategoryPriority(mActor_name_t item_no, int category, i
     return FALSE;
 }
 
-static int mSP_ItemNo2GoodsListCategory(mActor_name_t item_no) {
+/* PC: also used by the Catalogsanity hand-over check (pc_ap_logic.c) */
+#ifndef TARGET_PC
+static
+#endif
+int mSP_ItemNo2GoodsListCategory(mActor_name_t item_no) {
     if (ITEM_IS_FTR(item_no)) {
         return mSP_KIND_FURNITURE;
     } else if (item_no >= ITM_PAPER_START && item_no < ITM_PAPER_END) {

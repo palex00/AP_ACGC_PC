@@ -10,6 +10,10 @@
 #include "m_common_data.h"
 #include "libultra/libultra.h"
 
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#endif
+
 static u8 usable_to_fontnum[64] = {
     CHAR_b,   CHAR_K,       CHAR_z, CHAR_FIVE, CHAR_c,       CHAR_q, CHAR_Y,     CHAR_Z,     CHAR_O,     CHAR_d,
     CHAR_t,   CHAR_SIX,     CHAR_n, CHAR_l,    CHAR_B,       CHAR_y, CHAR_o,     CHAR_EIGHT, CHAR_FOUR,  CHAR_L,
@@ -1189,6 +1193,13 @@ extern int mMpswd_check_present(mMpswd_password_c* password) {
             }
         }
     }
+
+#ifdef TARGET_PC
+    /* AP Catalogsanity: pool items not in the catalog yet make the password invalid */
+    if (valid && present != RSV_NO && !pc_ap_catalog_item_allowed(present)) {
+        valid = FALSE;
+    }
+#endif
 
     return valid;
 }

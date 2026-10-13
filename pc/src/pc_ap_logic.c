@@ -54,6 +54,7 @@ extern void mMsm_GetFossil(mActor_name_t* fossil);
 extern void mBGMFieldNorm_make_req(void);
 extern void mBGMFieldNorm_delete_req(void);
 extern int mSP_get_cloth_season(void);
+extern int mSP_ItemNo2GoodsListCategory(mActor_name_t item_no);
 
 // Hour change music: fade type of the old song, and game frames of silence before the new one
 #define PC_AP_HOUR_FADE_STOP   0x168
@@ -400,6 +401,33 @@ int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, in
   r.unowned_only = unowned_only;
   pc_ap_catalogsanity_pick(&g_ap.catalog, pc_ap_catalogsanity_open_pools(&g_ap.catalog), &r, out, n);
   return 1;
+}
+
+int pc_ap_catalog_item_allowed(mActor_name_t item) {
+  // No player: no catalog to check against
+  if(g_ap.catalog.count == 0 || Common_Get(now_private) == NULL) {
+    return 1;
+  }
+  return pc_ap_catalogsanity_allowed(&g_ap.catalog, item);
+}
+
+mActor_name_t pc_ap_catalog_safe_item(mActor_name_t item, int source) {
+  if(pc_ap_catalog_item_allowed(item)) {
+    return item;
+  }
+  // Only pool items get here, and all of them are in a shop category
+  int category = mSP_ItemNo2GoodsListCategory(item);
+  if(category < 0) {
+    return ITM_CLOTH001;
+  }
+  int old_source = g_ap.catalog.source;
+  mActor_name_t out = EMPTY_NO;
+  g_ap.catalog.source = source;
+  mSP_SelectRandomItem_New(NULL, &out, 1, NULL, 0, category, mSP_LISTTYPE_ABC, FALSE);
+  g_ap.catalog.source = old_source;
+  // Nothing outside the pools left in that category (stationery, huge pools): the
+  // game's own fallback reward
+  return out != EMPTY_NO ? out : ITM_CLOTH001;
 }
 
 int pc_ap_wisp_item(mActor_name_t* const* lists, int list_count, mActor_name_t* item) {

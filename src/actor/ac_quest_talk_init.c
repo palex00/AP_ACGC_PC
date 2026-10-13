@@ -1203,6 +1203,19 @@ static void aQMgr_actor_set_reward(QUEST_MANAGER_ACTOR* manager) {
         pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
 #endif
     }
+
+#ifdef TARGET_PC
+    /* AP Catalogsanity: whatever the reward is (worn shirt, house furniture, ...), no pool item not in the catalog */
+    {
+        mActor_name_t safe = pc_ap_catalog_safe_item(target->reward_item, AP_CATALOG_SOURCE_FAVORS);
+
+        if (safe != target->reward_item && target->reward_kind == aQMgr_QUEST_REWARD_WORN_CLOTH) {
+            /* not the shirt they wear any more: plain cloth reward talk, as for another player's shirt above */
+            target->reward_kind = aQMgr_QUEST_REWARD_CLOTH;
+        }
+        target->reward_item = safe;
+    }
+#endif
 }
 
 static void aQMgr_talk_quest_clear_quest(QUEST_MANAGER_ACTOR* manager) {

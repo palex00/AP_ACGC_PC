@@ -62,6 +62,28 @@ static int pc_ap_catalogsanity_index(const pc_ap_catalogsanity* c, mActor_name_t
   return -1;
 }
 
+// One id per catalog entry: furniture without its facing (low 2 bits), stationery
+// without its stack size
+static mActor_name_t pc_ap_catalogsanity_entry(mActor_name_t item) {
+  if(ITEM_IS_FTR(item)) {
+    return item & ~3;
+  }
+  if(ITEM_IS_PAPER(item)) {
+    return ITM_PAPER_START + PAPER2TYPE(item - ITM_PAPER_START);
+  }
+  return item;
+}
+
+int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item) {
+  mActor_name_t entry = pc_ap_catalogsanity_entry(item);
+  for(int i = 0; i < c->count; i++) {
+    if(pc_ap_catalogsanity_entry(c->items[i]) == entry) {
+      return mSP_CollectCheck(item);
+    }
+  }
+  return 1;
+}
+
 // Clothes lists are blocks: any season, then spring, summer, autumn, winter
 // (cloth_season_cnt). pos is the index in one of the A/B/C lists.
 static int pc_ap_catalogsanity_in_season(int pos, int season) {
