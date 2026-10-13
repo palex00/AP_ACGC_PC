@@ -393,12 +393,22 @@ int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, in
   r.exclude_count = exist != NULL ? exist_count : 0;
   r.rare = Save_Get(shop).rare_item;
   r.new_chance = 0;
-  if(g_ap.catalog.source != PC_AP_CATALOG_SOURCE_NONE) {
+  if(pc_ap_catalogsanity_is_source(&g_ap.catalog, g_ap.catalog.source)) {
     // A source's rare slot always gets a new item while there is one
     r.new_chance = list_type == mSP_LISTTYPE_RARE ? 100 : g_ap.catalog.new_item_chance;
   }
   r.unowned_only = unowned_only;
   pc_ap_catalogsanity_pick(&g_ap.catalog, pc_ap_catalogsanity_open_pools(&g_ap.catalog), &r, out, n);
+  return 1;
+}
+
+int pc_ap_wisp_item(mActor_name_t* const* lists, int list_count, mActor_name_t* item) {
+  if(g_ap.catalog.count == 0 || Common_Get(now_private) == NULL) {
+    return 0;
+  }
+  int is_source = pc_ap_catalogsanity_is_source(&g_ap.catalog, AP_CATALOG_SOURCE_WISP);
+  *item = pc_ap_catalogsanity_wisp_pick(&g_ap.catalog, pc_ap_catalogsanity_open_pools(&g_ap.catalog), is_source,
+                                        lists, list_count);
   return 1;
 }
 

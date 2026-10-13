@@ -289,6 +289,13 @@ static mActor_name_t aEGH_not_collect_get() {
   int i;
   int total_count;
 
+#ifdef TARGET_PC
+  /* AP Catalogsanity: Wisp's pick (new pool items as a source, never locked ones) */
+  if (pc_ap_wisp_item(item_list, aEGH_ITEM_LIST_NUM, &item)) {
+    return mRmTp_FtrItemNo2Item1ItemNo(item != EMPTY_NO ? item : ITM_FOOD_PEACH, TRUE);
+  }
+#endif
+
   /* Calculate total items in each list and uncollected items in each list */
   for (i = 0; i < aEGH_ITEM_LIST_NUM; i++) {
     aEGH_check_collect_num(&list_num_tbl[i], &uncollect_num_tbl[i], item_list[i]);

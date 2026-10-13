@@ -609,6 +609,23 @@ class NewItemChance(Range):
     default = 75
 
 
+CATALOG_SOURCES = ["Favors", "Trades", "Lost and Found", "Dump", "Letters", "Trees", "Presents", "Grab Bags", "Wisp"]
+
+
+class CatalogSources(OptionSet):
+    """
+    With Catalogsanity, what besides Nook's shop can give you catalog checks (New Item Chance per item; rare ones
+    always when one is left). Turned off, a source only gives items that aren't checks (or are already in your
+    catalog). Nook's shop is always a source, so this never changes what is reachable.
+    Favors: villager favor rewards. Trades: villagers trading or selling in a chat. Lost and Found: the daily item.
+    Dump: the daily items. Letters: villager reply presents and letter-quality rewards. Trees: furniture from
+    shaking trees. Presents: from trees and balloons. Grab Bags: Nook's sale day bags. Wisp: his reward.
+    """
+    display_name = "Catalog Sources"
+    valid_keys = set(CATALOG_SOURCES)
+    default = frozenset(CATALOG_SOURCES)
+
+
 class Museumsanity(DefaultOnToggle):
     """
     Museum donations are items: your own donations never fill the museum, it shows the donation items
@@ -751,6 +768,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     catalog_pools: CatalogPools
     catalog_pool_size: CatalogPoolSize
     new_item_chance: NewItemChance
+    catalog_sources: CatalogSources
     museumsanity: Museumsanity
     bug_checks: BugChecks
     fish_checks: FishChecks

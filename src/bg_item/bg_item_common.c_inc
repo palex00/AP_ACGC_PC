@@ -1,3 +1,8 @@
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
+#endif
+
 static void bit_cmn_single_drawS(GAME* game, bg_item_common_info_c* common_info, mActor_name_t fg_item, xyz_t* pos,
                                  s_xyz* angle, xyz_t* scale, u8 alpha, bIT_DRAW_BF_PROC draw_bf,
                                  bIT_DRAW_AF_PROC draw_af, rgba_t* col);
@@ -1056,7 +1061,14 @@ static void drop_fruit(mActor_name_t fg_item, int ut_x, int ut_z, xyz_t* drop_po
                     }
                 }
 
+#ifdef TARGET_PC
+                /* AP Catalogsanity: furniture tree */
+                pc_ap_catalog_source(AP_CATALOG_SOURCE_TREES);
+#endif
                 mSP_SelectRandomItem_New(NULL, &ftr_item, 1, NULL, 0, mSP_KIND_FURNITURE, list, FALSE);
+#ifdef TARGET_PC
+                pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
                 fruit_set(ftr_item, ut_x, ut_z, fg_ytable[i].drop_count, 0, drop_pos, parent_actor);
             } else {
                 mActor_name_t drop_item = item;

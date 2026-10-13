@@ -27,6 +27,11 @@
 #include "m_roll_lib.h"
 #include "m_house.h"
 
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
+#endif
+
 static void mTG_mark_main_CLR(Submenu* submenu, const mSM_MenuInfo_c* menu_info);
 
 enum {
@@ -5150,7 +5155,14 @@ static void mTG_hukubukuro_open_proc(Submenu* submenu, mSM_MenuInfo_c* menu_info
                         category = mSP_KIND_FURNITURE;
                     }
 
+#ifdef TARGET_PC
+                    /* AP Catalogsanity: grab bag */
+                    pc_ap_catalog_source(AP_CATALOG_SOURCE_GRAB_BAGS);
+#endif
                     mSP_SelectRandomItem_New(NULL, &items[i], 1, items, i, category, mSP_LISTTYPE_RARE, FALSE);
+#ifdef TARGET_PC
+                    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
                 }
             }
         } else {

@@ -24,6 +24,7 @@ void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd) {
   }
   c->count = sd->catalog_count;
   c->new_item_chance = sd->new_item_chance;
+  c->sources = sd->catalog_sources;
   for(int i = 0; i < c->count; i++) {
     c->items[i] = sd->catalog_items[i];
     c->pool[i] = sd->catalog_pool[i];
@@ -45,6 +46,10 @@ int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, i
     }
   }
   return -1;
+}
+
+int pc_ap_catalogsanity_is_source(const pc_ap_catalogsanity* c, int source) {
+  return source == PC_AP_CATALOG_SOURCE_NOOK || (source & c->sources) != 0;
 }
 
 // Index of item in the pools, -1 if it isn't a pool item
@@ -167,4 +172,76 @@ void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_a
     }
     out[s] = item;
   }
+}
+
+// Wisp without a new pool item: his lists minus pool items that aren't in the
+// catalog (with unowned_only, only things not in the catalog)
+static int pc_ap_catalogsanity_wisp_candidate(const pc_ap_catalogsanity* c, mActor_name_t item, int unowned_only) {
+  int owned = mSP_CollectCheck(item);
+  if(unowned_only && owned) {
+    return 0;
+  }
+  return owned || pc_ap_catalogsanity_index(c, item) < 0;
+}
+
+static int pc_ap_catalogsanity_wisp_count(const pc_ap_catalogsanity* c, mActor_name_t* const* lists, int list_count,
+                                          int unowned_only) {
+  int n = 0;
+  for(int l = 0; l < list_count; l++) {
+    for(const mActor_name_t* p = lists[l]; p != NULL && *p != EMPTY_NO; p++) {
+      n += pc_ap_catalogsanity_wisp_candidate(c, *p, unowned_only);
+    }
+  }
+  return n;
+}
+
+// The k-th (0-based) candidate, EMPTY_NO past the end
+static mActor_name_t pc_ap_catalogsanity_wisp_nth(const pc_ap_catalogsanity* c, mActor_name_t* const* lists,
+                                                  int list_count, int unowned_only, int k) {
+  for(int l = 0; l < list_count; l++) {
+    for(const mActor_name_t* p = lists[l]; p != NULL && *p != EMPTY_NO; p++) {
+      if(pc_ap_catalogsanity_wisp_candidate(c, *p, unowned_only)) {
+        if(k == 0) {
+          return *p;
+        }
+        k--;
+      }
+    }
+  }
+  return EMPTY_NO;
+}
+
+mActor_name_t pc_ap_catalogsanity_wisp_pick(const pc_ap_catalogsanity* c, int open, int is_source,
+                                            mActor_name_t* const* lists, int list_count) {
+  if(is_source) {
+    int n = 0;
+    for(int i = 0; i < c->count; i++) {
+      if(c->pool[i] < open && !mSP_CollectCheck(c->items[i])) {
+        n++;
+      }
+    }
+    if(n > 0) {
+      int k = RANDOM(n);
+      for(int i = 0; i < c->count; i++) {
+        if(c->pool[i] < open && !mSP_CollectCheck(c->items[i])) {
+          if(k == 0) {
+            return c->items[i];
+          }
+          k--;
+        }
+      }
+    }
+  }
+
+  // His rule: something not in the catalog if there is any, else anything
+  int unowned_only = 1;
+  int n = pc_ap_catalogsanity_wisp_count(c, lists, list_count, 1);
+  if(n == 0) {
+    unowned_only = 0;
+    n = pc_ap_catalogsanity_wisp_count(c, lists, list_count, 0);
+  }
+  if(n == 0) {
+    return EMPTY_NO;
+  }
+  return pc_ap_catalogsanity_wisp_nth(c, lists, list_count, unowned_only, RANDOM(n));
 }

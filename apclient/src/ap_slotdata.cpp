@@ -63,6 +63,22 @@ static void read_catalog_pools(const nlohmann::json& slot_data, ap_slotdata * sd
   }
 }
 
+// Catalog Sources option set (names) -> AP_CATALOG_SOURCE_* bits; missing = none
+static int read_catalog_sources(const nlohmann::json& slot_data) {
+  // Same order as the bits (apworld options.CATALOG_SOURCES)
+  static const char * names[] = { "Favors", "Trades", "Lost and Found", "Dump", "Letters", "Trees", "Presents",
+                                  "Grab Bags", "Wisp" };
+  auto it = slot_data.find("catalog_sources");
+  if (it == slot_data.end() || !it->is_array()) { return 0; }
+  int bits = 0;
+  for (auto& v : *it) {
+    for (int i = 0; i < (int)(sizeof(names) / sizeof(names[0])); i++) {
+      if (v.is_string() && v.get<std::string>() == names[i]) { bits |= 1 << i; }
+    }
+  }
+  return bits;
+}
+
 static int read_goal(const nlohmann::json& slot_data) {
   auto it = slot_data.find("goal");
   if (it == slot_data.end() || !it->is_array()) { return AP_GOAL_STATUE; }
@@ -148,6 +164,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   read_catalog_pools(slot_data, sd);
   sd->new_item_chance = slot_data.value("new_item_chance", 0);
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
+  sd->catalog_sources = read_catalog_sources(slot_data);
 
   // Keyed by item name in the apworld (Small/Modest/Large Bell Credit)
   static const char * credit_names[AP_BELLCREDIT_NUM] = { "Small Bell Credit", "Modest Bell Credit", "Large Bell Credit" };

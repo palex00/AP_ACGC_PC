@@ -14,6 +14,7 @@
 #ifdef TARGET_PC
 #include "pc_ap_qol.h"
 #include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
 #endif
 
 static u8 l_candidate_num[FG_BLOCK_TOTAL_NUM];
@@ -3170,8 +3171,22 @@ extern void mAGrw_RenewalFgItem_ovl(lbRTC_time_c* now_time, int* deposit_haniwa)
                     }
 
                     mAGrw_SetCarp(last_grow_time);
+#ifdef TARGET_PC
+                    /* AP Catalogsanity: the daily lost and found item */
+                    pc_ap_catalog_source(AP_CATALOG_SOURCE_LOST_FOUND);
+#endif
                     mPB_force_set_keep_item();
+#ifdef TARGET_PC
+                    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
+#ifdef TARGET_PC
+                    /* AP Catalogsanity: the daily dump items */
+                    pc_ap_catalog_source(AP_CATALOG_SOURCE_DUMP);
+#endif
                     mAGrw_SetItemDump(&dump_info);
+#ifdef TARGET_PC
+                    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
                     lbRTC_TimeCopy(last_grow_time, now_time);
                     mFAs_SetFieldRank();
                 }

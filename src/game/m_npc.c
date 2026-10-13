@@ -18,6 +18,8 @@
 #ifdef TARGET_PC
 #include "pc_ap_villagers.h"
 #include "pc_ap_qol.h"
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
 #endif
 
 static int mNpc_CheckIslandAnimalID(AnmPersonalID_c* anm_id);
@@ -1529,7 +1531,14 @@ static void mNpc_GetRemailGoodData(Mail_c* mail, PersonalID_c* pid, AnmPersonalI
 
     give_present = RANDOM(4) & 1;
     if (give_present == 0) {
+#ifdef TARGET_PC
+        /* AP Catalogsanity: reply present */
+        pc_ap_catalog_source(AP_CATALOG_SOURCE_LETTERS);
+#endif
         mNpc_GetRemailPresent(&present);
+#ifdef TARGET_PC
+        pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
     }
 
     mNpc_SetRemailFreeString(pid, anm_id, remail);

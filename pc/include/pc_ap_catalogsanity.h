@@ -23,8 +23,9 @@ extern "C" {
 
 // Who asks the game for a random catalog item (pc_ap_catalog_source). Only
 // sources can hand out new pool items; everyone else gets "everything else".
+// Besides these two, a source is one of the Catalog Sources bits (AP_CATALOG_SOURCE_*).
 #define PC_AP_CATALOG_SOURCE_NONE 0
-#define PC_AP_CATALOG_SOURCE_NOOK 1 // Nook's daily stock (always a source)
+#define PC_AP_CATALOG_SOURCE_NOOK (1 << 30) // Nook's daily stock: always a source
 
 typedef struct {
   // Config (slot_data); count 0 when catalogsanity is off or offline
@@ -32,6 +33,7 @@ typedef struct {
   mActor_name_t items[AP_CATALOG_MAX]; // game item ids, pools flattened
   u8 pool[AP_CATALOG_MAX];             // pool (0-based) of each item
   int new_item_chance;                 // percent
+  int sources;                         // AP_CATALOG_SOURCE_* bits on
   // Transient
   int source;                          // PC_AP_CATALOG_SOURCE_* asking right now
 } pc_ap_catalogsanity;
@@ -56,6 +58,10 @@ int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c);
 // Includes ones already sent: the DLL drops repeats.
 int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, int* it);
 
+// Nonzero if source may give new pool items: PC_AP_CATALOG_SOURCE_NOOK, or an
+// AP_CATALOG_SOURCE_* bit that's on
+int pc_ap_catalogsanity_is_source(const pc_ap_catalogsanity* c, int source);
+
 // Fills out[0..n) for a request, ignoring the game's tiers: every pick is from
 // A/B/C of the category. Per slot, with new_chance a "new" item: an open-pool
 // item not in the catalog. Otherwise (or none left) "everything else": non-pool
@@ -65,6 +71,14 @@ int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, i
 // a locked-pool item that isn't in the catalog.
 void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
                               mActor_name_t* out, int n);
+
+// Wisp's reward from his lists (the game's table, EMPTY_NO-terminated each).
+// As a source with a new open-pool item left: a random one (any category).
+// Otherwise his own rule over the lists without pool items that aren't in the
+// catalog: something not in the catalog first, else anything. EMPTY_NO if the
+// lists are empty.
+mActor_name_t pc_ap_catalogsanity_wisp_pick(const pc_ap_catalogsanity* c, int open, int is_source,
+                                            mActor_name_t* const* lists, int list_count);
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,11 @@
 #include "m_item_name.h"
 #include "m_house.h"
 
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
+#endif
+
 enum {
   aEGH_TALK_END_WAIT,
   aEGH_TALK_GIVE_ME_WAIT,

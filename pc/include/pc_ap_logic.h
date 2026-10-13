@@ -152,14 +152,18 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap);
 
 // Catalogsanity hooks (pc_ap_catalogsanity.h). The tick sends the checks.
 
-// Who is asking for random catalog items now (PC_AP_CATALOG_SOURCE_*): set around a
-// source's rolls (Nook's daily stock), back to NONE after
+// Who is asking for random catalog items now (PC_AP_CATALOG_SOURCE_NOOK or an
+// AP_CATALOG_SOURCE_* bit; PC_AP_CATALOG_SOURCE_NONE = nobody): set around a
+// source's rolls (Nook's stock, favors, ...), back to NONE after
 void pc_ap_catalog_source(int source);
 // mSP_SelectRandomItem_New: 1 = handled, out[0..n) filled by the Catalogsanity picker.
 // 0 = vanilla: Catalogsanity off, diaries, themed lists (event, lottery, ...), no player.
 // lists = the category's shop lists (mSP_goods_seg_inf[category])
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,
                        int list_type, int unowned_only, mActor_name_t** lists);
+// aEGH_not_collect_get (Wisp's reward): 1 = handled, *item from his lists (the game's
+// table) by Catalog Sources; EMPTY_NO if they're empty. 0 = vanilla (Catalogsanity off).
+int pc_ap_wisp_item(mActor_name_t* const* lists, int list_count, mActor_name_t* item);
 
 // Time hooks (on top of pc_ap_timesanity.h): frozen clock, date changes,
 // normalized time travel.

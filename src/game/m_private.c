@@ -19,6 +19,8 @@
 #include "m_common_data.h"
 #ifdef TARGET_PC
 #include "pc_ap_newgame.h"
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
 #endif
 
 static Mail_c l_mpr_mail;
@@ -600,7 +602,14 @@ extern mActor_name_t mPr_DummyPresentToTruePresent() {
 
     /* 80% chance of rolling furniture from town's rare list */
     if (RANDOM(5) != 0) {
+#ifdef TARGET_PC
+        /* AP Catalogsanity: tree / balloon present */
+        pc_ap_catalog_source(AP_CATALOG_SOURCE_PRESENTS);
+#endif
         mSP_SelectRandomItem_New(NULL, &true_present, 1, NULL, 0, mSP_KIND_FURNITURE, mSP_LISTTYPE_RARE, FALSE);
+#ifdef TARGET_PC
+        pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
     }
 
     /* 20% (and default case) to get random non-native fruit */

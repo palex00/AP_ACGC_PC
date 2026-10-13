@@ -101,6 +101,7 @@ class AnimalCrossingWeb(WebWorld):
             options.CatalogPools,
             options.CatalogPoolSize,
             options.NewItemChance,
+            options.CatalogSources,
         ]),
         OptionGroup("Museumsanity", [
             options.Museumsanity,
@@ -456,6 +457,7 @@ class AnimalCrossingWorld(World):
             # Game item ids per pool; [] without Catalogsanity
             "catalog_pools": self.catalog_pools,
             "new_item_chance": self.options.new_item_chance.value,
+            "catalog_sources": sorted(self.options.catalog_sources.value),
             "museumsanity": self.options.museumsanity.value,
             # Effective modes: 0 without Museumsanity
             "bug_checks": self.museum_modes[MUSEUM_BUG],

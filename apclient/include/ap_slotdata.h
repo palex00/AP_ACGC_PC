@@ -21,6 +21,16 @@ extern "C" {
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
 #define AP_CATALOG_MAX 636 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
+// catalog_sources: sources besides Nook that can give new pool items (bits, apworld CATALOG_SOURCES order)
+#define AP_CATALOG_SOURCE_FAVORS     (1 << 0)
+#define AP_CATALOG_SOURCE_TRADES     (1 << 1)
+#define AP_CATALOG_SOURCE_LOST_FOUND (1 << 2)
+#define AP_CATALOG_SOURCE_DUMP       (1 << 3)
+#define AP_CATALOG_SOURCE_LETTERS    (1 << 4)
+#define AP_CATALOG_SOURCE_TREES      (1 << 5)
+#define AP_CATALOG_SOURCE_PRESENTS   (1 << 6)
+#define AP_CATALOG_SOURCE_GRAB_BAGS  (1 << 7)
+#define AP_CATALOG_SOURCE_WISP       (1 << 8)
 
 // nook_store_upgrades: what upgrades Nook's store
 #define AP_STORE_VANILLA     0 // offline / missing: the game's own rules
@@ -96,7 +106,8 @@ typedef struct {
   int catalog_count;                 // items in all pools (entries used in the two arrays below)
   unsigned short catalog_items[AP_CATALOG_MAX]; // game item ids, pools flattened in order
   unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k Progressive Catalog Pools
-  int new_item_chance;               // percent: a random item is a needed open-pool item (picker, not used yet)
+  int new_item_chance;               // percent: a random item from a source is a needed open-pool item
+  int catalog_sources;               // AP_CATALOG_SOURCE_* bits (Nook is always a source)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit
   char world_version[16];            // apworld version the seed was generated with ("" if missing)
   // Whether the struct has valid data

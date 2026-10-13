@@ -9,6 +9,7 @@
 
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
 #include "pc_ap_qol.h"
 #endif
 
@@ -1193,7 +1194,14 @@ static void aQMgr_actor_set_reward(QUEST_MANAGER_ACTOR* manager) {
             target->reward_item = ITM_CLOTH001;
         }
     } else {
+#ifdef TARGET_PC
+        /* AP Catalogsanity: favor reward */
+        pc_ap_catalog_source(AP_CATALOG_SOURCE_FAVORS);
+#endif
         mQst_GetGoods_common(&target->reward_item, &animal->id, target->reward_kind, NULL, 0, mSP_LISTTYPE_ABC);
+#ifdef TARGET_PC
+        pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
     }
 }
 

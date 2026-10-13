@@ -13,6 +13,11 @@
 #include "m_ledit_ovl.h"
 #include "libultra/libultra.h"
 
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
+#endif
+
 static int aQMgr_decide_msg_trade(QUEST_MANAGER_ACTOR* manager, int looks);
 
 enum {
@@ -953,6 +958,10 @@ static void aQMgr_order_decide_trade_common_item(aQMgr_SELECT_RND_ITEM_PROC sel_
         l_normal_info.trade_items[0] = itemNo;
     }
 
+#ifdef TARGET_PC
+    /* AP Catalogsanity: the villager's offers */
+    pc_ap_catalog_source(AP_CATALOG_SOURCE_TRADES);
+#endif
     for (i = 0; i < cat_table_cnt; i++) {
         cat = *cat_table;
         if (cat == mSP_KIND_DIARY) {
@@ -983,6 +992,9 @@ static void aQMgr_order_decide_trade_common_item(aQMgr_SELECT_RND_ITEM_PROC sel_
         mQst_SetItemNameStr(itemNo, mMsg_ITEM_STR1 + i);
         cat_table++;
     }
+#ifdef TARGET_PC
+    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
 
     if (item_mode == aQMgr_SEL_ITEM_MODE_RANDOM) {
         i = RANDOM(cat_table_cnt);
