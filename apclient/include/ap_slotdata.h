@@ -21,11 +21,11 @@ extern "C" {
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
 // nook_store_upgrades: what upgrades Nook's store
-#define AP_STORE_VANILLA 0 // offline / missing: the game's own rules
-#define AP_STORE_ITEMS   1 // Progressive Nook Store items
-#define AP_STORE_SALES   2 // total sales reach store_thresholds (Bells)
-#define AP_STORE_CATALOG 3 // catalog entries reach store_thresholds
-#define AP_STORE_LEVELS  3 // upgrades: Nook 'n' Go, Nookway, Nookington's
+#define AP_STORE_VANILLA     0 // offline / missing: the game's own rules
+#define AP_STORE_PROGRESSIVE 1 // Progressive Nook Store items
+#define AP_STORE_SALES       2 // total sales reach store_thresholds (Bells)
+#define AP_STORE_CATALOG     3 // catalog entries reach store_thresholds
+#define AP_STORE_LEVELS      3 // upgrades: Nook 'n' Go, Nookway, Nookington's
 
 // critter_spawns (bugs + fish)
 #define AP_CRITTER_SPAWNS_VANILLA    0

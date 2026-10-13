@@ -209,7 +209,7 @@ class AnimalCrossingWorld(World):
         self.store_items = 0
         self.store_thresholds = []
         mode = self.options.nook_store_upgrades.value
-        if mode == options.NookStoreUpgrades.option_items:
+        if mode == options.NookStoreUpgrades.option_progressive:
             self.store_items = NOOK_STORE_UPGRADES
         elif mode == options.NookStoreUpgrades.option_sales:
             self.store_thresholds = [self.options.nook_n_go_sales.value, self.options.nookway_sales.value,
@@ -406,7 +406,7 @@ class AnimalCrossingWorld(World):
             "favorsanity": self.options.favorsanity.value,
             "tools_in_pool": self.options.tools_in_pool.value,
             "nook_store_upgrades": self.options.nook_store_upgrades.value,
-            # Bells (sales) or catalog entries (catalog) per upgrade; empty with items
+            # Bells (sales) or catalog entries (catalog) per upgrade; empty with progressive
             "nook_store_thresholds": self.store_thresholds,
             "timesanity": self.options.timesanity.value,
             "starting_month": self.options.starting_month.value,

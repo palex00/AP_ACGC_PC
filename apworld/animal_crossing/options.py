@@ -377,15 +377,15 @@ class NookStoreUpgrades(Choice):
     """
     What upgrades Tom Nook's store (Nook's Cranny -> Nook 'n' Go -> Nookway -> Nookington's). Nookington's never
     needs a visitor from another town. Each upgrade still takes two days of renovation, one level at a time.
-    Items: three Progressive Nook Store items.
+    Progressive: three Progressive Nook Store items in the pool, one upgrade each.
     Sales: total Bells spent at the store reaches the Nook Store Sales amounts.
     Catalog: the number of entries in your catalog reaches the Nook Store Catalog counts.
     """
     display_name = "Nook Store Upgrades"
-    option_items = 1
+    option_progressive = 1
     option_sales = 2
     option_catalog = 3
-    default = option_items
+    default = option_progressive
 
 
 class StoreSales(NamedRange):
@@ -674,15 +674,8 @@ class MuseumGoalPercent(Range):
 
 @dataclass
 class AnimalCrossingOptions(PerGameCommonOptions):
+    # Same order as the option groups in world.py: the Options Creator lists a group's options in this order
     goal: Goal
-    starting_loan: StartingLoan
-    medium_loan: MediumLoan
-    basement_loan: BasementLoan
-    large_loan: LargeLoan
-    upper_loan: UpperLoan
-    loansanity: Loansanity
-    total_loan_checks: TotalLoanChecks
-    filler_bells_percent: FillerBellsPercent
     favorsanity: Favorsanity
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
@@ -693,17 +686,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     nook_n_go_catalog: NookNGoCatalog
     nookway_catalog: NookwayCatalog
     nookingtons_catalog: NookingtonsCatalog
-    timesanity: Timesanity
-    starting_month: StartingMonth
-    starting_time: StartingTime
-    museumsanity: Museumsanity
-    bug_checks: BugChecks
-    fish_checks: FishChecks
-    fossil_checks: FossilChecks
-    painting_checks: PaintingChecks
-    critter_spawns: CritterSpawns
-    fossil_spawns: FossilSpawns
-    museum_goal_percent: MuseumGoalPercent
     skip_intro: SkipIntro
     player_name: PlayerName
     town_name: TownName
@@ -715,11 +697,30 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     grass_shape: GrassShape
     train_station: TrainStation
     town_day: TownDay
-    villager_blacklist: VillagerBlacklist
-    starting_villagers: StartingVillagers
     letter_paper: LetterPaper
     letter_sender: LetterSender
     loan_letter_text: LoanLetterText
+    villager_blacklist: VillagerBlacklist
+    starting_villagers: StartingVillagers
+    loansanity: Loansanity
+    total_loan_checks: TotalLoanChecks
+    starting_loan: StartingLoan
+    medium_loan: MediumLoan
+    basement_loan: BasementLoan
+    large_loan: LargeLoan
+    upper_loan: UpperLoan
+    filler_bells_percent: FillerBellsPercent
+    timesanity: Timesanity
+    starting_month: StartingMonth
+    starting_time: StartingTime
+    museumsanity: Museumsanity
+    bug_checks: BugChecks
+    fish_checks: FishChecks
+    fossil_checks: FossilChecks
+    painting_checks: PaintingChecks
+    critter_spawns: CritterSpawns
+    fossil_spawns: FossilSpawns
+    museum_goal_percent: MuseumGoalPercent
     no_cockroaches: NoCockroaches
     shops_always_open: ShopsAlwaysOpen
     no_weeds: NoWeeds

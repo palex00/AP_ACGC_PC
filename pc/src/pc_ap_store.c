@@ -19,7 +19,7 @@ void pc_ap_store_init(pc_ap_store* s, const ap_slotdata* sd) {
 
 int pc_ap_store_level(const pc_ap_store* s, int cur_level, u32 sales_sum, int catalog_count) {
   int level = 0;
-  if(s->mode == AP_STORE_ITEMS) {
+  if(s->mode == AP_STORE_PROGRESSIVE) {
     level = ap_item_count(PC_AP_ITEM_PROGRESSIVE_NOOK_STORE);
   } else if(s->mode == AP_STORE_SALES || s->mode == AP_STORE_CATALOG) {
     u32 value = s->mode == AP_STORE_SALES ? sales_sum : (u32)catalog_count;
