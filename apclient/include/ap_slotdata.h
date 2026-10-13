@@ -20,7 +20,7 @@ extern "C" {
 
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
-#define AP_CATALOG_MAX 651 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
+#define AP_CATALOG_MAX 636 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
 
 // nook_store_upgrades: what upgrades Nook's store
 #define AP_STORE_VANILLA     0 // offline / missing: the game's own rules

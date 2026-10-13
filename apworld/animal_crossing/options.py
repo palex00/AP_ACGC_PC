@@ -579,7 +579,7 @@ class Catalogsanity(DefaultOnToggle):
 class CatalogPools(Range):
     """
     How far Catalogsanity is gated. Pool 1 is open from the start; the rest need one Progressive Catalog Pool
-    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 651.
+    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 636.
     """
     display_name = "Catalog Pools"
     range_start = 1
@@ -604,7 +604,7 @@ class NewItemChance(Range):
     right now, while any are left.
     """
     display_name = "New Item Chance"
-    range_start = 0
+    range_start = 5
     range_end = 100
     default = 75
 

@@ -21,12 +21,31 @@ extern "C" {
 #define PC_AP_ITEM_PROGRESSIVE_CATALOG_POOL 0x10005
 #define PC_AP_LOC_CATALOG_BASE              0x40000 // "Catalog: X" = base + game item id
 
+// Who asks the game for a random catalog item (pc_ap_catalog_source). Only
+// sources can hand out new pool items; everyone else gets "everything else".
+#define PC_AP_CATALOG_SOURCE_NONE 0
+#define PC_AP_CATALOG_SOURCE_NOOK 1 // Nook's daily stock (always a source)
+
 typedef struct {
   // Config (slot_data); count 0 when catalogsanity is off or offline
   int count;
   mActor_name_t items[AP_CATALOG_MAX]; // game item ids, pools flattened
   u8 pool[AP_CATALOG_MAX];             // pool (0-based) of each item
+  int new_item_chance;                 // percent
+  // Transient
+  int source;                          // PC_AP_CATALOG_SOURCE_* asking right now
 } pc_ap_catalogsanity;
+
+// One mSP_SelectRandomItem_New request, as the picker needs it
+typedef struct {
+  mActor_name_t** lists;          // the category's shop lists; A/B/C = [0..2], EMPTY_NO-terminated
+  int cloth_season;               // clothes: current mSP_CLOTH_SEASON_*, -1 for other categories
+  const mActor_name_t* exclude;   // never pick these (the game's exist table), may be NULL
+  int exclude_count;
+  mActor_name_t rare;             // today's rare item: never picked either
+  int new_chance;                 // percent chance per slot of a new open-pool item; 0 = not a source
+  int unowned_only;               // the game asked for items not in the catalog (no new pool items then)
+} pc_ap_catalog_request;
 
 void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd);
 
@@ -36,6 +55,16 @@ int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c);
 // current player's catalog (mSP_CollectCheck), -1 when done. Start *it at 0.
 // Includes ones already sent: the DLL drops repeats.
 int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, int* it);
+
+// Fills out[0..n) for a request, ignoring the game's tiers: every pick is from
+// A/B/C of the category. Per slot, with new_chance a "new" item: an open-pool
+// item not in the catalog. Otherwise (or none left) "everything else": non-pool
+// items (clothes: current season only) and pool items already in the catalog;
+// with unowned_only just non-pool items not in the catalog. Falls back to the
+// other bucket, then to repeats (except unowned_only), then EMPTY_NO. Never picks
+// a locked-pool item that isn't in the catalog.
+void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
+                              mActor_name_t* out, int n);
 
 #ifdef __cplusplus
 }

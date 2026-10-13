@@ -40,6 +40,7 @@
 #include "m_msg.h"
 #include "m_museum_display.h"
 #include "m_room_type.h"
+#include "m_shop.h"
 #include "m_name_table.h"
 #include "libc64/qrand.h"
 #include "ac_set_manager.h"
@@ -47,11 +48,12 @@
 #include <ini.h>
 #include <stdio.h>
 
-// From ac_animal_logo.c and m_bgm.c (static there, un-static on PC)
+// From ac_animal_logo.c, m_bgm.c and m_shop.c (static there, un-static on PC)
 extern void aAL_title_decide_p_sel_npc(void);
 extern void mMsm_GetFossil(mActor_name_t* fossil);
 extern void mBGMFieldNorm_make_req(void);
 extern void mBGMFieldNorm_delete_req(void);
+extern int mSP_get_cloth_season(void);
 
 // Hour change music: fade type of the old song, and game frames of silence before the new one
 #define PC_AP_HOUR_FADE_STOP   0x168
@@ -367,6 +369,37 @@ int pc_ap_shop_real_level(int cur_level, u32 sales_sum) {
 
 int pc_ap_shop_sales_cap(int cur_level, u32* cap) {
   return pc_ap_store_sales_cap(&g_ap.store, cur_level, cap);
+}
+
+void pc_ap_catalog_source(int source) {
+  g_ap.catalog.source = source;
+}
+
+int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,
+                       int list_type, int unowned_only, mActor_name_t** lists) {
+  // Catalog bits are the current player's (mSP_CollectCheck)
+  if(g_ap.catalog.count == 0 || Common_Get(now_private) == NULL || category == mSP_KIND_DIARY) {
+    return 0;
+  }
+  // Only the shop tiers hold pool items; themed lists never overlap them
+  if(list_type != mSP_LISTTYPE_ABC && list_type != mSP_LISTTYPE_COMMON && list_type != mSP_LISTTYPE_UNCOMMON &&
+     list_type != mSP_LISTTYPE_RARE) {
+    return 0;
+  }
+  pc_ap_catalog_request r;
+  r.lists = lists;
+  r.cloth_season = category == mSP_KIND_CLOTH ? mSP_get_cloth_season() : -1;
+  r.exclude = exist;
+  r.exclude_count = exist != NULL ? exist_count : 0;
+  r.rare = Save_Get(shop).rare_item;
+  r.new_chance = 0;
+  if(g_ap.catalog.source != PC_AP_CATALOG_SOURCE_NONE) {
+    // A source's rare slot always gets a new item while there is one
+    r.new_chance = list_type == mSP_LISTTYPE_RARE ? 100 : g_ap.catalog.new_item_chance;
+  }
+  r.unowned_only = unowned_only;
+  pc_ap_catalogsanity_pick(&g_ap.catalog, pc_ap_catalogsanity_open_pools(&g_ap.catalog), &r, out, n);
+  return 1;
 }
 
 int pc_ap_time_frozen(void) {

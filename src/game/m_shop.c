@@ -16,6 +16,7 @@
 #include "pc_settings.h"
 #include "pc_ap_qol.h"
 #include "pc_ap_logic.h"
+#include "pc_ap_catalogsanity.h"
 #endif
 
 extern mActor_name_t* mSP_ftr_list[];
@@ -314,7 +315,11 @@ static int mSP_CountElementInCommonList_collect(mActor_name_t* list, int* select
     return count;
 }
 
-static int mSP_get_cloth_season() {
+/* PC: also used by the Catalogsanity picker (pc_ap_logic.c) */
+#ifndef TARGET_PC
+static
+#endif
+int mSP_get_cloth_season() {
     lbRTC_time_c rtc_time = Common_Get(time.rtc_time);
     lbRTC_month_t month = rtc_time.month;
     int res;
@@ -520,6 +525,14 @@ extern void mSP_SelectRandomItem_New(GAME* game, mActor_name_t* goods_table, int
             u8 abc_priorities[3];
             mActor_name_t** goods_seg_p = mSP_goods_seg_inf[category];
             int i = 0;
+
+#ifdef TARGET_PC
+            /* AP Catalogsanity: pool items only through its picker */
+            if (pc_ap_catalog_pick(goods_table, goods_count, goods_exist_table, goods_exist_count, category,
+                                   list_type, uncollected_only, goods_seg_p)) {
+                return;
+            }
+#endif
 
             mSP_GetGoodsPriority(abc_priorities, category);
 
@@ -847,6 +860,11 @@ static void mSP_MakeRandomGoodsList(GAME* game, int* count, mActor_name_t* goods
     Shop_c* shop = Save_GetPointer(shop);
     mActor_name_t rare;
 
+#ifdef TARGET_PC
+    /* AP Catalogsanity: Nook is a source for everything rolled below */
+    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NOOK);
+#endif
+
     /* roll rare furniture if the shop has one */
     if (goods_count[mSP_GOODS_TYPE_RARE_FTR] != 0) {
         mSP_SelectRandomItem_New(game, &rare, 1, NULL, 0, mSP_KIND_FURNITURE, mSP_LISTTYPE_RARE, FALSE);
@@ -896,6 +914,10 @@ static void mSP_MakeRandomGoodsList(GAME* game, int* count, mActor_name_t* goods
     mSP_SelectRandomItem_New(game, goods_list + count[0], goods_count[mSP_GOODS_TYPE_WALL], NULL, 0, mSP_KIND_WALLPAPER,
                              mSP_LISTTYPE_ABC, FALSE);
     count[0] += goods_count[mSP_GOODS_TYPE_WALL];
+
+#ifdef TARGET_PC
+    pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
+#endif
 }
 
 extern int mSP_CountElementInGoodsList() {

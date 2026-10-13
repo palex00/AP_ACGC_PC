@@ -1,8 +1,21 @@
 #include "pc_ap_catalogsanity.h"
 #include "ap_archipelago.h"
 #include "m_shop.h"
+#include "m_name_table.h"
+#include "sys_math.h"
+#include "libc64/qrand.h"
 
 #include <string.h>
+
+// A + B + C of one category (furniture is the biggest: 310)
+#define PC_AP_CATALOG_CANDIDATES 400
+
+// What a candidate is for the picker
+#define PC_AP_CATALOG_SKIP 0
+#define PC_AP_CATALOG_NEW  1 // open pool, not in the catalog
+#define PC_AP_CATALOG_ELSE 2 // everything else
+
+extern u8 cloth_season_cnt[]; // cloth_list.c: any, spring, summer, autumn, winter
 
 void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd) {
   memset(c, 0, sizeof(*c));
@@ -10,6 +23,7 @@ void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd) {
     return;
   }
   c->count = sd->catalog_count;
+  c->new_item_chance = sd->new_item_chance;
   for(int i = 0; i < c->count; i++) {
     c->items[i] = sd->catalog_items[i];
     c->pool[i] = sd->catalog_pool[i];
@@ -31,4 +45,126 @@ int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, i
     }
   }
   return -1;
+}
+
+// Index of item in the pools, -1 if it isn't a pool item
+static int pc_ap_catalogsanity_index(const pc_ap_catalogsanity* c, mActor_name_t item) {
+  for(int i = 0; i < c->count; i++) {
+    if(c->items[i] == item) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// Clothes lists are blocks: any season, then spring, summer, autumn, winter
+// (cloth_season_cnt). pos is the index in one of the A/B/C lists.
+static int pc_ap_catalogsanity_in_season(int pos, int season) {
+  if(pos < cloth_season_cnt[mSP_CLOTH_SEASON_ANY]) {
+    return 1;
+  }
+  int start = cloth_season_cnt[mSP_CLOTH_SEASON_ANY];
+  for(int s = mSP_CLOTH_SEASON_SPRING; s < season; s++) {
+    start += cloth_season_cnt[s];
+  }
+  return pos >= start && pos < start + cloth_season_cnt[season];
+}
+
+static int pc_ap_catalogsanity_kind(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
+                                    mActor_name_t item, int pos) {
+  int owned = mSP_CollectCheck(item);
+  int i = pc_ap_catalogsanity_index(c, item);
+  if(i >= 0) {
+    // Pool items ignore seasons
+    if(!owned) {
+      return c->pool[i] < open ? PC_AP_CATALOG_NEW : PC_AP_CATALOG_SKIP;
+    }
+    return r->unowned_only ? PC_AP_CATALOG_SKIP : PC_AP_CATALOG_ELSE;
+  }
+  if(r->cloth_season >= 0 && !pc_ap_catalogsanity_in_season(pos, r->cloth_season)) {
+    return PC_AP_CATALOG_SKIP;
+  }
+  if(r->unowned_only && owned) {
+    return PC_AP_CATALOG_SKIP;
+  }
+  return PC_AP_CATALOG_ELSE;
+}
+
+// Already picked for this request, excluded by the game, or today's rare item
+static int pc_ap_catalogsanity_taken(const pc_ap_catalog_request* r, const mActor_name_t* out, int filled,
+                                     mActor_name_t item) {
+  if(item == r->rare) {
+    return 1;
+  }
+  for(int i = 0; i < filled; i++) {
+    if(out[i] == item) {
+      return 1;
+    }
+  }
+  for(int i = 0; i < r->exclude_count; i++) {
+    if(r->exclude[i] == item) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+// Random candidate of one kind, EMPTY_NO if none. repeats: also ones already taken
+static mActor_name_t pc_ap_catalogsanity_draw(const mActor_name_t* cand, const u8* kind, int count, int want,
+                                              const pc_ap_catalog_request* r, const mActor_name_t* out,
+                                              int filled, int repeats) {
+  int n = 0;
+  for(int i = 0; i < count; i++) {
+    if(kind[i] == want && (repeats || !pc_ap_catalogsanity_taken(r, out, filled, cand[i]))) {
+      n++;
+    }
+  }
+  if(n == 0) {
+    return EMPTY_NO;
+  }
+  int k = RANDOM(n);
+  for(int i = 0; i < count; i++) {
+    if(kind[i] == want && (repeats || !pc_ap_catalogsanity_taken(r, out, filled, cand[i]))) {
+      if(k == 0) {
+        return cand[i];
+      }
+      k--;
+    }
+  }
+  return EMPTY_NO;
+}
+
+void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
+                              mActor_name_t* out, int n) {
+  static mActor_name_t cand[PC_AP_CATALOG_CANDIDATES];
+  static u8 kind[PC_AP_CATALOG_CANDIDATES];
+  int count = 0;
+  for(int l = 0; l < 3; l++) {
+    const mActor_name_t* list = r->lists[l];
+    for(int pos = 0; list != NULL && list[pos] != EMPTY_NO && count < PC_AP_CATALOG_CANDIDATES; pos++) {
+      cand[count] = list[pos];
+      kind[count] = (u8)pc_ap_catalogsanity_kind(c, open, r, list[pos], pos);
+      count++;
+    }
+  }
+
+  for(int s = 0; s < n; s++) {
+    mActor_name_t item = EMPTY_NO;
+    // Only sources (new_chance > 0) ever get a new pool item, even as a fallback
+    if(r->new_chance > 0 && RANDOM(100) < r->new_chance) {
+      item = pc_ap_catalogsanity_draw(cand, kind, count, PC_AP_CATALOG_NEW, r, out, s, 0);
+    }
+    if(item == EMPTY_NO) {
+      item = pc_ap_catalogsanity_draw(cand, kind, count, PC_AP_CATALOG_ELSE, r, out, s, 0);
+    }
+    if(item == EMPTY_NO && r->new_chance > 0) {
+      item = pc_ap_catalogsanity_draw(cand, kind, count, PC_AP_CATALOG_NEW, r, out, s, 0);
+    }
+    // Like the game: repeats when there's too little to choose from, but "not
+    // in the catalog" requests stay empty (callers use that to try something else)
+    if(item == EMPTY_NO && !r->unowned_only) {
+      item = pc_ap_catalogsanity_draw(cand, kind, count, PC_AP_CATALOG_ELSE, r, out, s, 1);
+    }
+    out[s] = item;
+  }
 }
