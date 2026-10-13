@@ -231,6 +231,8 @@ static int ap_start_offline(const char * path) {
   sd->timesanity = 0;
   sd->favorsanity = 0;
   sd->museumsanity = 0;
+  sd->catalogsanity = 0;
+  sd->catalog_count = 0;
   sd->tools_in_pool = 0;
   sd->store_upgrades = AP_STORE_VANILLA;
   sd->goal = 0;

@@ -8,6 +8,7 @@
 #include "pc_ap_mail.h"
 #include "pc_ap_tools.h"
 #include "pc_ap_store.h"
+#include "pc_ap_catalogsanity.h"
 #include "pc_ap_overlay.h"
 #include "pc_ap_strings.h"
 #include "pc_ap_weather.h"
@@ -67,6 +68,7 @@ typedef struct {
   pc_ap_mail mail;
   pc_ap_tools tools;
   pc_ap_store store;
+  pc_ap_catalogsanity catalog;
   int initialized; // module config set from slot_data
 } pc_ap;
 
@@ -82,6 +84,7 @@ void pc_ap_init(void) {
   pc_ap_mail_init(&g_ap.mail, sd);
   pc_ap_tools_init(&g_ap.tools, sd);
   pc_ap_store_init(&g_ap.store, sd);
+  pc_ap_catalogsanity_init(&g_ap.catalog, sd);
   g_ap.initialized = 1;
 }
 
@@ -610,6 +613,14 @@ void pc_ap_tick(GAME_PLAY* play) {
   it = 0;
   while((id = pc_ap_favorsanity_next_check(&g_ap.favors, &it)) >= 0) {
     ap_send_location(id);
+  }
+  // Open-pool items in the catalog: also sends the ones already there when a pool opens
+  if(pc_ap_accepting()) {
+    int open = pc_ap_catalogsanity_open_pools(&g_ap.catalog);
+    it = 0;
+    while((id = pc_ap_catalogsanity_next_check(&g_ap.catalog, open, &it)) >= 0) {
+      ap_send_location(id);
+    }
   }
 
   pc_ap_apply_credit(paid);

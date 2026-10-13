@@ -38,6 +38,31 @@ static void read_npc_list(const nlohmann::json& slot_data, const char * key, uns
   }
 }
 
+// Catalogsanity pools: a list of lists of game item ids. Bad entries are skipped
+// (apworld/client mismatch), anything past AP_CATALOG_MAX is dropped
+static void read_catalog_pools(const nlohmann::json& slot_data, ap_slotdata * sd) {
+  sd->catalog_count = 0;
+  auto it = slot_data.find("catalog_pools");
+  if (it == slot_data.end() || !it->is_array()) { return; }
+  int pool = 0;
+  for (auto& items : *it) {
+    if (items.is_array()) {
+      for (auto& v : items) {
+        if (!v.is_number_integer() || v.get<int>() <= 0 || v.get<int>() > 0xFFFF) {
+          APLOG_WARN("catalog_pools: ignoring bad entry %s", v.dump().c_str());
+        } else if (sd->catalog_count >= AP_CATALOG_MAX) {
+          APLOG_WARN("catalog_pools: more than %d items, ignoring %s", AP_CATALOG_MAX, v.dump().c_str());
+        } else {
+          sd->catalog_items[sd->catalog_count] = (unsigned short)v.get<int>();
+          sd->catalog_pool[sd->catalog_count] = (unsigned char)(pool < 255 ? pool : 255);
+          sd->catalog_count++;
+        }
+      }
+    }
+    pool++;
+  }
+}
+
 static int read_goal(const nlohmann::json& slot_data) {
   auto it = slot_data.find("goal");
   if (it == slot_data.end() || !it->is_array()) { return AP_GOAL_STATUE; }
@@ -119,6 +144,10 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   // Same range as the game (mTM_MIN_YEAR / mTM_MAX_YEAR on PC)
   sd->start_year = slot_data.value("start_year", 2001);
   if (sd->start_year < 2001 || sd->start_year > 2100) { sd->start_year = 2001; }
+  sd->catalogsanity = slot_data.value("catalogsanity", 0) % 2;
+  read_catalog_pools(slot_data, sd);
+  sd->new_item_chance = slot_data.value("new_item_chance", 0);
+  if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
 
   // Keyed by item name in the apworld (Small/Modest/Large Bell Credit)
   static const char * credit_names[AP_BELLCREDIT_NUM] = { "Small Bell Credit", "Modest Bell Credit", "Large Bell Credit" };

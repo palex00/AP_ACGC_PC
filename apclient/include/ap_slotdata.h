@@ -20,6 +20,8 @@ extern "C" {
 
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
+#define AP_CATALOG_MAX 651 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
+
 // nook_store_upgrades: what upgrades Nook's store
 #define AP_STORE_VANILLA     0 // offline / missing: the game's own rules
 #define AP_STORE_PROGRESSIVE 1 // Progressive Nook Store items
@@ -89,6 +91,12 @@ typedef struct {
   int starting_month;                // 0-11
   int starting_time;                 // 0-3: Morning 4-8, Day 9-15, Evening 16-20, Night 21-3
   int start_year;                    // year of the frozen clock (seed generation year, 2001-2100)
+  // Catalogsanity: catalog items split into pools, registering an open-pool item is a check
+  int catalogsanity;                 // nonzero: catalog checks + Progressive Catalog Pool items
+  int catalog_count;                 // items in all pools (entries used in the two arrays below)
+  unsigned short catalog_items[AP_CATALOG_MAX]; // game item ids, pools flattened in order
+  unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k Progressive Catalog Pools
+  int new_item_chance;               // percent: a random item is a needed open-pool item (picker, not used yet)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit
   char world_version[16];            // apworld version the seed was generated with ("" if missing)
   // Whether the struct has valid data
