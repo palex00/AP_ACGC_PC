@@ -45,6 +45,16 @@ int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c) {
   return 1 + ap_item_count(PC_AP_ITEM_PROGRESSIVE_CATALOG_POOL);
 }
 
+int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c) {
+  int n = 0;
+  for(int i = 0; i < c->count; i++) {
+    if(c->pool[i] + 1 > n) {
+      n = c->pool[i] + 1;
+    }
+  }
+  return n;
+}
+
 int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, int* it) {
   while(*it < c->count) {
     int i = (*it)++;

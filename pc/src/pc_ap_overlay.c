@@ -270,6 +270,10 @@ static void pc_ap_draw_tracker(struct game_s* game) {
       apo_append(output, sizeof(output), "\nFavors: %d / %d", pc_ap_favors_done(), pc_ap_favors_total());
     }
     apo_append_museum(output, sizeof(output));
+    if(pc_ap_catalog_pools_total() > 0) {
+      apo_append(output, sizeof(output), "\nCatalog Pools: %d / %d", pc_ap_catalog_pools_open(),
+                 pc_ap_catalog_pools_total());
+    }
     apo_append_unlocks(output, sizeof(output));
   } else {
     snprintf(output, sizeof(output), "Waiting on save...");

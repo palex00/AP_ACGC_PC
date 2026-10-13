@@ -52,6 +52,8 @@ void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd);
 
 // Pools open: 1 + Progressive Catalog Pools received (0 without catalogsanity)
 int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c);
+// Pools in the seed (0 without catalogsanity)
+int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c);
 // Next "Catalog: X" id of an item in the first `open` pools that is in the
 // current player's catalog (mSP_CollectCheck), -1 when done. Start *it at 0.
 // Includes ones already sent: the DLL drops repeats.

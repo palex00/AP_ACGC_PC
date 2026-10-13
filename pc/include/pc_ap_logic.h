@@ -153,6 +153,10 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap);
 
 // Catalogsanity hooks (pc_ap_catalogsanity.h). The tick sends the checks.
 
+// Tracker: Catalog Pools open (at most total) and in total; total 0 = Catalogsanity off
+int pc_ap_catalog_pools_open(void);
+int pc_ap_catalog_pools_total(void);
+
 // Who is asking for random catalog items now (PC_AP_CATALOG_SOURCE_NOOK or an
 // AP_CATALOG_SOURCE_* bit; PC_AP_CATALOG_SOURCE_NONE = nobody): set around a
 // source's rolls (Nook's stock, favors, ...), back to NONE after

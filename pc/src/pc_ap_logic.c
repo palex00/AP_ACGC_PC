@@ -379,6 +379,16 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap) {
   return pc_ap_store_sales_cap(&g_ap.store, cur_level, cap);
 }
 
+int pc_ap_catalog_pools_open(void) {
+  int open = pc_ap_catalogsanity_open_pools(&g_ap.catalog);
+  int total = pc_ap_catalog_pools_total();
+  return open < total ? open : total; // extra Progressive Catalog Pools (start inventory)
+}
+
+int pc_ap_catalog_pools_total(void) {
+  return pc_ap_catalogsanity_pool_count(&g_ap.catalog);
+}
+
 void pc_ap_catalog_source(int source) {
   g_ap.catalog_source = source;
 }
