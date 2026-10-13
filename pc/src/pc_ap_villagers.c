@@ -91,35 +91,37 @@ static int pc_ap_villagers_random(int looks, int pool_only) {
   return -1;
 }
 
-// Starter pick state: personalities picked so far, starters still to pick
-static int l_picked_looks;
-static int l_left;
+// Starter pick in progress
+typedef struct {
+  int picked_looks; // personalities picked so far (bit per looks)
+  int left;         // starters still to pick
+} pc_ap_villagers_pick;
 
-static int pc_ap_villagers_pick_one(int looks, int pool_only) {
+static int pc_ap_villagers_pick_one(pc_ap_villagers_pick* p, int looks, int pool_only) {
   int idx = pc_ap_villagers_random(looks, pool_only);
 
   if (idx == -1) {
     return FALSE;
   }
   npc_grow_list[idx] = mNpc_GROW_STARTER;
-  l_picked_looks |= 1 << npc_looks_table[idx];
-  l_left--;
+  p->picked_looks |= 1 << npc_looks_table[idx];
+  p->left--;
   return TRUE;
 }
 
 // One villager for each personality not picked yet
-static void pc_ap_villagers_pick_per_personality(int pool_only) {
+static void pc_ap_villagers_pick_per_personality(pc_ap_villagers_pick* p, int pool_only) {
   int looks;
 
-  for (looks = 0; looks < mNpc_LOOKS_NUM && l_left > 0; looks++) {
-    if (((l_picked_looks >> looks) & 1) == 0) {
-      pc_ap_villagers_pick_one(looks, pool_only);
+  for (looks = 0; looks < mNpc_LOOKS_NUM && p->left > 0; looks++) {
+    if (((p->picked_looks >> looks) & 1) == 0) {
+      pc_ap_villagers_pick_one(p, looks, pool_only);
     }
   }
 }
 
-static void pc_ap_villagers_pick_rest(int pool_only) {
-  while (l_left > 0 && pc_ap_villagers_pick_one(-1, pool_only)) {
+static void pc_ap_villagers_pick_rest(pc_ap_villagers_pick* p, int pool_only) {
+  while (p->left > 0 && pc_ap_villagers_pick_one(p, -1, pool_only)) {
   }
 }
 
@@ -137,17 +139,16 @@ int pc_ap_villagers_pick_starters(int count) {
       npc_grow_list[i] = mNpc_GROW_MOVE_IN;
     }
   }
-  l_picked_looks = 0;
-  l_left = count;
+  pc_ap_villagers_pick p = { 0, count };
 
   // Pool first: a pool smaller than count is always taken whole, a bigger one fills every slot
-  pc_ap_villagers_pick_per_personality(TRUE);
-  pc_ap_villagers_pick_rest(TRUE);
+  pc_ap_villagers_pick_per_personality(&p, TRUE);
+  pc_ap_villagers_pick_rest(&p, TRUE);
   // Then like vanilla
-  pc_ap_villagers_pick_per_personality(FALSE);
-  pc_ap_villagers_pick_rest(FALSE);
+  pc_ap_villagers_pick_per_personality(&p, FALSE);
+  pc_ap_villagers_pick_rest(&p, FALSE);
 
-  if (l_left > 0) {
+  if (p.left > 0) {
     OSReport("[AP] villager options: not enough villagers for the starting town\n");
   }
 

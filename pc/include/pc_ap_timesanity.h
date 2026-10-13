@@ -28,16 +28,6 @@ struct Save_s;
 // never leave. The game only shows hours and minutes.
 #define PC_AP_TIME_SEC   16
 
-// Date & Time reload steps (pc_ap_logic.c): fade out, save on the way to the title,
-// player select starts the same player, leave player select
-enum {
-  PC_AP_RELOAD_NONE,
-  PC_AP_RELOAD_FADE,          // fading out of the town, waiting for trademark_init
-  PC_AP_RELOAD_TITLE,         // saved with the new date, trademark hands over to player select
-  PC_AP_RELOAD_PLAYER_SELECT, // player select's villager should start reload_player
-  PC_AP_RELOAD_LEAVING,       // started, screen covered until player select is left
-};
-
 typedef struct {
   // Config (slot_data)
   int frozen;       // timesanity: the clock stands still
@@ -50,10 +40,6 @@ typedef struct {
   lbRTC_time_c request; // Date & Time change waiting for the next play frame
   int spoil_pending;
   int spoil;            // turnip decision from the last normalize, for the next grow tick
-  int reload;               // PC_AP_RELOAD_*
-  lbRTC_time_c reload_date; // new date, set right before the save
-  int reload_player;        // player_no to start again
-  int change_allowed;       // facade's Date & Time gate on the last play frame (pause menu reads it)
 } pc_ap_timesanity;
 
 // Config from slot_data, transient fields zeroed

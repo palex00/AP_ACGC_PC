@@ -62,6 +62,24 @@ extern int mSP_ItemNo2GoodsListCategory(mActor_name_t item_no);
 
 // All AP game state: the only global. Everything below is the facade that
 // hands it (and the game/DLL state) to the modules.
+// Date & Time reload steps: fade out, save on the way to the title, player select
+// starts the same player, leave player select
+enum {
+  PC_AP_RELOAD_NONE,
+  PC_AP_RELOAD_FADE,          // fading out of the town, waiting for trademark_init
+  PC_AP_RELOAD_TITLE,         // saved with the new date, trademark hands over to player select
+  PC_AP_RELOAD_PLAYER_SELECT, // player select's villager should start player
+  PC_AP_RELOAD_LEAVING,       // started, screen covered until player select is left
+};
+
+// Date & Time reload in progress (not saved). pc_ap_time_tick starts it, the
+// pc_ap_time_reload_* hooks step it.
+typedef struct {
+  int step;          // PC_AP_RELOAD_*
+  lbRTC_time_c date; // new date, set right before the save
+  int player;        // player_no to start again
+} pc_ap_reload;
+
 typedef struct {
   pc_ap_loansanity loans;
   pc_ap_credit credit;
@@ -73,6 +91,8 @@ typedef struct {
   pc_ap_store store;
   pc_ap_catalogsanity catalog;
   int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
+  pc_ap_reload reload;
+  int time_change_allowed; // Date & Time gate on the last play frame (pause menu reads it)
   int initialized;    // module config set from slot_data
 } pc_ap;
 
@@ -89,6 +109,9 @@ void pc_ap_init(void) {
   pc_ap_tools_init(&g_ap.tools, sd);
   pc_ap_store_init(&g_ap.store, sd);
   pc_ap_catalogsanity_init(&g_ap.catalog, sd);
+  // Cleared here as when they were timesanity fields
+  memset(&g_ap.reload, 0, sizeof(g_ap.reload));
+  g_ap.time_change_allowed = 0;
   g_ap.initialized = 1;
 }
 
@@ -569,7 +592,7 @@ int pc_ap_time_change_allowed(GAME_PLAY* play) {
 }
 
 int pc_ap_time_change_allowed_now(void) {
-  return g_ap.time.change_allowed;
+  return g_ap.time_change_allowed;
 }
 
 // Applies a pending Date & Time request. Runs before pc_ap_tick's gate and re-checks
@@ -581,7 +604,7 @@ static void pc_ap_time_tick(GAME_PLAY* play) {
   if(!pc_ap_timesanity_take_request(&g_ap.time, &want)) {
     return;
   }
-  if(g_ap.time.reload != PC_AP_RELOAD_NONE) {
+  if(g_ap.reload.step != PC_AP_RELOAD_NONE) {
     return; // a reload is already running
   }
   if(!pc_ap_time_change_allowed(play)) {
@@ -601,9 +624,9 @@ static void pc_ap_time_tick(GAME_PLAY* play) {
     mBGMFieldNorm_delete_req();
     mBGMFieldNorm_make_req();
   } else {
-    g_ap.time.reload = PC_AP_RELOAD_FADE;
-    g_ap.time.reload_date = want;
-    g_ap.time.reload_player = Common_Get(player_no);
+    g_ap.reload.step = PC_AP_RELOAD_FADE;
+    g_ap.reload.date = want;
+    g_ap.reload.player = Common_Get(player_no);
     // The save villager's quit (aNRST_think_title): fade to black, then the trademark scene
     play->fb_wipe_type = WIPE_TYPE_FADE_BLACK;
     play->fb_fade_type = FADE_TYPE_OUT_RETURN_TITLE;
@@ -613,11 +636,11 @@ static void pc_ap_time_tick(GAME_PLAY* play) {
 }
 
 void pc_ap_time_reload_save(void) {
-  if(g_ap.time.reload != PC_AP_RELOAD_FADE) {
+  if(g_ap.reload.step != PC_AP_RELOAD_FADE) {
     return;
   }
   pc_ap_overlay_screen_cover(1);
-  pc_ap_time_set_date(&g_ap.time.reload_date);
+  pc_ap_time_set_date(&g_ap.reload.date);
   // Like aNRST_before_save. After set_date: it mails/deletes fish records against the clock.
   Save_Set(cheated_flag, FALSE);
   Save_Set(npc_force_go_home, FALSE);
@@ -626,7 +649,7 @@ void pc_ap_time_reload_save(void) {
   if(mCD_SaveHome_bg(0, NULL) != mCD_TRANS_ERR_NONE) {
     OSReport("[AP] Date & Time reload: save failed, loading the last save\n");
   }
-  g_ap.time.reload = PC_AP_RELOAD_TITLE;
+  g_ap.reload.step = PC_AP_RELOAD_TITLE;
 }
 
 // What the title's Start press does, then player select
@@ -636,7 +659,7 @@ static void pc_ap_time_reload_title(GAME* game) {
   aAL_title_decide_p_sel_npc();              // after the load: picks one of its villagers
   Common_Set(transition.wipe_type, WIPE_TYPE_FADE_BLACK);
   Save_Set(scene_no, SCENE_PLAYERSELECT_2);
-  g_ap.time.reload = PC_AP_RELOAD_PLAYER_SELECT;
+  g_ap.reload.step = PC_AP_RELOAD_PLAYER_SELECT;
   GAME_GOTO_NEXT(game, play, PLAY);
 }
 
@@ -661,7 +684,7 @@ static void pc_ap_time_reload_cleanup(GAME* game) {
 }
 
 void pc_ap_time_reload_takeover(GAME* game) {
-  if(g_ap.time.reload != PC_AP_RELOAD_TITLE) {
+  if(g_ap.reload.step != PC_AP_RELOAD_TITLE) {
     return;
   }
   game->exec = &pc_ap_time_reload_main;
@@ -669,27 +692,27 @@ void pc_ap_time_reload_takeover(GAME* game) {
 }
 
 int pc_ap_time_reload_take_player(void) {
-  if(g_ap.time.reload != PC_AP_RELOAD_PLAYER_SELECT) {
+  if(g_ap.reload.step != PC_AP_RELOAD_PLAYER_SELECT) {
     return -1;
   }
-  g_ap.time.reload = PC_AP_RELOAD_LEAVING;
-  return g_ap.time.reload_player;
+  g_ap.reload.step = PC_AP_RELOAD_LEAVING;
+  return g_ap.reload.player;
 }
 
 int pc_ap_time_reloading(void) {
-  return g_ap.time.reload != PC_AP_RELOAD_NONE;
+  return g_ap.reload.step != PC_AP_RELOAD_NONE;
 }
 
 void pc_ap_time_reload_failed(void) {
-  g_ap.time.reload = PC_AP_RELOAD_NONE;
+  g_ap.reload.step = PC_AP_RELOAD_NONE;
   pc_ap_overlay_screen_cover(0);
 }
 
 // Uncovers the screen once player select is left (Game_play_change_scene_move_end);
 // the town's own fade-in follows
 static void pc_ap_time_reload_update(void) {
-  if(g_ap.time.reload == PC_AP_RELOAD_LEAVING && Save_Get(scene_no) != SCENE_PLAYERSELECT_2) {
-    g_ap.time.reload = PC_AP_RELOAD_NONE;
+  if(g_ap.reload.step == PC_AP_RELOAD_LEAVING && Save_Get(scene_no) != SCENE_PLAYERSELECT_2) {
+    g_ap.reload.step = PC_AP_RELOAD_NONE;
     pc_ap_overlay_screen_cover(0);
   }
 }
@@ -698,7 +721,7 @@ void pc_ap_tick(GAME_PLAY* play) {
   pc_crash_note_frame(play);
   pc_ap_time_tick(play); // before the gate: a blocked request is dropped with a toast
   // Not while paused (Game_play_move returns first), so the pause menu sees the last frame's
-  g_ap.time.change_allowed = g_ap.time.reload == PC_AP_RELOAD_NONE && pc_ap_time_change_allowed(play);
+  g_ap.time_change_allowed = g_ap.reload.step == PC_AP_RELOAD_NONE && pc_ap_time_change_allowed(play);
   if(!pc_ap_in_game(play)) {
     return;
   }
