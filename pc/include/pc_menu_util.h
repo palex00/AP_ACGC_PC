@@ -13,6 +13,24 @@ struct graph_s;
 
 #define PC_MENU_SCALE_SELECTED 1.15f
 
+// Menu input, from keys / pad (pc_pause_menu.c translates SDL events)
+typedef enum {
+  PC_MENU_NONE,
+  PC_MENU_UP,
+  PC_MENU_DOWN,
+  PC_MENU_LEFT,
+  PC_MENU_RIGHT,
+  PC_MENU_CONFIRM,
+  PC_MENU_CANCEL,
+} pc_menu_action;
+
+// What the pause menu should do after a page's input
+enum {
+  PC_MENU_STAY,   // page stays open
+  PC_MENU_BACK,   // back to the pause menu's main page
+  PC_MENU_RESUME, // close the pause menu
+};
+
 /* Full-screen translucent black backdrop, drawn into NOW_FONT_DISP. */
 void pc_menu_dim_rect(struct graph_s* graph, int alpha);
 void pc_menu_dim_box(struct graph_s* graph, f32 x, f32 y, f32 w, f32 h, int alpha);

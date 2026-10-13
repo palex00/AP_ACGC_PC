@@ -10,6 +10,7 @@
 #include "m_item_name.h"
 #include "pc_ap_museumsanity.h" // PC_AP_CRITTER_NUM
 #include "pc_menu_list.h"
+#include "pc_menu_util.h" // pc_menu_action
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,10 +30,8 @@ typedef struct {
 // cat: mMmd_CATEGORY_INSECT or mMmd_CATEGORY_FISH. Needs a player.
 void pc_ap_critter_menu_enter(pc_ap_critter_menu* m, int cat);
 
-void pc_ap_critter_menu_up(pc_ap_critter_menu* m);
-void pc_ap_critter_menu_down(pc_ap_critter_menu* m);
-void pc_ap_critter_menu_left(pc_ap_critter_menu* m);
-void pc_ap_critter_menu_right(pc_ap_critter_menu* m);
+// Up/down scroll, left/right page, cancel = PC_MENU_BACK; else PC_MENU_STAY
+int pc_ap_critter_menu_input(pc_ap_critter_menu* m, pc_menu_action act);
 
 // Draws into NOW_FONT_DISP with its own dim backdrop. Font projection must be loaded.
 void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game);

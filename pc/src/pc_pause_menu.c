@@ -170,29 +170,19 @@ static void confirm_activate(void) {
     }
 }
 
-/* Device-independent menu actions; keyboard and gamepad both map here. */
-typedef enum {
-    ACT_NONE = 0,
-    ACT_UP,
-    ACT_DOWN,
-    ACT_LEFT,
-    ACT_RIGHT,
-    ACT_CONFIRM,
-    ACT_CANCEL,
-} MenuAction;
-
-static void handle_action(MenuAction act) {
+/* Keyboard and gamepad both map to pc_menu_action (pc_menu_util.h). */
+static void handle_action(pc_menu_action act) {
     /* Settings page is driven by pc_settings_menu. */
     if (cur_page == PAGE_SETTINGS) {
         switch (act) {
-            case ACT_UP:    pc_settings_menu_nav_up();    break;
-            case ACT_DOWN:  pc_settings_menu_nav_down();  break;
-            case ACT_LEFT:  pc_settings_menu_nav_left();  break;
-            case ACT_RIGHT: pc_settings_menu_nav_right(); break;
-            case ACT_CONFIRM:
+            case PC_MENU_UP:    pc_settings_menu_nav_up();    break;
+            case PC_MENU_DOWN:  pc_settings_menu_nav_down();  break;
+            case PC_MENU_LEFT:  pc_settings_menu_nav_left();  break;
+            case PC_MENU_RIGHT: pc_settings_menu_nav_right(); break;
+            case PC_MENU_CONFIRM:
                 if (!pc_settings_menu_confirm()) cur_page = PAGE_MAIN;
                 break;
-            case ACT_CANCEL:
+            case PC_MENU_CANCEL:
                 if (!pc_settings_menu_cancel()) cur_page = PAGE_MAIN;
                 break;
             default: break;
@@ -200,48 +190,16 @@ static void handle_action(MenuAction act) {
         return;
     }
 
-    /* Date & Time page is driven by pc_ap_time_menu. */
-    if (cur_page == PAGE_TIME) {
-        int result = PC_AP_TIME_MENU_STAY;
-        switch (act) {
-            case ACT_UP:      pc_ap_time_menu_up(&time_menu);    break;
-            case ACT_DOWN:    pc_ap_time_menu_down(&time_menu);  break;
-            case ACT_LEFT:    pc_ap_time_menu_left(&time_menu);  break;
-            case ACT_RIGHT:   pc_ap_time_menu_right(&time_menu); break;
-            case ACT_CONFIRM: result = pc_ap_time_menu_confirm(&time_menu); break;
-            case ACT_CANCEL:  result = pc_ap_time_menu_cancel(&time_menu);  break;
-            default: break;
-        }
-        if (result == PC_AP_TIME_MENU_BACK) {
+    /* Date & Time, Catalog, Bugs/Fish: each page handles its own input. */
+    if (cur_page == PAGE_TIME || cur_page == PAGE_CATALOG || cur_page == PAGE_CRITTERS) {
+        int result;
+        if (cur_page == PAGE_TIME)         result = pc_ap_time_menu_input(&time_menu, act);
+        else if (cur_page == PAGE_CATALOG) result = pc_ap_catalog_menu_input(&catalog_menu, act);
+        else                               result = pc_ap_critter_menu_input(&critter_menu, act);
+        if (result == PC_MENU_BACK) {
             cur_page = PAGE_MAIN;
-        } else if (result == PC_AP_TIME_MENU_RESUME) {
+        } else if (result == PC_MENU_RESUME) {
             pc_pause_menu_toggle();
-        }
-        return;
-    }
-
-    /* Catalog page is driven by pc_ap_catalog_menu; only cancel leaves it. */
-    if (cur_page == PAGE_CATALOG) {
-        switch (act) {
-            case ACT_UP:     pc_ap_catalog_menu_up(&catalog_menu);    break;
-            case ACT_DOWN:   pc_ap_catalog_menu_down(&catalog_menu);  break;
-            case ACT_LEFT:   pc_ap_catalog_menu_left(&catalog_menu);  break;
-            case ACT_RIGHT:  pc_ap_catalog_menu_right(&catalog_menu); break;
-            case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
-            default: break;
-        }
-        return;
-    }
-
-    /* Bugs/Fish page is driven by pc_ap_critter_menu; only cancel leaves it. */
-    if (cur_page == PAGE_CRITTERS) {
-        switch (act) {
-            case ACT_UP:     pc_ap_critter_menu_up(&critter_menu);    break;
-            case ACT_DOWN:   pc_ap_critter_menu_down(&critter_menu);  break;
-            case ACT_LEFT:   pc_ap_critter_menu_left(&critter_menu);  break;
-            case ACT_RIGHT:  pc_ap_critter_menu_right(&critter_menu); break;
-            case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
-            default: break;
         }
         return;
     }
@@ -253,19 +211,19 @@ static void handle_action(MenuAction act) {
         int* sel       = (cur_page == PAGE_MAIN) ? &main_sel : &confirm_sel;
 
         switch (act) {
-            case ACT_UP:
-            case ACT_LEFT:
+            case PC_MENU_UP:
+            case PC_MENU_LEFT:
                 *sel = (*sel + item_count - 1) % item_count;
                 break;
-            case ACT_DOWN:
-            case ACT_RIGHT:
+            case PC_MENU_DOWN:
+            case PC_MENU_RIGHT:
                 *sel = (*sel + 1) % item_count;
                 break;
-            case ACT_CONFIRM:
+            case PC_MENU_CONFIRM:
                 if (cur_page == PAGE_MAIN)              main_activate();
                 else if (cur_page == PAGE_CONFIRM_QUIT) confirm_activate();
                 break;
-            case ACT_CANCEL:
+            case PC_MENU_CANCEL:
                 if (cur_page == PAGE_CONFIRM_QUIT) cur_page = PAGE_MAIN;
                 else                               pc_pause_menu_toggle();
                 break;
@@ -274,58 +232,58 @@ static void handle_action(MenuAction act) {
     }
 }
 
-static MenuAction translate_key(SDL_Keycode k) {
+static pc_menu_action translate_key(SDL_Keycode k) {
     switch (k) {
         case SDLK_UP:
-        case SDLK_w:        return ACT_UP;
+        case SDLK_w:        return PC_MENU_UP;
         case SDLK_DOWN:
-        case SDLK_s:        return ACT_DOWN;
+        case SDLK_s:        return PC_MENU_DOWN;
         case SDLK_LEFT:
-        case SDLK_a:        return ACT_LEFT;
+        case SDLK_a:        return PC_MENU_LEFT;
         case SDLK_RIGHT:
-        case SDLK_d:        return ACT_RIGHT;
+        case SDLK_d:        return PC_MENU_RIGHT;
         case SDLK_RETURN:
         case SDLK_KP_ENTER:
-        case SDLK_SPACE:    return ACT_CONFIRM;
-        case SDLK_ESCAPE:   return ACT_CANCEL;
+        case SDLK_SPACE:    return PC_MENU_CONFIRM;
+        case SDLK_ESCAPE:   return PC_MENU_CANCEL;
     }
-    return ACT_NONE;
+    return PC_MENU_NONE;
 }
 
-static MenuAction translate_pad_button(int button) {
+static pc_menu_action translate_pad_button(int button) {
     switch (button) {
-        case SDL_CONTROLLER_BUTTON_DPAD_UP:    return ACT_UP;
-        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:  return ACT_DOWN;
-        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:  return ACT_LEFT;
-        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return ACT_RIGHT;
-        case SDL_CONTROLLER_BUTTON_A:          return ACT_CONFIRM;
+        case SDL_CONTROLLER_BUTTON_DPAD_UP:    return PC_MENU_UP;
+        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:  return PC_MENU_DOWN;
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:  return PC_MENU_LEFT;
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return PC_MENU_RIGHT;
+        case SDL_CONTROLLER_BUTTON_A:          return PC_MENU_CONFIRM;
         case SDL_CONTROLLER_BUTTON_B:
         case SDL_CONTROLLER_BUTTON_BACK:
-        case SDL_CONTROLLER_BUTTON_START:      return ACT_CANCEL;
+        case SDL_CONTROLLER_BUTTON_START:      return PC_MENU_CANCEL;
     }
-    return ACT_NONE;
+    return PC_MENU_NONE;
 }
 
 /* Left-stick nav with a per-axis latch so one push = one step. */
 #define STICK_NAV_PRESS   18000
 #define STICK_NAV_RELEASE 12000
 
-static MenuAction translate_pad_axis(int axis, int value) {
+static pc_menu_action translate_pad_axis(int axis, int value) {
     static int latch_x = 0, latch_y = 0;
     int* latch;
-    MenuAction neg, pos;
+    pc_menu_action neg, pos;
 
-    if (axis == SDL_CONTROLLER_AXIS_LEFTX)      { latch = &latch_x; neg = ACT_LEFT; pos = ACT_RIGHT; }
-    else if (axis == SDL_CONTROLLER_AXIS_LEFTY) { latch = &latch_y; neg = ACT_UP;   pos = ACT_DOWN; }
-    else return ACT_NONE;
+    if (axis == SDL_CONTROLLER_AXIS_LEFTX)      { latch = &latch_x; neg = PC_MENU_LEFT; pos = PC_MENU_RIGHT; }
+    else if (axis == SDL_CONTROLLER_AXIS_LEFTY) { latch = &latch_y; neg = PC_MENU_UP;   pos = PC_MENU_DOWN; }
+    else return PC_MENU_NONE;
 
     if (*latch != 0) {
         if (value > -STICK_NAV_RELEASE && value < STICK_NAV_RELEASE) *latch = 0;
-        return ACT_NONE;
+        return PC_MENU_NONE;
     }
     if (value <= -STICK_NAV_PRESS) { *latch = -1; return neg; }
     if (value >=  STICK_NAV_PRESS) { *latch =  1; return pos; }
-    return ACT_NONE;
+    return PC_MENU_NONE;
 }
 
 int pc_pause_menu_handle_event(const SDL_Event* e) {

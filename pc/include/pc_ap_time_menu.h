@@ -5,6 +5,7 @@
 #define PC_AP_TIME_MENU_H
 
 #include "lb_rtc.h"
+#include "pc_menu_util.h" // pc_menu_action, PC_MENU_STAY/BACK/RESUME
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,22 +21,11 @@ typedef struct {
   int confirm_sel;      // 0 = No, 1 = Yes
 } pc_ap_time_menu;
 
-// What the pause menu should do after an input
-enum {
-  PC_AP_TIME_MENU_STAY,   // page stays open
-  PC_AP_TIME_MENU_BACK,   // back to the pause menu's main page
-  PC_AP_TIME_MENU_RESUME, // close the pause menu (change requested, or nothing to change)
-};
-
 // Opens on the current date and hour
 void pc_ap_time_menu_enter(pc_ap_time_menu* m);
 
-void pc_ap_time_menu_up(pc_ap_time_menu* m);
-void pc_ap_time_menu_down(pc_ap_time_menu* m);
-void pc_ap_time_menu_left(pc_ap_time_menu* m);
-void pc_ap_time_menu_right(pc_ap_time_menu* m);
-int  pc_ap_time_menu_confirm(pc_ap_time_menu* m); // PC_AP_TIME_MENU_*
-int  pc_ap_time_menu_cancel(pc_ap_time_menu* m);  // PC_AP_TIME_MENU_*
+// Returns PC_MENU_STAY / BACK / RESUME (change requested, or nothing to change)
+int pc_ap_time_menu_input(pc_ap_time_menu* m, pc_menu_action act);
 
 // Draws into NOW_FONT_DISP with its own dim backdrop. Font projection must be loaded.
 void pc_ap_time_menu_draw(const pc_ap_time_menu* m, struct game_s* game);

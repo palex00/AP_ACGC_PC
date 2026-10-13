@@ -27,7 +27,7 @@ void pc_ap_time_menu_enter(pc_ap_time_menu* m) {
   m->confirm = 0;
 }
 
-void pc_ap_time_menu_up(pc_ap_time_menu* m) {
+static void pc_ap_time_menu_up(pc_ap_time_menu* m) {
   if(m->confirm) {
     m->confirm_sel = !m->confirm_sel;
   } else {
@@ -35,7 +35,7 @@ void pc_ap_time_menu_up(pc_ap_time_menu* m) {
   }
 }
 
-void pc_ap_time_menu_down(pc_ap_time_menu* m) {
+static void pc_ap_time_menu_down(pc_ap_time_menu* m) {
   if(m->confirm) {
     m->confirm_sel = !m->confirm_sel;
   } else {
@@ -56,48 +56,61 @@ static void pc_ap_time_menu_step(pc_ap_time_menu* m, int dir) {
   }
 }
 
-void pc_ap_time_menu_left(pc_ap_time_menu* m) {
+static void pc_ap_time_menu_left(pc_ap_time_menu* m) {
   pc_ap_time_menu_step(m, -1);
 }
 
-void pc_ap_time_menu_right(pc_ap_time_menu* m) {
+static void pc_ap_time_menu_right(pc_ap_time_menu* m) {
   pc_ap_time_menu_step(m, 1);
 }
 
-int pc_ap_time_menu_confirm(pc_ap_time_menu* m) {
+static int pc_ap_time_menu_confirm(pc_ap_time_menu* m) {
   if(m->confirm) {
     if(m->confirm_sel == 1) {
       pc_ap_time_request(&m->pending);
-      return PC_AP_TIME_MENU_RESUME;
+      return PC_MENU_RESUME;
     }
     m->confirm = 0;
-    return PC_AP_TIME_MENU_STAY;
+    return PC_MENU_STAY;
   }
   if(m->sel == ROW_BACK) {
-    return PC_AP_TIME_MENU_BACK;
+    return PC_MENU_BACK;
   }
   if(m->sel != ROW_CHANGE) {
     m->sel = ROW_CHANGE;
-    return PC_AP_TIME_MENU_STAY;
+    return PC_MENU_STAY;
   }
   // New date: reload, which saves, so ask first. Same date: hour set live.
   if(!pc_ap_time_menu_same_date(&m->pending, &m->now)) {
     m->confirm = 1;
     m->confirm_sel = 0;
-    return PC_AP_TIME_MENU_STAY;
+    return PC_MENU_STAY;
   }
   if(m->pending.hour != m->now.hour) {
     pc_ap_time_request(&m->pending);
   }
-  return PC_AP_TIME_MENU_RESUME;
+  return PC_MENU_RESUME;
 }
 
-int pc_ap_time_menu_cancel(pc_ap_time_menu* m) {
+static int pc_ap_time_menu_cancel(pc_ap_time_menu* m) {
   if(m->confirm) {
     m->confirm = 0;
-    return PC_AP_TIME_MENU_STAY;
+    return PC_MENU_STAY;
   }
-  return PC_AP_TIME_MENU_BACK;
+  return PC_MENU_BACK;
+}
+
+int pc_ap_time_menu_input(pc_ap_time_menu* m, pc_menu_action act) {
+  switch(act) {
+    case PC_MENU_UP:      pc_ap_time_menu_up(m);    break;
+    case PC_MENU_DOWN:    pc_ap_time_menu_down(m);  break;
+    case PC_MENU_LEFT:    pc_ap_time_menu_left(m);  break;
+    case PC_MENU_RIGHT:   pc_ap_time_menu_right(m); break;
+    case PC_MENU_CONFIRM: return pc_ap_time_menu_confirm(m);
+    case PC_MENU_CANCEL:  return pc_ap_time_menu_cancel(m);
+    default: break;
+  }
+  return PC_MENU_STAY;
 }
 
 static const char* l_month_names[12] = {

@@ -72,20 +72,16 @@ void pc_ap_critter_menu_enter(pc_ap_critter_menu* m, int cat) {
   pc_ap_critter_menu_load(m, (Common_Get(time.rtc_time).month - 1) % 12); // lbRTC months are 1-12
 }
 
-void pc_ap_critter_menu_up(pc_ap_critter_menu* m) {
-  pc_menu_list_up(&m->list);
-}
-
-void pc_ap_critter_menu_down(pc_ap_critter_menu* m) {
-  pc_menu_list_down(&m->list);
-}
-
-void pc_ap_critter_menu_left(pc_ap_critter_menu* m) {
-  pc_ap_critter_menu_load(m, (m->month + 11) % 12);
-}
-
-void pc_ap_critter_menu_right(pc_ap_critter_menu* m) {
-  pc_ap_critter_menu_load(m, (m->month + 1) % 12);
+int pc_ap_critter_menu_input(pc_ap_critter_menu* m, pc_menu_action act) {
+  switch(act) {
+    case PC_MENU_UP:     pc_menu_list_up(&m->list); break;
+    case PC_MENU_DOWN:   pc_menu_list_down(&m->list); break;
+    case PC_MENU_LEFT:   pc_ap_critter_menu_load(m, (m->month + 11) % 12); break;
+    case PC_MENU_RIGHT:  pc_ap_critter_menu_load(m, (m->month + 1) % 12); break;
+    case PC_MENU_CANCEL: return PC_MENU_BACK;
+    default: break;
+  }
+  return PC_MENU_STAY;
 }
 
 // [star] name, slots, day range, weather; colour by status

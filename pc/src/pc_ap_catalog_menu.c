@@ -30,14 +30,6 @@ void pc_ap_catalog_menu_enter(pc_ap_catalog_menu* m) {
   pc_ap_catalog_menu_load(m, pc_ap_catalog_first_unfinished_pool());
 }
 
-void pc_ap_catalog_menu_up(pc_ap_catalog_menu* m) {
-  pc_menu_list_up(&m->list);
-}
-
-void pc_ap_catalog_menu_down(pc_ap_catalog_menu* m) {
-  pc_menu_list_down(&m->list);
-}
-
 // Next/previous pool, wrapping around
 static void pc_ap_catalog_menu_step(pc_ap_catalog_menu* m, int dir) {
   int total = pc_ap_catalog_pools_total();
@@ -46,12 +38,16 @@ static void pc_ap_catalog_menu_step(pc_ap_catalog_menu* m, int dir) {
   }
 }
 
-void pc_ap_catalog_menu_left(pc_ap_catalog_menu* m) {
-  pc_ap_catalog_menu_step(m, -1);
-}
-
-void pc_ap_catalog_menu_right(pc_ap_catalog_menu* m) {
-  pc_ap_catalog_menu_step(m, 1);
+int pc_ap_catalog_menu_input(pc_ap_catalog_menu* m, pc_menu_action act) {
+  switch(act) {
+    case PC_MENU_UP:     pc_menu_list_up(&m->list); break;
+    case PC_MENU_DOWN:   pc_menu_list_down(&m->list); break;
+    case PC_MENU_LEFT:   pc_ap_catalog_menu_step(m, -1); break;
+    case PC_MENU_RIGHT:  pc_ap_catalog_menu_step(m, 1); break;
+    case PC_MENU_CANCEL: return PC_MENU_BACK;
+    default: break;
+  }
+  return PC_MENU_STAY;
 }
 
 // Star + white when in the catalog, else gray
