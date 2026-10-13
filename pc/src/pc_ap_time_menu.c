@@ -14,93 +14,87 @@
 
 enum { ROW_YEAR, ROW_MONTH, ROW_DAY, ROW_HOUR, ROW_CHANGE, ROW_BACK, ROW_COUNT };
 
-static lbRTC_time_c s_now;     // clock when the page opened (minutes dropped)
-static lbRTC_time_c s_pending; // date and hour being picked
-static int s_sel;
-static int s_confirm;          // on the "the game will save" page
-static int s_confirm_sel;      // 0 = No, 1 = Yes
-
 static int pc_ap_time_menu_same_date(const lbRTC_time_c* a, const lbRTC_time_c* b) {
   return lbRTC_IsEqualDate(a->year, a->month, a->day, b->year, b->month, b->day) == lbRTC_EQUAL;
 }
 
-void pc_ap_time_menu_enter(void) {
-  lbRTC_GetTime(&s_now);
-  s_now.min = 0;
-  s_now.sec = PC_AP_TIME_SEC;
-  s_pending = s_now;
-  s_sel = ROW_YEAR;
-  s_confirm = 0;
+void pc_ap_time_menu_enter(pc_ap_time_menu* m) {
+  lbRTC_GetTime(&m->now);
+  m->now.min = 0;
+  m->now.sec = PC_AP_TIME_SEC;
+  m->pending = m->now;
+  m->sel = ROW_YEAR;
+  m->confirm = 0;
 }
 
-void pc_ap_time_menu_up(void) {
-  if(s_confirm) {
-    s_confirm_sel = !s_confirm_sel;
+void pc_ap_time_menu_up(pc_ap_time_menu* m) {
+  if(m->confirm) {
+    m->confirm_sel = !m->confirm_sel;
   } else {
-    s_sel = (s_sel + ROW_COUNT - 1) % ROW_COUNT;
+    m->sel = (m->sel + ROW_COUNT - 1) % ROW_COUNT;
   }
 }
 
-void pc_ap_time_menu_down(void) {
-  if(s_confirm) {
-    s_confirm_sel = !s_confirm_sel;
+void pc_ap_time_menu_down(pc_ap_time_menu* m) {
+  if(m->confirm) {
+    m->confirm_sel = !m->confirm_sel;
   } else {
-    s_sel = (s_sel + 1) % ROW_COUNT;
+    m->sel = (m->sel + 1) % ROW_COUNT;
   }
 }
 
-static void pc_ap_time_menu_step(int dir) {
-  if(s_confirm) {
-    s_confirm_sel = !s_confirm_sel;
+static void pc_ap_time_menu_step(pc_ap_time_menu* m, int dir) {
+  if(m->confirm) {
+    m->confirm_sel = !m->confirm_sel;
     return;
   }
-  switch(s_sel) {
-    case ROW_YEAR:  pc_ap_time_step_year(&s_pending, dir);  break;
-    case ROW_MONTH: pc_ap_time_step_month(&s_pending, dir); break;
-    case ROW_DAY:   pc_ap_time_step_day(&s_pending, dir);   break;
-    case ROW_HOUR:  pc_ap_time_step_hour(&s_pending, dir);  break;
+  switch(m->sel) {
+    case ROW_YEAR:  pc_ap_time_step_year(&m->pending, dir);  break;
+    case ROW_MONTH: pc_ap_time_step_month(&m->pending, dir); break;
+    case ROW_DAY:   pc_ap_time_step_day(&m->pending, dir);   break;
+    case ROW_HOUR:  pc_ap_time_step_hour(&m->pending, dir);  break;
   }
 }
 
-void pc_ap_time_menu_left(void) {
-  pc_ap_time_menu_step(-1);
+void pc_ap_time_menu_left(pc_ap_time_menu* m) {
+  pc_ap_time_menu_step(m, -1);
 }
 
-void pc_ap_time_menu_right(void) {
-  pc_ap_time_menu_step(1);
+void pc_ap_time_menu_right(pc_ap_time_menu* m) {
+  pc_ap_time_menu_step(m, 1);
 }
 
-int pc_ap_time_menu_confirm(void) {
-  if(s_confirm) {
-    if(s_confirm_sel == 1) {
-      pc_ap_time_request(&s_pending);
+int pc_ap_time_menu_confirm(pc_ap_time_menu* m) {
+  if(m->confirm) {
+    if(m->confirm_sel == 1) {
+      pc_ap_time_request(&m->pending);
       return PC_AP_TIME_MENU_RESUME;
     }
-    s_confirm = 0;
+    m->confirm = 0;
     return PC_AP_TIME_MENU_STAY;
   }
-  if(s_sel == ROW_BACK) {
+  if(m->sel == ROW_BACK) {
     return PC_AP_TIME_MENU_BACK;
   }
-  if(s_sel != ROW_CHANGE) {
-    s_sel = ROW_CHANGE;
+  if(m->sel != ROW_CHANGE) {
+    m->sel = ROW_CHANGE;
     return PC_AP_TIME_MENU_STAY;
   }
   // New date: reload, which saves, so ask first. Same date: hour set live.
-  if(!pc_ap_time_menu_same_date(&s_pending, &s_now)) {
-    s_confirm = 1;
-    s_confirm_sel = 0;
+  if(!pc_ap_time_menu_same_date(&m->pending, &m->now)) {
+    m->confirm = 1;
+    m->confirm_sel = 0;
     return PC_AP_TIME_MENU_STAY;
   }
-  if(s_pending.hour != s_now.hour) {
-    pc_ap_time_request(&s_pending);
+  if(m->pending.hour != m->now.hour) {
+    pc_ap_time_request(&m->pending);
   }
   return PC_AP_TIME_MENU_RESUME;
 }
 
-int pc_ap_time_menu_cancel(void) {
-  if(s_confirm) {
-    s_confirm = 0;
+int pc_ap_time_menu_cancel(pc_ap_time_menu* m) {
+  if(m->confirm) {
+    m->confirm = 0;
     return PC_AP_TIME_MENU_STAY;
   }
   return PC_AP_TIME_MENU_BACK;
@@ -115,8 +109,8 @@ static const char* l_weekday_names[lbRTC_WEEK] = {
 };
 static const char* l_slot_names[PC_AP_SLOT_NUM] = { "Morning", "Day", "Evening", "Night" };
 
-static void pc_ap_time_menu_format(int row, char* out, int size) {
-  const lbRTC_time_c* t = &s_pending;
+static void pc_ap_time_menu_format(const pc_ap_time_menu* m, int row, char* out, int size) {
+  const lbRTC_time_c* t = &m->pending;
   int hour12 = t->hour % 12 == 0 ? 12 : t->hour % 12;
 
   switch(row) {
@@ -140,17 +134,17 @@ static void pc_ap_time_menu_format(int row, char* out, int size) {
 }
 
 // Colored weather symbol of the picked date, after the Day row's text
-static void pc_ap_time_menu_draw_weather(struct game_s* game, f32 vx, f32 y) {
+static void pc_ap_time_menu_draw_weather(const pc_ap_time_menu* m, struct game_s* game, f32 vx, f32 y) {
   char value[64];
   char sym[2] = { 0, 0 };
   int r, g, b;
   int intensity;
-  f32 s = s_sel == ROW_DAY ? PC_MENU_SCALE_SELECTED : 1.0f;
+  f32 s = m->sel == ROW_DAY ? PC_MENU_SCALE_SELECTED : 1.0f;
   f32 x;
 
-  pc_ap_time_menu_format(ROW_DAY, value, sizeof(value));
+  pc_ap_time_menu_format(m, ROW_DAY, value, sizeof(value));
   x = vx + (pc_text_width(value) + 6) * s;
-  int weather = pc_ap_weather_of_date(&s_pending, &intensity);
+  int weather = pc_ap_weather_of_date(&m->pending, &intensity);
   switch(weather) {
     case mEnv_WEATHER_RAIN:
       sym[0] = (char)CHAR_SYMBOL_DROPLET;
@@ -175,7 +169,7 @@ static void pc_ap_time_menu_draw_weather(struct game_s* game, f32 vx, f32 y) {
   }
 }
 
-static void pc_ap_time_menu_draw_page(struct game_s* game) {
+static void pc_ap_time_menu_draw_page(const pc_ap_time_menu* m, struct game_s* game) {
   static const char* labels[ROW_HOUR + 1] = { "Year", "Month", "Day", "Hour" };
   int r, g, b, a;
   f32 lx = 70.0f;
@@ -186,39 +180,39 @@ static void pc_ap_time_menu_draw_page(struct game_s* game) {
 
   pc_menu_draw_centered(game, "- Date & Time -", 40.0f, 255, 255, 255, 255, 1.0f);
   for(int i = 0; i <= ROW_HOUR; i++) {
-    int selected = s_sel == i;
+    int selected = m->sel == i;
     f32 s = selected ? PC_MENU_SCALE_SELECTED : 1.0f;
     pc_menu_row_colors(selected, &r, &g, &b, &a);
     pc_menu_draw_left(game, labels[i], lx, y0 + i * line_h, r, g, b, a, s);
-    pc_ap_time_menu_format(i, value, sizeof(value));
+    pc_ap_time_menu_format(m, i, value, sizeof(value));
     pc_menu_draw_left(game, value, vx, y0 + i * line_h, r, g, b, a, s);
   }
 
-  pc_ap_time_menu_draw_weather(game, vx, y0 + ROW_DAY * line_h);
+  pc_ap_time_menu_draw_weather(m, game, vx, y0 + ROW_DAY * line_h);
 
   f32 y = y0 + 4 * line_h + 10.0f;
-  pc_menu_row_colors(s_sel == ROW_CHANGE, &r, &g, &b, &a);
-  pc_menu_draw_centered(game, "Change", y, r, g, b, a, s_sel == ROW_CHANGE ? PC_MENU_SCALE_SELECTED : 1.0f);
-  pc_menu_row_colors(s_sel == ROW_BACK, &r, &g, &b, &a);
-  pc_menu_draw_centered(game, "Back", y + line_h, r, g, b, a, s_sel == ROW_BACK ? PC_MENU_SCALE_SELECTED : 1.0f);
+  pc_menu_row_colors(m->sel == ROW_CHANGE, &r, &g, &b, &a);
+  pc_menu_draw_centered(game, "Change", y, r, g, b, a, m->sel == ROW_CHANGE ? PC_MENU_SCALE_SELECTED : 1.0f);
+  pc_menu_row_colors(m->sel == ROW_BACK, &r, &g, &b, &a);
+  pc_menu_draw_centered(game, "Back", y + line_h, r, g, b, a, m->sel == ROW_BACK ? PC_MENU_SCALE_SELECTED : 1.0f);
 }
 
-static void pc_ap_time_menu_draw_confirm(struct game_s* game) {
+static void pc_ap_time_menu_draw_confirm(const pc_ap_time_menu* m, struct game_s* game) {
   char date[64];
 
-  snprintf(date, sizeof(date), "%s %d, %d", l_month_names[(s_pending.month - 1) % 12], s_pending.day,
-           s_pending.year);
+  snprintf(date, sizeof(date), "%s %d, %d", l_month_names[(m->pending.month - 1) % 12], m->pending.day,
+           m->pending.year);
   pc_menu_draw_centered(game, "- Change the date? -", 80.0f, 255, 255, 255, 255, 1.0f);
   pc_menu_draw_centered(game, date, 105.0f, 230, 230, 230, 255, 1.0f);
   pc_menu_draw_centered(game, "The game will save.", 125.0f, 230, 230, 230, 255, 1.0f);
-  pc_menu_draw_two_choice(game, "No", "Yes", s_confirm_sel, 160.0f);
+  pc_menu_draw_two_choice(game, "No", "Yes", m->confirm_sel, 160.0f);
 }
 
-void pc_ap_time_menu_draw(struct game_s* game) {
+void pc_ap_time_menu_draw(const pc_ap_time_menu* m, struct game_s* game) {
   pc_menu_dim_rect(game->graph, 180);
-  if(s_confirm) {
-    pc_ap_time_menu_draw_confirm(game);
+  if(m->confirm) {
+    pc_ap_time_menu_draw_confirm(m, game);
   } else {
-    pc_ap_time_menu_draw_page(game);
+    pc_ap_time_menu_draw_page(m, game);
   }
 }

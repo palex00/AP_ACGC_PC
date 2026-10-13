@@ -58,6 +58,11 @@ static int main_count = 0;
 static int main_sel = 0;    /* index into main_items */
 static int confirm_sel = 0; /* 0=No (default), 1=Yes */
 
+// Page state
+static pc_ap_time_menu time_menu;
+static pc_ap_catalog_menu catalog_menu;
+static pc_ap_critter_menu critter_menu; // Bugs or Fish
+
 // Rebuilds the main page entries (Catalogsanity can turn on while paused on the title)
 static void main_update(void) {
     main_count = 0;
@@ -119,7 +124,7 @@ static void main_activate(void) {
         case MAIN_TIME: /* only where the gate allows it */
             if (pc_ap_time_change_allowed_now()) {
                 cur_page = PAGE_TIME;
-                pc_ap_time_menu_enter();
+                pc_ap_time_menu_enter(&time_menu);
             } else {
                 pc_ap_overlay_toast("Date & Time: only outdoors in your own town");
             }
@@ -127,7 +132,7 @@ static void main_activate(void) {
         case MAIN_CATALOG: /* needs a loaded save (the catalog is the player's) */
             if (pc_ap_accepting()) {
                 cur_page = PAGE_CATALOG;
-                pc_ap_catalog_menu_enter();
+                pc_ap_catalog_menu_enter(&catalog_menu);
             } else {
                 pc_ap_overlay_toast("Catalog: load your save first");
             }
@@ -136,7 +141,7 @@ static void main_activate(void) {
         case MAIN_FISH:
             if (pc_ap_accepting()) {
                 cur_page = PAGE_CRITTERS;
-                pc_ap_critter_menu_enter(main_items[main_sel] == MAIN_FISH ? mMmd_CATEGORY_FISH : mMmd_CATEGORY_INSECT);
+                pc_ap_critter_menu_enter(&critter_menu, main_items[main_sel] == MAIN_FISH ? mMmd_CATEGORY_FISH : mMmd_CATEGORY_INSECT);
             } else {
                 pc_ap_overlay_toast(main_items[main_sel] == MAIN_FISH ? "Fish: load your save first"
                                                                       : "Bugs: load your save first");
@@ -199,12 +204,12 @@ static void handle_action(MenuAction act) {
     if (cur_page == PAGE_TIME) {
         int result = PC_AP_TIME_MENU_STAY;
         switch (act) {
-            case ACT_UP:      pc_ap_time_menu_up();    break;
-            case ACT_DOWN:    pc_ap_time_menu_down();  break;
-            case ACT_LEFT:    pc_ap_time_menu_left();  break;
-            case ACT_RIGHT:   pc_ap_time_menu_right(); break;
-            case ACT_CONFIRM: result = pc_ap_time_menu_confirm(); break;
-            case ACT_CANCEL:  result = pc_ap_time_menu_cancel();  break;
+            case ACT_UP:      pc_ap_time_menu_up(&time_menu);    break;
+            case ACT_DOWN:    pc_ap_time_menu_down(&time_menu);  break;
+            case ACT_LEFT:    pc_ap_time_menu_left(&time_menu);  break;
+            case ACT_RIGHT:   pc_ap_time_menu_right(&time_menu); break;
+            case ACT_CONFIRM: result = pc_ap_time_menu_confirm(&time_menu); break;
+            case ACT_CANCEL:  result = pc_ap_time_menu_cancel(&time_menu);  break;
             default: break;
         }
         if (result == PC_AP_TIME_MENU_BACK) {
@@ -218,10 +223,10 @@ static void handle_action(MenuAction act) {
     /* Catalog page is driven by pc_ap_catalog_menu; only cancel leaves it. */
     if (cur_page == PAGE_CATALOG) {
         switch (act) {
-            case ACT_UP:     pc_ap_catalog_menu_up();    break;
-            case ACT_DOWN:   pc_ap_catalog_menu_down();  break;
-            case ACT_LEFT:   pc_ap_catalog_menu_left();  break;
-            case ACT_RIGHT:  pc_ap_catalog_menu_right(); break;
+            case ACT_UP:     pc_ap_catalog_menu_up(&catalog_menu);    break;
+            case ACT_DOWN:   pc_ap_catalog_menu_down(&catalog_menu);  break;
+            case ACT_LEFT:   pc_ap_catalog_menu_left(&catalog_menu);  break;
+            case ACT_RIGHT:  pc_ap_catalog_menu_right(&catalog_menu); break;
             case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
             default: break;
         }
@@ -231,10 +236,10 @@ static void handle_action(MenuAction act) {
     /* Bugs/Fish page is driven by pc_ap_critter_menu; only cancel leaves it. */
     if (cur_page == PAGE_CRITTERS) {
         switch (act) {
-            case ACT_UP:     pc_ap_critter_menu_up();    break;
-            case ACT_DOWN:   pc_ap_critter_menu_down();  break;
-            case ACT_LEFT:   pc_ap_critter_menu_left();  break;
-            case ACT_RIGHT:  pc_ap_critter_menu_right(); break;
+            case ACT_UP:     pc_ap_critter_menu_up(&critter_menu);    break;
+            case ACT_DOWN:   pc_ap_critter_menu_down(&critter_menu);  break;
+            case ACT_LEFT:   pc_ap_critter_menu_left(&critter_menu);  break;
+            case ACT_RIGHT:  pc_ap_critter_menu_right(&critter_menu); break;
             case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
             default: break;
         }
@@ -383,11 +388,11 @@ void pc_pause_menu_draw(struct game_s* game) {
         /* The user may have closed it from inside (Back). */
         if (!pc_settings_menu_active()) cur_page = PAGE_MAIN;
     } else if (cur_page == PAGE_TIME) {
-        pc_ap_time_menu_draw(game);
+        pc_ap_time_menu_draw(&time_menu, game);
     } else if (cur_page == PAGE_CATALOG) {
-        pc_ap_catalog_menu_draw(game);
+        pc_ap_catalog_menu_draw(&catalog_menu, game);
     } else if (cur_page == PAGE_CRITTERS) {
-        pc_ap_critter_menu_draw(game);
+        pc_ap_critter_menu_draw(&critter_menu, game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
         if (cur_page == PAGE_MAIN)              draw_main_page(game);

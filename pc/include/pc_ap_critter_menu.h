@@ -7,6 +7,9 @@
 #define PC_AP_CRITTER_MENU_H
 
 #include "types.h"
+#include "m_item_name.h"
+#include "pc_ap_museumsanity.h" // PC_AP_CRITTER_NUM
+#include "pc_menu_list.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,16 +17,25 @@ extern "C" {
 
 struct game_s;
 
-// cat: mMmd_CATEGORY_INSECT or mMmd_CATEGORY_FISH. Needs a player.
-void pc_ap_critter_menu_enter(int cat);
+typedef struct {
+  int cat;   // mMmd_CATEGORY_INSECT / FISH
+  int month; // 0-11
+  int locked;
+  pc_menu_list list;              // lines of month (none when locked)
+  int species[PC_AP_CRITTER_NUM]; // museum index per line
+  char names[PC_AP_CRITTER_NUM][mIN_ITEM_NAME_LEN + 1]; // by museum index, game font, trailing spaces cut
+} pc_ap_critter_menu;
 
-void pc_ap_critter_menu_up(void);
-void pc_ap_critter_menu_down(void);
-void pc_ap_critter_menu_left(void);
-void pc_ap_critter_menu_right(void);
+// cat: mMmd_CATEGORY_INSECT or mMmd_CATEGORY_FISH. Needs a player.
+void pc_ap_critter_menu_enter(pc_ap_critter_menu* m, int cat);
+
+void pc_ap_critter_menu_up(pc_ap_critter_menu* m);
+void pc_ap_critter_menu_down(pc_ap_critter_menu* m);
+void pc_ap_critter_menu_left(pc_ap_critter_menu* m);
+void pc_ap_critter_menu_right(pc_ap_critter_menu* m);
 
 // Draws into NOW_FONT_DISP with its own dim backdrop. Font projection must be loaded.
-void pc_ap_critter_menu_draw(struct game_s* game);
+void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game);
 
 // Which half of the month a line shows, from its slot bits per half (days 1-15, 16-end):
 // -1 = halves the same (no day range); a half with no slots -> the other one; both have
