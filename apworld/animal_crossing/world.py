@@ -112,6 +112,15 @@ class AnimalCrossingWeb(WebWorld):
             options.FossilSpawns,
             options.MuseumGoalPercent,
         ]),
+        OptionGroup("Nook's Cranny", [
+            options.NookStoreUpgrades,
+            options.NookNGoSales,
+            options.NookwaySales,
+            options.NookingtonsSales,
+            options.NookNGoCatalog,
+            options.NookwayCatalog,
+            options.NookingtonsCatalog,
+        ]),
         OptionGroup("Quality of Life", [
             options.NoCockroaches,
             options.ShopsAlwaysOpen,

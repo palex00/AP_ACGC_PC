@@ -394,21 +394,21 @@ class StoreSales(NamedRange):
 
 
 class NookNGoSales(StoreSales):
-    """With Nook Store Upgrades: Sales, total Bells spent for Nook 'n' Go. Vanilla: 25,000."""
+    """Sales Upgrades only: total Bells spent for Nook 'n' Go. Vanilla: 25,000."""
     display_name = "Nook 'n' Go Sales"
     default = 15000
     special_range_names = {"default": 15000, "vanilla": 25000}
 
 
 class NookwaySales(StoreSales):
-    """With Nook Store Upgrades: Sales, total Bells spent for Nookway. Vanilla: 90,000."""
+    """Sales Upgrades only: total Bells spent for Nookway. Vanilla: 90,000."""
     display_name = "Nookway Sales"
     default = 40000
     special_range_names = {"default": 40000, "vanilla": 90000}
 
 
 class NookingtonsSales(StoreSales):
-    """With Nook Store Upgrades: Sales, total Bells spent for Nookington's. Vanilla: 240,000."""
+    """Sales Upgrades only: total Bells spent for Nookington's. Vanilla: 240,000."""
     display_name = "Nookington's Sales"
     default = 75000
     special_range_names = {"default": 75000, "vanilla": 240000}
@@ -420,19 +420,19 @@ class StoreCatalog(Range):
 
 
 class NookNGoCatalog(StoreCatalog):
-    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nook 'n' Go."""
+    """Catalog Upgrades only: catalog entries (of the current player) for Nook 'n' Go."""
     display_name = "Nook 'n' Go Catalog"
     default = 30
 
 
 class NookwayCatalog(StoreCatalog):
-    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nookway."""
+    """Catalog Upgrades only: catalog entries (of the current player) for Nookway."""
     display_name = "Nookway Catalog"
     default = 70
 
 
 class NookingtonsCatalog(StoreCatalog):
-    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nookington's."""
+    """Catalog Upgrades only: catalog entries (of the current player) for Nookington's."""
     display_name = "Nookington's Catalog"
     default = 120
 
@@ -577,7 +577,10 @@ class Catalogsanity(DefaultOnToggle):
 
 
 class CatalogPools(Range):
-    """With Catalogsanity, the number of pools. Pools times Pool Size can be at most 651 (every eligible item)."""
+    """
+    How far Catalogsanity is gated. Pool 1 is open from the start; the rest need one Progressive Catalog Pool
+    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 651.
+    """
     display_name = "Catalog Pools"
     range_start = 1
     range_end = 100
@@ -585,7 +588,10 @@ class CatalogPools(Range):
 
 
 class CatalogPoolSize(Range):
-    """With Catalogsanity, the number of items (and checks) in each pool."""
+    """
+    Catalog checks unlocked per Progressive Catalog Pool. Items are picked at random, with every pool getting
+    a similar mix of furniture, clothes, tools and so on.
+    """
     display_name = "Catalog Pool Size"
     range_start = 1
     range_end = 100
@@ -594,8 +600,8 @@ class CatalogPoolSize(Range):
 
 class NewItemChance(Range):
     """
-    With Catalogsanity, the chance (percent) that a random item you get (from Nook's shop and other sources) is one
-    you still need from an unlocked pool, when there is one left.
+    How often a random item you get (Nook's shop, favors, balloon presents, ...) is a catalog check you can send
+    right now, while any are left.
     """
     display_name = "New Item Chance"
     range_start = 0
@@ -714,13 +720,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     favorsanity: Favorsanity
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
-    nook_store_upgrades: NookStoreUpgrades
-    nook_n_go_sales: NookNGoSales
-    nookway_sales: NookwaySales
-    nookingtons_sales: NookingtonsSales
-    nook_n_go_catalog: NookNGoCatalog
-    nookway_catalog: NookwayCatalog
-    nookingtons_catalog: NookingtonsCatalog
     skip_intro: SkipIntro
     player_name: PlayerName
     town_name: TownName
@@ -760,6 +759,13 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     critter_spawns: CritterSpawns
     fossil_spawns: FossilSpawns
     museum_goal_percent: MuseumGoalPercent
+    nook_store_upgrades: NookStoreUpgrades
+    nook_n_go_sales: NookNGoSales
+    nookway_sales: NookwaySales
+    nookingtons_sales: NookingtonsSales
+    nook_n_go_catalog: NookNGoCatalog
+    nookway_catalog: NookwayCatalog
+    nookingtons_catalog: NookingtonsCatalog
     no_cockroaches: NoCockroaches
     shops_always_open: ShopsAlwaysOpen
     no_weeds: NoWeeds
