@@ -822,6 +822,13 @@ static void pc_ap_critter_wanted(int cat, u8 wanted[PC_AP_CRITTER_NUM]) {
   pc_ap_museumsanity_critter_wanted(&g_ap.museum, cat, &Save_Get(museum_display), journal, wanted);
 }
 
+int pc_ap_critter_status(int cat, int idx) {
+  int fish = cat == mMmd_CATEGORY_FISH;
+  int journal = fish ? mSM_COLLECT_FISH_GET(idx) : mSM_COLLECT_INSECT_GET(idx);
+  int displayed = (fish ? mMmd_FishInfo(idx) : mMmd_InsectInfo(idx)) != mMmd_DONATOR_NONE;
+  return pc_ap_museumsanity_critter_status(&g_ap.museum, cat, idx, journal, displayed);
+}
+
 void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
   // The journal needs a player (none on the title demo)
   if(g_ap.museum.critter_spawns == AP_CRITTER_SPAWNS_VANILLA || Common_Get(now_private) == NULL) {

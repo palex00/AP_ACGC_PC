@@ -129,6 +129,10 @@ void pc_ap_insect_spawns(struct insect_spawn_info_f_s* rows, int n);
 // Exhibit plaques, after the game copied the donator's name into free string 0: replaces
 // it with the AP player who sent the item (8 chars). Nothing for vanilla exhibits.
 void pc_ap_museum_plaque_name(mActor_name_t item);
+// Bugs/Fish pause pages: 0 none, 1 has one, 2 has both of the "has it" sources of bug or fish
+// (cat mMmd_CATEGORY_INSECT/FISH, museum index idx), see pc_ap_museumsanity_critter_status.
+// Needs a player (journal).
+int pc_ap_critter_status(int cat, int idx);
 
 // Tools in Pool hooks (pc_ap_tools.h). The tick mails received tools.
 

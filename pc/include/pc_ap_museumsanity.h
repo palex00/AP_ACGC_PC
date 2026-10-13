@@ -85,6 +85,11 @@ int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[
 // journal (journal[idx] = 0) or from the museum display in info
 void pc_ap_museumsanity_critter_wanted(const pc_ap_museumsanity* m, int cat, const mMmd_info_c* info,
                                        const u8 journal[PC_AP_CRITTER_NUM], u8 wanted[PC_AP_CRITTER_NUM]);
+// Bugs/Fish pause pages: how many of its "has it" sources a bug or fish (cat, idx)
+// has: 0 none, 1 has one, 2 has both (gold). Active category: its find / donate
+// checks sent (one check mode -> 0 or 1). Inactive: journal (caught) and museum
+// display (donated, displayed nonzero).
+int pc_ap_museumsanity_critter_status(const pc_ap_museumsanity* m, int cat, int idx, int journal, int displayed);
 // critter_spawns on the game's spawn list right before the weighted draw, in
 // place. Only the species' weights change (whale, trash, spirits, island "nothing"
 // rows untouched) and their total stays the same, so the "nothing spawns" chance

@@ -5,10 +5,12 @@
 #include "pc_text_draw.h"
 #include "pc_ap_time_menu.h"
 #include "pc_ap_catalog_menu.h"
+#include "pc_ap_critter_menu.h"
 #include "pc_ap_logic.h"
 #include "pc_ap_overlay.h"
 
 #include "m_font.h"
+#include "m_museum_display.h" /* mMmd_CATEGORY_* */
 #include "m_rcp.h"
 #include "graph.h"
 #include "main.h"       /* SCREEN_WIDTH_F */
@@ -33,6 +35,7 @@ typedef enum {
     PAGE_CONFIRM_QUIT = 2,
     PAGE_TIME = 3,
     PAGE_CATALOG = 4,
+    PAGE_CRITTERS = 5, /* Bugs or Fish */
 } PauseMenuPage;
 
 // Main page entries; which ones show is decided by main_update
@@ -40,6 +43,8 @@ typedef enum {
     MAIN_RESUME,
     MAIN_TIME,
     MAIN_CATALOG, // Catalogsanity only
+    MAIN_BUGS,
+    MAIN_FISH,
     MAIN_SETTINGS,
     MAIN_QUIT,
     MAIN_MAX,
@@ -61,6 +66,8 @@ static void main_update(void) {
     if (pc_ap_catalog_pools_total() > 0) {
         main_items[main_count++] = MAIN_CATALOG;
     }
+    main_items[main_count++] = MAIN_BUGS;
+    main_items[main_count++] = MAIN_FISH;
     main_items[main_count++] = MAIN_SETTINGS;
     main_items[main_count++] = MAIN_QUIT;
     if (main_sel >= main_count) main_sel = 0;
@@ -71,6 +78,8 @@ static const char* main_label(MainItem item) {
         case MAIN_RESUME:   return "Resume";
         case MAIN_TIME:     return "Date & Time";
         case MAIN_CATALOG:  return "Catalog";
+        case MAIN_BUGS:     return "Bugs";
+        case MAIN_FISH:     return "Fish";
         case MAIN_SETTINGS: return "Settings";
         case MAIN_QUIT:     return "Quit Game";
         default:            return "";
@@ -80,7 +89,7 @@ static const char* main_label(MainItem item) {
 // Greyed out where it can't open
 static int main_disabled(MainItem item) {
     if (item == MAIN_TIME)    return !pc_ap_time_change_allowed_now();
-    if (item == MAIN_CATALOG) return !pc_ap_accepting();
+    if (item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH) return !pc_ap_accepting();
     return 0;
 }
 
@@ -121,6 +130,16 @@ static void main_activate(void) {
                 pc_ap_catalog_menu_enter();
             } else {
                 pc_ap_overlay_toast("Catalog: load your save first");
+            }
+            break;
+        case MAIN_BUGS: /* the journal is the player's */
+        case MAIN_FISH:
+            if (pc_ap_accepting()) {
+                cur_page = PAGE_CRITTERS;
+                pc_ap_critter_menu_enter(main_items[main_sel] == MAIN_FISH ? mMmd_CATEGORY_FISH : mMmd_CATEGORY_INSECT);
+            } else {
+                pc_ap_overlay_toast(main_items[main_sel] == MAIN_FISH ? "Fish: load your save first"
+                                                                      : "Bugs: load your save first");
             }
             break;
         case MAIN_SETTINGS:
@@ -203,6 +222,19 @@ static void handle_action(MenuAction act) {
             case ACT_DOWN:   pc_ap_catalog_menu_down();  break;
             case ACT_LEFT:   pc_ap_catalog_menu_left();  break;
             case ACT_RIGHT:  pc_ap_catalog_menu_right(); break;
+            case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
+            default: break;
+        }
+        return;
+    }
+
+    /* Bugs/Fish page is driven by pc_ap_critter_menu; only cancel leaves it. */
+    if (cur_page == PAGE_CRITTERS) {
+        switch (act) {
+            case ACT_UP:     pc_ap_critter_menu_up();    break;
+            case ACT_DOWN:   pc_ap_critter_menu_down();  break;
+            case ACT_LEFT:   pc_ap_critter_menu_left();  break;
+            case ACT_RIGHT:  pc_ap_critter_menu_right(); break;
             case ACT_CANCEL: cur_page = PAGE_MAIN;       break;
             default: break;
         }
@@ -354,6 +386,8 @@ void pc_pause_menu_draw(struct game_s* game) {
         pc_ap_time_menu_draw(game);
     } else if (cur_page == PAGE_CATALOG) {
         pc_ap_catalog_menu_draw(game);
+    } else if (cur_page == PAGE_CRITTERS) {
+        pc_ap_critter_menu_draw(game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
         if (cur_page == PAGE_MAIN)              draw_main_page(game);

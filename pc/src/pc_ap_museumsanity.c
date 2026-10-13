@@ -263,6 +263,20 @@ void pc_ap_museumsanity_critter_wanted(const pc_ap_museumsanity* m, int cat, con
   }
 }
 
+int pc_ap_museumsanity_critter_status(const pc_ap_museumsanity* m, int cat, int idx, int journal, int displayed) {
+  if(!pc_ap_museumsanity_active(m, cat)) {
+    return (journal ? 1 : 0) + (displayed ? 1 : 0);
+  }
+  int has = 0;
+  if((m->checks[cat] & AP_MUSEUM_FIND) && ap_location_checked(PC_AP_LOC_FIND_BASE + PC_AP_MUSEUM_SLOT(cat, idx))) {
+    has++;
+  }
+  if((m->checks[cat] & AP_MUSEUM_DONATE) && ap_location_checked(PC_AP_LOC_DONATE_BASE + PC_AP_MUSEUM_SLOT(cat, idx))) {
+    has++;
+  }
+  return has;
+}
+
 // One multiplier per species from its total weight in the list (sum 0 = not in
 // the list). The total of all species stays the same, split into equal shares:
 // one per species, PC_AP_SPAWN_BOOST for a wanted one when dynamic.
