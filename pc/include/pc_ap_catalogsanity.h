@@ -35,8 +35,6 @@ typedef struct {
   u8 pool[AP_CATALOG_MAX];             // pool (0-based) of each item
   int new_item_chance;                 // percent
   int sources;                         // AP_CATALOG_SOURCE_* bits on
-  // Transient
-  int source;                          // PC_AP_CATALOG_SOURCE_* asking right now
 } pc_ap_catalogsanity;
 
 // One mSP_SelectRandomItem_New request, as the picker needs it

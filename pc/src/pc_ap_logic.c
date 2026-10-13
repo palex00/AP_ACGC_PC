@@ -72,7 +72,8 @@ typedef struct {
   pc_ap_tools tools;
   pc_ap_store store;
   pc_ap_catalogsanity catalog;
-  int initialized; // module config set from slot_data
+  int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
+  int initialized;    // module config set from slot_data
 } pc_ap;
 
 static pc_ap g_ap;
@@ -379,7 +380,7 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap) {
 }
 
 void pc_ap_catalog_source(int source) {
-  g_ap.catalog.source = source;
+  g_ap.catalog_source = source;
 }
 
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,
@@ -400,7 +401,7 @@ int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, in
   r.exclude_count = exist != NULL ? exist_count : 0;
   r.rare = Save_Get(shop).rare_item;
   r.new_chance = 0;
-  if(pc_ap_catalogsanity_is_source(&g_ap.catalog, g_ap.catalog.source)) {
+  if(pc_ap_catalogsanity_is_source(&g_ap.catalog, g_ap.catalog_source)) {
     // A source's rare slot always gets a new item while there is one
     r.new_chance = list_type == mSP_LISTTYPE_RARE ? 100 : g_ap.catalog.new_item_chance;
   }
@@ -426,11 +427,11 @@ mActor_name_t pc_ap_catalog_safe_item(mActor_name_t item, int source) {
   if(category < 0) {
     return ITM_CLOTH001;
   }
-  int old_source = g_ap.catalog.source;
+  int old_source = g_ap.catalog_source;
   mActor_name_t out = EMPTY_NO;
-  g_ap.catalog.source = source;
+  g_ap.catalog_source = source;
   mSP_SelectRandomItem_New(NULL, &out, 1, NULL, 0, category, mSP_LISTTYPE_ABC, FALSE);
-  g_ap.catalog.source = old_source;
+  g_ap.catalog_source = old_source;
   // Nothing outside the pools left in that category (stationery, huge pools): the
   // game's own fallback reward
   return out != EMPTY_NO ? out : ITM_CLOTH001;
