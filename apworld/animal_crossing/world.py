@@ -8,7 +8,8 @@ from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule, set_rule
 
-from .items import BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, PROGRESSIVE_HOUSE, SHOVEL, TIME_SLOTS, TOOLS
+from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOOK_STORE_UPGRADES, PROGRESSIVE_HOUSE,
+                    PROGRESSIVE_NOOK_STORE, SHOVEL, TIME_SLOTS, TOOLS)
 from .locations import LOANS, LOCATION_NAME_TO_ID, favor_location_name, loan_location_name, split_loan_checks
 from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
                      MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS,
@@ -204,15 +205,28 @@ class AnimalCrossingWorld(World):
         else:
             self.loan_checks = [0] * len(LOANS)
 
+        # Nook store upgrades: Progressive Nook Store items, or the thresholds of the chosen mode
+        self.store_items = 0
+        self.store_thresholds = []
+        mode = self.options.nook_store_upgrades.value
+        if mode == options.NookStoreUpgrades.option_items:
+            self.store_items = NOOK_STORE_UPGRADES
+        elif mode == options.NookStoreUpgrades.option_sales:
+            self.store_thresholds = [self.options.nook_n_go_sales.value, self.options.nookway_sales.value,
+                                     self.options.nookingtons_sales.value]
+        else:
+            self.store_thresholds = [self.options.nook_n_go_catalog.value, self.options.nookway_catalog.value,
+                                     self.options.nookingtons_catalog.value]
+
         locations = sum(self.loan_checks) + self.options.favorsanity.value + len(self.museum_locations)
         if locations == 0:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favorsanity must be "
                               f"at least 1.")
-        # Every progression item needs a location (the starting month and slot are given at the start)
+        # Every non-filler item needs a location (the starting month and slot are given at the start)
         items = len(LOANS) - 1 if self.options.loansanity else 0
         if self.options.timesanity:
             items += len(MONTHS) + len(TIME_SLOTS) - 2
-        items += len(self.museum_item_names) + len(self.pool_tools)
+        items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items
         if locations < items:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Total checks at {locations}, it must be at "
                               f"least {items} with these options. Raise optional checks such as Favorsanity.")
@@ -240,6 +254,7 @@ class AnimalCrossingWorld(World):
                     pool.append(self.create_item(name))
         pool += [self.create_item(name) for name in self.museum_item_names]
         pool += [self.create_item(name) for name in self.pool_tools]
+        pool += [self.create_item(PROGRESSIVE_NOOK_STORE) for _ in range(self.store_items)]
         if self.starting_tool:
             self.multiworld.push_precollected(self.create_item(self.starting_tool))
         # Everything else is filler. Bell credit amounts are set in fill_slot_data from what was actually placed,
@@ -257,6 +272,8 @@ class AnimalCrossingWorld(World):
             # Progression when a museum category with checks needs it (only with Tools in Pool)
             needed = self.options.tools_in_pool and any(self.museum_modes[c] for c, tool in self.category_tools.items() if tool == name)
             classification = ItemClassification.progression if needed else ItemClassification.useful
+        elif name == PROGRESSIVE_NOOK_STORE:
+            classification = ItemClassification.useful
         else:
             classification = ItemClassification.filler
         return AnimalCrossingItem(name, classification, ITEM_NAME_TO_ID[name], self.player)
@@ -388,6 +405,9 @@ class AnimalCrossingWorld(World):
             "loan_checks": self.loan_checks,
             "favorsanity": self.options.favorsanity.value,
             "tools_in_pool": self.options.tools_in_pool.value,
+            "nook_store_upgrades": self.options.nook_store_upgrades.value,
+            # Bells (sales) or catalog entries (catalog) per upgrade; empty with items
+            "nook_store_thresholds": self.store_thresholds,
             "timesanity": self.options.timesanity.value,
             "starting_month": self.options.starting_month.value,
             "starting_time": self.options.starting_time.value,

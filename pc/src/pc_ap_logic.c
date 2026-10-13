@@ -7,6 +7,7 @@
 #include "pc_ap_museumsanity.h"
 #include "pc_ap_mail.h"
 #include "pc_ap_tools.h"
+#include "pc_ap_store.h"
 #include "pc_ap_overlay.h"
 #include "pc_ap_strings.h"
 #include "pc_ap_weather.h"
@@ -65,6 +66,7 @@ typedef struct {
   pc_ap_museumsanity museum;
   pc_ap_mail mail;
   pc_ap_tools tools;
+  pc_ap_store store;
   int initialized; // module config set from slot_data
 } pc_ap;
 
@@ -79,6 +81,7 @@ void pc_ap_init(void) {
   pc_ap_museumsanity_init(&g_ap.museum, sd);
   pc_ap_mail_init(&g_ap.mail, sd);
   pc_ap_tools_init(&g_ap.tools, sd);
+  pc_ap_store_init(&g_ap.store, sd);
   g_ap.initialized = 1;
 }
 
@@ -349,6 +352,18 @@ int pc_ap_shop_tools(const int* table, int n, int* out) {
 
 mActor_name_t pc_ap_lost_found_item(mActor_name_t item) {
   return pc_ap_tool_allowed(item) ? item : ITM_SAPLING;
+}
+
+int pc_ap_shop_real_level(int cur_level, u32 sales_sum) {
+  int catalog = 0;
+  if(g_ap.store.mode == AP_STORE_CATALOG) {
+    catalog = pc_ap_store_catalog_count(Common_Get(now_private));
+  }
+  return pc_ap_store_level(&g_ap.store, cur_level, sales_sum, catalog);
+}
+
+int pc_ap_shop_sales_cap(int cur_level, u32* cap) {
+  return pc_ap_store_sales_cap(&g_ap.store, cur_level, cap);
 }
 
 int pc_ap_time_frozen(void) {

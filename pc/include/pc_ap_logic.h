@@ -142,6 +142,14 @@ int pc_ap_shop_tools(const int* table, int n, int* out);
 // mPB_get_force_set_item_item (lost and found): a tool not received yet becomes a sapling
 mActor_name_t pc_ap_lost_found_item(mActor_name_t item);
 
+// Nook Store Upgrades hooks (pc_ap_store.h)
+
+// mSP_GetRealShopLevel: target store level (catalog count of the current player),
+// -1 = vanilla
+int pc_ap_shop_real_level(int cur_level, u32 sales_sum);
+// mSP_PlusSales: 1 and *cap = the most sales_sum may be, 0 = vanilla clamp
+int pc_ap_shop_sales_cap(int cur_level, u32* cap);
+
 // Time hooks (on top of pc_ap_timesanity.h): frozen clock, date changes,
 // normalized time travel.
 

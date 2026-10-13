@@ -373,6 +373,70 @@ class StartingTool(Choice):
     default = 0
 
 
+class NookStoreUpgrades(Choice):
+    """
+    What upgrades Tom Nook's store (Nook's Cranny -> Nook 'n' Go -> Nookway -> Nookington's). Nookington's never
+    needs a visitor from another town. Each upgrade still takes two days of renovation, one level at a time.
+    Items: three Progressive Nook Store items.
+    Sales: total Bells spent at the store reaches the Nook Store Sales amounts.
+    Catalog: the number of entries in your catalog reaches the Nook Store Catalog counts.
+    """
+    display_name = "Nook Store Upgrades"
+    option_items = 1
+    option_sales = 2
+    option_catalog = 3
+    default = option_items
+
+
+class StoreSales(NamedRange):
+    range_start = 1000
+    range_end = 999999
+
+
+class NookNGoSales(StoreSales):
+    """With Nook Store Upgrades: Sales, total Bells spent for Nook 'n' Go. Vanilla: 25,000."""
+    display_name = "Nook 'n' Go Sales"
+    default = 15000
+    special_range_names = {"default": 15000, "vanilla": 25000}
+
+
+class NookwaySales(StoreSales):
+    """With Nook Store Upgrades: Sales, total Bells spent for Nookway. Vanilla: 90,000."""
+    display_name = "Nookway Sales"
+    default = 40000
+    special_range_names = {"default": 40000, "vanilla": 90000}
+
+
+class NookingtonsSales(StoreSales):
+    """With Nook Store Upgrades: Sales, total Bells spent for Nookington's. Vanilla: 240,000."""
+    display_name = "Nookington's Sales"
+    default = 75000
+    special_range_names = {"default": 75000, "vanilla": 240000}
+
+
+class StoreCatalog(Range):
+    range_start = 1
+    range_end = 500
+
+
+class NookNGoCatalog(StoreCatalog):
+    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nook 'n' Go."""
+    display_name = "Nook 'n' Go Catalog"
+    default = 30
+
+
+class NookwayCatalog(StoreCatalog):
+    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nookway."""
+    display_name = "Nookway Catalog"
+    default = 70
+
+
+class NookingtonsCatalog(StoreCatalog):
+    """With Nook Store Upgrades: Catalog, catalog entries (of the current player) for Nookington's."""
+    display_name = "Nookington's Catalog"
+    default = 120
+
+
 def villager_key(name: str) -> str:
     # What the player sees and writes in the yaml: "Bob (Lazy)"
     return f"{name} ({PERSONALITIES[VILLAGERS[name][1]]})"
@@ -622,6 +686,13 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     favorsanity: Favorsanity
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
+    nook_store_upgrades: NookStoreUpgrades
+    nook_n_go_sales: NookNGoSales
+    nookway_sales: NookwaySales
+    nookingtons_sales: NookingtonsSales
+    nook_n_go_catalog: NookNGoCatalog
+    nookway_catalog: NookwayCatalog
+    nookingtons_catalog: NookingtonsCatalog
     timesanity: Timesanity
     starting_month: StartingMonth
     starting_time: StartingTime

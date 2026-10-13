@@ -2350,12 +2350,15 @@ PROGRESSIVE_HOUSE = "Progressive House"
 SMALL_BELL_CREDIT = "Small Bell Credit"
 MODEST_BELL_CREDIT = "Modest Bell Credit"
 LARGE_BELL_CREDIT = "Large Bell Credit"
+PROGRESSIVE_NOOK_STORE = "Progressive Nook Store"
+NOOK_STORE_UPGRADES = 3  # Nook 'n' Go, Nookway, Nookington's
 
 AP_ITEM_NAME_TO_ID = {
     PROGRESSIVE_HOUSE: 0x10000,
     SMALL_BELL_CREDIT: 0x10001,
     MODEST_BELL_CREDIT: 0x10002,
     LARGE_BELL_CREDIT: 0x10003,
+    PROGRESSIVE_NOOK_STORE: 0x10004,
 }
 # Timesanity: one item per month and per time slot (Morning 4-8, Day 9-15, Evening 16-20, Night 21-3)
 MONTHS = ["January", "February", "March", "April", "May", "June",

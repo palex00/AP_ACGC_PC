@@ -20,6 +20,13 @@ extern "C" {
 
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
+// nook_store_upgrades: what upgrades Nook's store
+#define AP_STORE_VANILLA 0 // offline / missing: the game's own rules
+#define AP_STORE_ITEMS   1 // Progressive Nook Store items
+#define AP_STORE_SALES   2 // total sales reach store_thresholds (Bells)
+#define AP_STORE_CATALOG 3 // catalog entries reach store_thresholds
+#define AP_STORE_LEVELS  3 // upgrades: Nook 'n' Go, Nookway, Nookington's
+
 // critter_spawns (bugs + fish)
 #define AP_CRITTER_SPAWNS_VANILLA    0
 #define AP_CRITTER_SPAWNS_NORMALIZED 1 // every species equally likely
@@ -64,6 +71,8 @@ typedef struct {
   int loan_checks[AP_LOAN_NUM];      // checks sent when each loan is paid off
   int favorsanity;                   // number of favor checks
   int tools_in_pool;                 // nonzero: net, rod, shovel are items (shop/lost and found only after received)
+  int store_upgrades;                // AP_STORE_*
+  int store_thresholds[AP_STORE_LEVELS]; // per upgrade: Bells (SALES) or catalog entries (CATALOG)
   // Museumsanity: donations are items, museum shows received ones
   int museumsanity;                  // nonzero: museum donation items + the check modes below
   int bug_checks;                    // AP_MUSEUM_* bits

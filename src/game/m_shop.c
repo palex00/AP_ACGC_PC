@@ -1237,7 +1237,12 @@ extern void mSP_SetRenewalChiraswhi_AppoDay() {
     int header_back_start;
 
     if (Save_Get(shop).shop_info.upgrading_today && mEv_CheckEvent(mEv_SAVED_RENEWSHOP) == FALSE) {
+#ifdef TARGET_PC
+        // The store that just opened: with AP Nook Store Upgrades the real level can already be one higher
+        int shop_level = mSP_GetShopLevel();
+#else
         int shop_level = mSP_GetRealShopLevel();
+#endif
         int i;
 
         for (i = 0; i < mHS_HOUSE_NUM; i++) {
@@ -1282,6 +1287,17 @@ extern void mSP_ExchangeLineUp_InGame(GAME* game) {
 
 extern void mSP_PlusSales(u32 sum) {
     Save_Get(shop).sales_sum += sum;
+
+#ifdef TARGET_PC
+    // AP Nook Store Upgrades, sales mode: clamp at our thresholds instead
+    u32 ap_cap;
+    if (pc_ap_shop_sales_cap(mSP_GetShopLevel(), &ap_cap)) {
+        if (Save_Get(shop).sales_sum > ap_cap) {
+            Save_Get(shop).sales_sum = ap_cap;
+        }
+        return;
+    }
+#endif
 
     if (mSP_GetShopLevel() == mSP_SHOP_TYPE_ZAKKA) {
         if (Save_Get(shop).sales_sum > mSP_COMBINI_SUM) {
@@ -1331,6 +1347,12 @@ extern int mSP_GetRealShopLevel() {
     u32 sales_sum = mSP_GetSalesSum();
 
 #ifdef TARGET_PC
+    // AP Nook Store Upgrades (items, sales or catalog); -1 = vanilla below
+    int ap_level = pc_ap_shop_real_level(mSP_GetShopLevel(), sales_sum);
+    if (ap_level >= 0) {
+        return ap_level;
+    }
+
     /* Optional toggle: skip the foreign-town shopper requirement for Nookington's. */
     if (sales_sum >= mSP_DSUPER_SUM && g_pc_settings.disable_shop_visitor_req) {
         return mSP_SHOP_TYPE_DSUPER;

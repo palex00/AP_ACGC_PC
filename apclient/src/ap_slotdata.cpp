@@ -91,6 +91,9 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   read_int_array(slot_data, "loan_checks", sd->loan_checks, default_loan_checks, AP_LOAN_NUM);
   sd->favorsanity = slot_data.value("favorsanity", 0);
   sd->tools_in_pool = slot_data.value("tools_in_pool", 0) % 2;
+  sd->store_upgrades = slot_data.value("nook_store_upgrades", AP_STORE_VANILLA) % 4;
+  static const int no_thresholds[AP_STORE_LEVELS] = { 0, 0, 0 };
+  read_int_array(slot_data, "nook_store_thresholds", sd->store_thresholds, no_thresholds, AP_STORE_LEVELS);
   sd->museumsanity = slot_data.value("museumsanity", 0) % 2;
   sd->bug_checks = slot_data.value("bug_checks", 0) % 4;
   sd->fish_checks = slot_data.value("fish_checks", 0) % 4;
