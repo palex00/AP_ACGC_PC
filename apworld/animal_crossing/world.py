@@ -194,6 +194,11 @@ class AnimalCrossingWorld(World):
         if self.options.tools_in_pool:
             self.pool_tools = [tool for tool in TOOLS if tool != self.starting_tool]
         self.museum_goal_count = math.ceil(len(self.museum_item_names) * self.options.museum_goal_percent.value / 100)
+        # Museum goal: only the donation items it needs are progression (picked at random), the rest are useful.
+        # The client counts every donation item received, so a useful one still counts in game.
+        self.museum_progression = set()
+        if "Museum" in self.options.goal.value:
+            self.museum_progression = set(self.random.sample(self.museum_item_names, self.museum_goal_count))
         self.ac_player_name = clamp_name(self.options.player_name.value) or clamp_name(self.player_name)
         self.ac_town_name = clamp_name(self.options.town_name.value) or DEFAULT_TOWN
         self.ac_letter_sender = (clamp_name(self.options.letter_sender.value, LETTER_SENDER_MAX)
@@ -308,8 +313,10 @@ class AnimalCrossingWorld(World):
     def create_item(self, name: str) -> AnimalCrossingItem:
         if name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL) or name in MONTHS or name in TIME_SLOTS:
             classification = ItemClassification.progression
-        elif name in MUSEUM_ITEM_NAME_TO_ID and "Museum" in self.options.goal.value:
+        elif name in self.museum_progression:
             classification = ItemClassification.progression
+        elif name in MUSEUM_ITEM_NAME_TO_ID and "Museum" in self.options.goal.value:
+            classification = ItemClassification.useful
         elif name in TOOLS:
             # Progression when a museum category with checks needs it (only with Tools in Pool)
             needed = self.options.tools_in_pool and any(self.museum_modes[c] for c, tool in self.category_tools.items() if tool == name)

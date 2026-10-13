@@ -739,7 +739,7 @@ class MuseumGoalPercent(Range):
     display_name = "Museum Goal Percent"
     range_start = 1
     range_end = 100
-    default = 85
+    default = 70
 
 
 @dataclass
