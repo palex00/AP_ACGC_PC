@@ -266,10 +266,11 @@ class Goal(OptionSet):
     What you need to do to finish. With several goals, all of them are required.
     Statue: pay off every house loan so Tom Nook builds your statue.
     Museum: receive Museum Goal Percent of the museum donation items (needs Museumsanity).
+    Froggy Chair: get the froggy chair into your catalog, any way you can (never a Catalogsanity item).
     Once all goals are done, listen to K.K. Slider on a Saturday night (20:00-23:59) to finish.
     """
     display_name = "Goal"
-    valid_keys = {"Statue", "Museum"}
+    valid_keys = {"Statue", "Museum", "Froggy Chair"}
     default = frozenset({"Statue", "Museum"})
 
 

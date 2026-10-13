@@ -374,6 +374,8 @@ class AnimalCrossingWorld(World):
             # The statue comes after the last loan, which needs every house upgrade
             "Statue": lambda state: state.has(PROGRESSIVE_HOUSE, self.player, len(LOANS) - 1),
             "Museum": lambda state: state.has_from_list(self.museum_item_names, self.player, self.museum_goal_count),
+            # No AP item gates it: Nook's shop, trees, villagers, ... can all hand it out
+            "Froggy Chair": lambda state: True,
         }
         chosen = [goals[g] for g in sorted(self.options.goal.value)]
         # Goals are only sent when K.K. Slider plays (Saturday 20:00-23:59, any month): needs a slot with those hours

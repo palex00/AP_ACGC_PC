@@ -85,7 +85,8 @@ void pc_ap_favor_done(void);
 void pc_ap_tick(struct game_play_s* play);
 // pc_ap_accepting + no submenu, no demo (talk, door, event, save), no scene wipe
 int pc_ap_in_game(struct game_play_s* play);
-// All goals set in slot_data are done (statue ordered, museum_goal_count donation items received)
+// All goals set in slot_data are done (statue ordered, museum_goal_count donation items received,
+// froggy chair in the current player's catalog)
 int pc_ap_goals_done(void);
 // K.K.'s song starts (aNTT_roll1_init, every performance is the staff roll): the only place the
 // goal is sent, once all goals are done. Own town only (pc_ap_goals_done needs pc_ap_my_home).

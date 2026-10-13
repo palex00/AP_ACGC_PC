@@ -13,6 +13,7 @@ extern "C" {
 
 #define AP_GOAL_STATUE  (1 << 0)
 #define AP_GOAL_MUSEUM  (1 << 1)
+#define AP_GOAL_FROGGY  (1 << 2) // froggy chair in the catalog
 
 // Museumsanity check modes (bits, per category). 0 = no checks for that category.
 #define AP_MUSEUM_FIND   (1 << 0) // bugs/fish: catching it (journal). Fossils: digging it up (pre-appraised)

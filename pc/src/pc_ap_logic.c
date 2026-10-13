@@ -256,6 +256,12 @@ int pc_ap_goals_done(void) {
       return 0;
     }
   }
+  if(goal & AP_GOAL_FROGGY) {
+    // The current player's catalog (pc_ap_my_home above means there is one)
+    if(!mSP_CollectCheck(FTR_START(FTR_ARI_ISU01))) {
+      return 0;
+    }
+  }
   return goal != 0;
 }
 

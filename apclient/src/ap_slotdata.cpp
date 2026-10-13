@@ -86,6 +86,7 @@ static int read_goal(const nlohmann::json& slot_data) {
   for (auto& g : *it) {
     if (g.is_string() && g.get<std::string>() == "Statue") { goal |= AP_GOAL_STATUE; }
     if (g.is_string() && g.get<std::string>() == "Museum") { goal |= AP_GOAL_MUSEUM; }
+    if (g.is_string() && g.get<std::string>() == "Froggy Chair") { goal |= AP_GOAL_FROGGY; }
   }
   return goal;
 }
