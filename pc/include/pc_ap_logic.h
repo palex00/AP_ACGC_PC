@@ -86,7 +86,7 @@ void pc_ap_tick(struct game_play_s* play);
 // pc_ap_accepting + no submenu, no demo (talk, door, event, save), no scene wipe
 int pc_ap_in_game(struct game_play_s* play);
 // All goals set in slot_data are done (statue ordered, museum_goal_count donation items received,
-// froggy chair in the current player's catalog)
+// froggy chair in the current player's catalog, catalog_goal_count open-pool items in it)
 int pc_ap_goals_done(void);
 // K.K.'s song starts (aNTT_roll1_init, every performance is the staff roll): the only place the
 // goal is sent, once all goals are done. Own town only (pc_ap_goals_done needs pc_ap_my_home).
@@ -160,6 +160,10 @@ int pc_ap_shop_sales_cap(int cur_level, u32* cap);
 // Tracker: Catalog Pools open (at most total) and in total; total 0 = Catalogsanity off
 int pc_ap_catalog_pools_open(void);
 int pc_ap_catalog_pools_total(void);
+// Tracker: open-pool items in the current player's catalog, and how many the Catalog goal
+// needs (0 if it isn't a goal)
+int pc_ap_catalog_registered(void);
+int pc_ap_catalog_goal(void);
 // Catalog page: items of pool (0-based) sorted by id, how many; 0 for a locked pool
 int pc_ap_catalog_pool_items(int pool, mActor_name_t* out, int max);
 // Catalog page: first open pool with an item not in the current player's catalog, 0 if none

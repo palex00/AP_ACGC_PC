@@ -267,10 +267,11 @@ class Goal(OptionSet):
     Statue: pay off every house loan so Tom Nook builds your statue.
     Museum: receive Museum Goal Percent of the museum donation items (needs Museumsanity).
     Froggy Chair: get the froggy chair into your catalog, any way you can (never a Catalogsanity item).
+    Catalog: get Catalog Goal Percent of the Catalogsanity items into your catalog (needs Catalogsanity).
     Once all goals are done, listen to K.K. Slider on a Saturday night (20:00-23:59) to finish.
     """
     display_name = "Goal"
-    valid_keys = {"Statue", "Museum", "Froggy Chair"}
+    valid_keys = {"Statue", "Museum", "Froggy Chair", "Catalog"}
     default = frozenset({"Statue", "Museum"})
 
 
@@ -573,6 +574,7 @@ class Catalogsanity(DefaultOnToggle):
     """
     Catalog items are split into pools. Getting an item of an unlocked pool into your catalog (picking it up,
     wearing it, ...) sends a check. Pool 1 is open from the start, each Progressive Catalog Pool unlocks the next.
+    Must be on for the Catalog goal.
     """
     display_name = "Catalogsanity"
 
@@ -626,6 +628,14 @@ class CatalogSources(OptionSet):
     display_name = "Catalog Sources"
     valid_keys = set(CATALOG_SOURCES)
     default = frozenset(CATALOG_SOURCES)
+
+
+class CatalogGoalPercent(Range):
+    """For the Catalog goal: percentage of the Catalogsanity items you need in your catalog."""
+    display_name = "Catalog Goal Percent"
+    range_start = 1
+    range_end = 100
+    default = 85
 
 
 class Museumsanity(DefaultOnToggle):
@@ -771,6 +781,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     catalog_pool_size: CatalogPoolSize
     new_item_chance: NewItemChance
     catalog_sources: CatalogSources
+    catalog_goal_percent: CatalogGoalPercent
     museumsanity: Museumsanity
     bug_checks: BugChecks
     fish_checks: FishChecks

@@ -102,6 +102,7 @@ class AnimalCrossingWeb(WebWorld):
             options.CatalogPoolSize,
             options.NewItemChance,
             options.CatalogSources,
+            options.CatalogGoalPercent,
         ]),
         OptionGroup("Museumsanity", [
             options.Museumsanity,
@@ -156,6 +157,8 @@ class AnimalCrossingWorld(World):
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Statue goal needs Loansanity on.")
         if "Museum" in self.options.goal.value and not self.options.museumsanity:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Museum goal needs Museumsanity on.")
+        if "Catalog" in self.options.goal.value and not self.options.catalogsanity:
+            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Catalog goal needs Catalogsanity on.")
         # Check mode per museum category (CHECK_* bits), 0 = vanilla, no items. All 0 without Museumsanity.
         self.museum_modes = {MUSEUM_FOSSIL: 0, MUSEUM_PAINTING: 0, MUSEUM_BUG: 0, MUSEUM_FISH: 0}
         if self.options.museumsanity:
@@ -245,6 +248,14 @@ class AnimalCrossingWorld(World):
                                   f"{CATALOG_ELIGIBLE // pools}).")
             self.catalog_pools = make_pools(self.random, pools, size)
         self.catalog_pool_items = max(len(self.catalog_pools) - 1, 0)
+        catalog_total = sum(len(pool) for pool in self.catalog_pools)
+        self.catalog_goal_count = math.ceil(catalog_total * self.options.catalog_goal_percent.value / 100)
+        # Catalog goal: pools needed to hold catalog_goal_count items, so k-1 Progressive Catalog Pool
+        self.catalog_goal_pools = 0
+        held = 0
+        while held < self.catalog_goal_count:
+            held += len(self.catalog_pools[self.catalog_goal_pools])
+            self.catalog_goal_pools += 1
 
         locations = sum(self.loan_checks) + self.options.favorsanity.value + len(self.museum_locations)
         locations += sum(len(pool) for pool in self.catalog_pools)
@@ -376,8 +387,14 @@ class AnimalCrossingWorld(World):
             "Museum": lambda state: state.has_from_list(self.museum_item_names, self.player, self.museum_goal_count),
             # No AP item gates it: Nook's shop, trees, villagers, ... can all hand it out
             "Froggy Chair": lambda state: True,
+            # Enough pools open (with Timesanity also a shop slot, below)
+            "Catalog": lambda state: state.has(PROGRESSIVE_CATALOG_POOL, self.player,
+                                               max(self.catalog_goal_pools - 1, 0)),
         }
         chosen = [goals[g] for g in sorted(self.options.goal.value)]
+        # Catalog goal: Nook's shop (as for the catalog locations above)
+        if "Catalog" in self.options.goal.value and self.options.timesanity and not self.options.shops_always_open:
+            chosen.append(lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"), self.player))
         # Goals are only sent when K.K. Slider plays (Saturday 20:00-23:59, any month): needs a slot with those hours
         if self.options.timesanity:
             chosen.append(lambda state: state.has_any(("Evening Hours", "Night Hours"), self.player))
@@ -460,6 +477,7 @@ class AnimalCrossingWorld(World):
             "catalog_pools": self.catalog_pools,
             "new_item_chance": self.options.new_item_chance.value,
             "catalog_sources": sorted(self.options.catalog_sources.value),
+            "catalog_goal_count": self.catalog_goal_count,
             "museumsanity": self.options.museumsanity.value,
             # Effective modes: 0 without Museumsanity
             "bug_checks": self.museum_modes[MUSEUM_BUG],

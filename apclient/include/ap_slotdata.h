@@ -14,6 +14,7 @@ extern "C" {
 #define AP_GOAL_STATUE  (1 << 0)
 #define AP_GOAL_MUSEUM  (1 << 1)
 #define AP_GOAL_FROGGY  (1 << 2) // froggy chair in the catalog
+#define AP_GOAL_CATALOG (1 << 3) // catalog_goal_count Catalogsanity items in the catalog
 
 // Museumsanity check modes (bits, per category). 0 = no checks for that category.
 #define AP_MUSEUM_FIND   (1 << 0) // bugs/fish: catching it (journal). Fossils: digging it up (pre-appraised)
@@ -109,6 +110,7 @@ typedef struct {
   unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k Progressive Catalog Pools
   int new_item_chance;               // percent: a random item from a source is a needed open-pool item
   int catalog_sources;               // AP_CATALOG_SOURCE_* bits (Nook is always a source)
+  int catalog_goal_count;            // Catalog goal: pool items to get into the catalog (apworld computes it from its % option)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit
   char world_version[16];            // apworld version the seed was generated with ("" if missing)
   // Whether the struct has valid data

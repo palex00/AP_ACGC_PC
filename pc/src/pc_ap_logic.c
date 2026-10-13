@@ -280,6 +280,11 @@ int pc_ap_goals_done(void) {
       return 0;
     }
   }
+  if(goal & AP_GOAL_CATALOG) {
+    if(pc_ap_catalog_registered() < g_ap.catalog.goal_count) {
+      return 0;
+    }
+  }
   if(goal & AP_GOAL_FROGGY) {
     // The current player's catalog (pc_ap_my_home above means there is one)
     if(!mSP_CollectCheck(FTR_START(FTR_ARI_ISU01))) {
@@ -410,6 +415,14 @@ int pc_ap_catalog_pools_open(void) {
 
 int pc_ap_catalog_pools_total(void) {
   return pc_ap_catalogsanity_pool_count(&g_ap.catalog);
+}
+
+int pc_ap_catalog_registered(void) {
+  return pc_ap_catalogsanity_registered(&g_ap.catalog, pc_ap_catalog_pools_open());
+}
+
+int pc_ap_catalog_goal(void) {
+  return (ap_getslotdata()->goal & AP_GOAL_CATALOG) ? g_ap.catalog.goal_count : 0;
 }
 
 int pc_ap_catalog_pool_items(int pool, mActor_name_t* out, int max) {

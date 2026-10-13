@@ -35,6 +35,7 @@ typedef struct {
   u8 pool[AP_CATALOG_MAX];             // pool (0-based) of each item
   int new_item_chance;                 // percent
   int sources;                         // AP_CATALOG_SOURCE_* bits on
+  int goal_count;                      // Catalog goal: items to have (only used when it's a goal)
 } pc_ap_catalogsanity;
 
 // One mSP_SelectRandomItem_New request, as the picker needs it
@@ -62,6 +63,8 @@ int pc_ap_catalogsanity_first_unfinished(const pc_ap_catalogsanity* c, int open)
 // current player's catalog (mSP_CollectCheck), -1 when done. Start *it at 0.
 // Includes ones already sent: the DLL drops repeats.
 int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, int* it);
+// Items of the first `open` pools in the current player's catalog (the checks sent)
+int pc_ap_catalogsanity_registered(const pc_ap_catalogsanity* c, int open);
 
 // Nonzero if source may give new pool items: PC_AP_CATALOG_SOURCE_NOOK, or an
 // AP_CATALOG_SOURCE_* bit that's on

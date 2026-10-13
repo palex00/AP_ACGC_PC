@@ -32,6 +32,7 @@ void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd) {
   c->count = sd->catalog_count;
   c->new_item_chance = sd->new_item_chance;
   c->sources = sd->catalog_sources;
+  c->goal_count = sd->catalog_goal_count;
   for(int i = 0; i < c->count; i++) {
     c->items[i] = sd->catalog_items[i];
     c->pool[i] = sd->catalog_pool[i];
@@ -90,6 +91,16 @@ int64_t pc_ap_catalogsanity_next_check(const pc_ap_catalogsanity* c, int open, i
     }
   }
   return -1;
+}
+
+int pc_ap_catalogsanity_registered(const pc_ap_catalogsanity* c, int open) {
+  int n = 0;
+  for(int i = 0; i < c->count; i++) {
+    if(c->pool[i] < open && mSP_CollectCheck(c->items[i])) {
+      n++;
+    }
+  }
+  return n;
 }
 
 int pc_ap_catalogsanity_is_source(const pc_ap_catalogsanity* c, int source) {

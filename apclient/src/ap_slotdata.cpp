@@ -87,6 +87,7 @@ static int read_goal(const nlohmann::json& slot_data) {
     if (g.is_string() && g.get<std::string>() == "Statue") { goal |= AP_GOAL_STATUE; }
     if (g.is_string() && g.get<std::string>() == "Museum") { goal |= AP_GOAL_MUSEUM; }
     if (g.is_string() && g.get<std::string>() == "Froggy Chair") { goal |= AP_GOAL_FROGGY; }
+    if (g.is_string() && g.get<std::string>() == "Catalog") { goal |= AP_GOAL_CATALOG; }
   }
   return goal;
 }
@@ -166,6 +167,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->new_item_chance = slot_data.value("new_item_chance", 0);
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
   sd->catalog_sources = read_catalog_sources(slot_data);
+  sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
 
   // Keyed by item name in the apworld (Small/Modest/Large Bell Credit)
   static const char * credit_names[AP_BELLCREDIT_NUM] = { "Small Bell Credit", "Modest Bell Credit", "Large Bell Credit" };
