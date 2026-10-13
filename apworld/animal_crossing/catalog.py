@@ -15,7 +15,7 @@ _ID_TO_NAME = {item_id: name for name, item_id in ITEM_NAME_TO_ID.items()}
 
 
 def catalog_location_name(item_id: int) -> str:
-    # Stationery is sold in stacks of 4 ("airmail paper x4"); the catalog entry is the paper itself
+    # Stationery (not eligible now) is sold in stacks of 4 ("airmail paper x4"); the entry is the paper itself
     return "Catalog: " + re.sub(r" x\d+$", "", _ID_TO_NAME[item_id])
 
 

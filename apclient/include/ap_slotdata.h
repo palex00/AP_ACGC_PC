@@ -21,7 +21,7 @@ extern "C" {
 
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
 
-#define AP_CATALOG_MAX 636 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
+#define AP_CATALOG_MAX 575 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
 // catalog_sources: sources besides Nook that can give new pool items (bits, apworld CATALOG_SOURCES order)
 #define AP_CATALOG_SOURCE_FAVORS     (1 << 0)
 #define AP_CATALOG_SOURCE_TRADES     (1 << 1)

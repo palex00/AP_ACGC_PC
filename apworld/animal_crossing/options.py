@@ -580,7 +580,8 @@ class Catalogsanity(DefaultOnToggle):
 class CatalogPools(Range):
     """
     How far Catalogsanity is gated. Pool 1 is open from the start; the rest need one Progressive Catalog Pool
-    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 636.
+    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 575
+    (furniture, clothes, carpets and wallpaper; no stationery or diaries).
     """
     display_name = "Catalog Pools"
     range_start = 1
@@ -591,7 +592,7 @@ class CatalogPools(Range):
 class CatalogPoolSize(Range):
     """
     Catalog checks unlocked per Progressive Catalog Pool. Items are picked at random, with every pool getting
-    a similar mix of furniture, clothes, tools and so on.
+    a similar mix of furniture, clothes, carpets and wallpaper.
     """
     display_name = "Catalog Pool Size"
     range_start = 1
