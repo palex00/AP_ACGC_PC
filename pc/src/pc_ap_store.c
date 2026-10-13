@@ -1,13 +1,7 @@
 #include "pc_ap_store.h"
 #include "ap_archipelago.h"
-#include "m_name_table.h"
 
 #include <string.h>
-
-// Journal bits in furniture_collected_bitfield, by furniture index (m_submenu.c
-// mSM_COLLECT_INSECT_SET / mSM_COLLECT_FISH_SET)
-#define PC_AP_STORE_INSECT_IDX 0x2F2
-#define PC_AP_STORE_FISH_IDX   0x31A
 
 void pc_ap_store_init(pc_ap_store* s, const ap_slotdata* sd) {
   memset(s, 0, sizeof(*s));
@@ -49,44 +43,4 @@ int pc_ap_store_sales_cap(const pc_ap_store* s, int cur_level, u32* cap) {
   // Nookington's: nothing left to reach
   *cap = cur_level < AP_STORE_LEVELS ? s->thresholds[cur_level] : 0xFFFFFFFF;
   return 1;
-}
-
-static int pc_ap_store_popcount(u32 v) {
-  int n = 0;
-  while(v != 0) {
-    v &= v - 1;
-    n++;
-  }
-  return n;
-}
-
-static int pc_ap_store_count_bits(const u32* bits, int words) {
-  int n = 0;
-  for(int i = 0; i < words; i++) {
-    n += pc_ap_store_popcount(bits[i]);
-  }
-  return n;
-}
-
-static int pc_ap_store_journal_bit(int idx) {
-  return (idx >= PC_AP_STORE_INSECT_IDX && idx < PC_AP_STORE_INSECT_IDX + INSECT_ONLY_NUM) ||
-         (idx >= PC_AP_STORE_FISH_IDX && idx < PC_AP_STORE_FISH_IDX + FISH_NUM);
-}
-
-int pc_ap_store_catalog_count(const Private_c* priv) {
-  if(priv == NULL) {
-    return 0;
-  }
-  int words = sizeof(priv->furniture_collected_bitfield) / sizeof(u32);
-  int n = 0;
-  for(int idx = 0; idx < words * 32; idx++) {
-    if((priv->furniture_collected_bitfield[idx >> 5] & (1u << (idx & 31))) && !pc_ap_store_journal_bit(idx)) {
-      n++;
-    }
-  }
-  n += pc_ap_store_count_bits(priv->wall_collected_bitfield, 3);
-  n += pc_ap_store_count_bits(priv->carpet_collected_bitfield, 3);
-  n += pc_ap_store_count_bits(priv->paper_collected_bitfield, 2);
-  n += pc_ap_store_count_bits(priv->music_collected_bitfield, 2);
-  return n;
 }

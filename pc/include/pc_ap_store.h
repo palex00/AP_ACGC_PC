@@ -7,7 +7,6 @@
 #define PC_AP_STORE_H
 
 #include "types.h"
-#include "m_private.h"
 #include "ap_slotdata.h"
 
 #ifdef __cplusplus
@@ -30,9 +29,6 @@ int pc_ap_store_level(const pc_ap_store* s, int cur_level, u32 sales_sum, int ca
 // Sales clamp for mSP_PlusSales (sales never run ahead of the next upgrade):
 // 1 and *cap = the most sales_sum may be, 0 = vanilla clamp.
 int pc_ap_store_sales_cap(const pc_ap_store* s, int cur_level, u32* cap);
-// Catalog entries of one player: the collected bits, without the bug and fish
-// journal (stored in the furniture bits but not shown in the catalog)
-int pc_ap_store_catalog_count(const Private_c* priv);
 
 #ifdef __cplusplus
 }

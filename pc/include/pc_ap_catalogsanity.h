@@ -11,6 +11,7 @@
 
 #include "types.h"
 #include "m_actor_type.h"
+#include "m_private.h"
 #include "ap_slotdata.h"
 
 #ifdef __cplusplus
@@ -84,6 +85,10 @@ int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item
 // lists are empty.
 mActor_name_t pc_ap_catalogsanity_wisp_pick(const pc_ap_catalogsanity* c, int open, int is_source,
                                             mActor_name_t* const* lists, int list_count);
+
+// Catalog entries of one player: the collected bits, without the bug and fish
+// journal (stored in the furniture bits but not shown in the catalog)
+int pc_ap_catalogsanity_entry_count(const Private_c* priv);
 
 #ifdef __cplusplus
 }

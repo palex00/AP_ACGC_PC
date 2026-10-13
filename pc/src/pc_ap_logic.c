@@ -369,7 +369,7 @@ mActor_name_t pc_ap_lost_found_item(mActor_name_t item) {
 int pc_ap_shop_real_level(int cur_level, u32 sales_sum) {
   int catalog = 0;
   if(g_ap.store.mode == AP_STORE_CATALOG) {
-    catalog = pc_ap_store_catalog_count(Common_Get(now_private));
+    catalog = pc_ap_catalogsanity_entry_count(Common_Get(now_private));
   }
   return pc_ap_store_level(&g_ap.store, cur_level, sales_sum, catalog);
 }

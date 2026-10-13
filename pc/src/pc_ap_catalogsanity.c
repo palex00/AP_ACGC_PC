@@ -9,6 +9,13 @@
 
 // A + B + C of one category (furniture is the biggest: 310)
 #define PC_AP_CATALOG_CANDIDATES 400
+// Wisp's candidates: all of his lists (~1000), or every pool item (AP_CATALOG_MAX)
+#define PC_AP_CATALOG_WISP_MAX 2048
+
+// Journal bits in furniture_collected_bitfield, by furniture index (m_submenu.c
+// mSM_COLLECT_INSECT_SET / mSM_COLLECT_FISH_SET)
+#define PC_AP_CATALOG_INSECT_IDX 0x2F2
+#define PC_AP_CATALOG_FISH_IDX   0x31A
 
 // What a candidate is for the picker
 #define PC_AP_CATALOG_SKIP 0
@@ -52,16 +59,6 @@ int pc_ap_catalogsanity_is_source(const pc_ap_catalogsanity* c, int source) {
   return source == PC_AP_CATALOG_SOURCE_NOOK || (source & c->sources) != 0;
 }
 
-// Index of item in the pools, -1 if it isn't a pool item
-static int pc_ap_catalogsanity_index(const pc_ap_catalogsanity* c, mActor_name_t item) {
-  for(int i = 0; i < c->count; i++) {
-    if(c->items[i] == item) {
-      return i;
-    }
-  }
-  return -1;
-}
-
 // One id per catalog entry: furniture without its facing (low 2 bits), stationery
 // without its stack size
 static mActor_name_t pc_ap_catalogsanity_entry(mActor_name_t item) {
@@ -74,14 +71,19 @@ static mActor_name_t pc_ap_catalogsanity_entry(mActor_name_t item) {
   return item;
 }
 
-int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item) {
+// Index of item's catalog entry in the pools, -1 if it isn't a pool item
+static int pc_ap_catalogsanity_index(const pc_ap_catalogsanity* c, mActor_name_t item) {
   mActor_name_t entry = pc_ap_catalogsanity_entry(item);
   for(int i = 0; i < c->count; i++) {
     if(pc_ap_catalogsanity_entry(c->items[i]) == entry) {
-      return mSP_CollectCheck(item);
+      return i;
     }
   }
-  return 1;
+  return -1;
+}
+
+int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item) {
+  return pc_ap_catalogsanity_index(c, item) < 0 || mSP_CollectCheck(item);
 }
 
 // Clothes lists are blocks: any season, then spring, summer, autumn, winter
@@ -140,25 +142,14 @@ static int pc_ap_catalogsanity_taken(const pc_ap_catalog_request* r, const mActo
 static mActor_name_t pc_ap_catalogsanity_draw(const mActor_name_t* cand, const u8* kind, int count, int want,
                                               const pc_ap_catalog_request* r, const mActor_name_t* out,
                                               int filled, int repeats) {
+  static mActor_name_t match[PC_AP_CATALOG_CANDIDATES];
   int n = 0;
   for(int i = 0; i < count; i++) {
     if(kind[i] == want && (repeats || !pc_ap_catalogsanity_taken(r, out, filled, cand[i]))) {
-      n++;
+      match[n++] = cand[i];
     }
   }
-  if(n == 0) {
-    return EMPTY_NO;
-  }
-  int k = RANDOM(n);
-  for(int i = 0; i < count; i++) {
-    if(kind[i] == want && (repeats || !pc_ap_catalogsanity_taken(r, out, filled, cand[i]))) {
-      if(k == 0) {
-        return cand[i];
-      }
-      k--;
-    }
-  }
-  return EMPTY_NO;
+  return n > 0 ? match[RANDOM(n)] : EMPTY_NO;
 }
 
 void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
@@ -206,64 +197,73 @@ static int pc_ap_catalogsanity_wisp_candidate(const pc_ap_catalogsanity* c, mAct
   return owned || pc_ap_catalogsanity_index(c, item) < 0;
 }
 
-static int pc_ap_catalogsanity_wisp_count(const pc_ap_catalogsanity* c, mActor_name_t* const* lists, int list_count,
-                                          int unowned_only) {
+// Copies his candidates to buf (at most PC_AP_CATALOG_WISP_MAX), returns how many
+static int pc_ap_catalogsanity_wisp_collect(const pc_ap_catalogsanity* c, mActor_name_t* const* lists, int list_count,
+                                            int unowned_only, mActor_name_t* buf) {
   int n = 0;
   for(int l = 0; l < list_count; l++) {
-    for(const mActor_name_t* p = lists[l]; p != NULL && *p != EMPTY_NO; p++) {
-      n += pc_ap_catalogsanity_wisp_candidate(c, *p, unowned_only);
+    for(const mActor_name_t* p = lists[l]; p != NULL && *p != EMPTY_NO && n < PC_AP_CATALOG_WISP_MAX; p++) {
+      if(pc_ap_catalogsanity_wisp_candidate(c, *p, unowned_only)) {
+        buf[n++] = *p;
+      }
     }
   }
   return n;
 }
 
-// The k-th (0-based) candidate, EMPTY_NO past the end
-static mActor_name_t pc_ap_catalogsanity_wisp_nth(const pc_ap_catalogsanity* c, mActor_name_t* const* lists,
-                                                  int list_count, int unowned_only, int k) {
-  for(int l = 0; l < list_count; l++) {
-    for(const mActor_name_t* p = lists[l]; p != NULL && *p != EMPTY_NO; p++) {
-      if(pc_ap_catalogsanity_wisp_candidate(c, *p, unowned_only)) {
-        if(k == 0) {
-          return *p;
-        }
-        k--;
-      }
-    }
-  }
-  return EMPTY_NO;
-}
-
 mActor_name_t pc_ap_catalogsanity_wisp_pick(const pc_ap_catalogsanity* c, int open, int is_source,
                                             mActor_name_t* const* lists, int list_count) {
+  static mActor_name_t buf[PC_AP_CATALOG_WISP_MAX];
+  int n = 0;
   if(is_source) {
-    int n = 0;
     for(int i = 0; i < c->count; i++) {
       if(c->pool[i] < open && !mSP_CollectCheck(c->items[i])) {
-        n++;
+        buf[n++] = c->items[i];
       }
     }
     if(n > 0) {
-      int k = RANDOM(n);
-      for(int i = 0; i < c->count; i++) {
-        if(c->pool[i] < open && !mSP_CollectCheck(c->items[i])) {
-          if(k == 0) {
-            return c->items[i];
-          }
-          k--;
-        }
-      }
+      return buf[RANDOM(n)];
     }
   }
 
   // His rule: something not in the catalog if there is any, else anything
-  int unowned_only = 1;
-  int n = pc_ap_catalogsanity_wisp_count(c, lists, list_count, 1);
+  n = pc_ap_catalogsanity_wisp_collect(c, lists, list_count, 1, buf);
   if(n == 0) {
-    unowned_only = 0;
-    n = pc_ap_catalogsanity_wisp_count(c, lists, list_count, 0);
+    n = pc_ap_catalogsanity_wisp_collect(c, lists, list_count, 0, buf);
   }
-  if(n == 0) {
-    return EMPTY_NO;
+  return n > 0 ? buf[RANDOM(n)] : EMPTY_NO;
+}
+
+static int pc_ap_catalogsanity_bits(const u32* bits, int words) {
+  int n = 0;
+  for(int i = 0; i < words; i++) {
+    for(u32 v = bits[i]; v != 0; v &= v - 1) {
+      n++;
+    }
   }
-  return pc_ap_catalogsanity_wisp_nth(c, lists, list_count, unowned_only, RANDOM(n));
+  return n;
+}
+
+// Set journal bits in idx..idx+num
+static int pc_ap_catalogsanity_journal_bits(const Private_c* priv, int idx, int num) {
+  int n = 0;
+  for(int i = idx; i < idx + num; i++) {
+    n += (priv->furniture_collected_bitfield[i >> 5] >> (i & 31)) & 1;
+  }
+  return n;
+}
+
+int pc_ap_catalogsanity_entry_count(const Private_c* priv) {
+  if(priv == NULL) {
+    return 0;
+  }
+  int n = 0;
+  n += pc_ap_catalogsanity_bits(priv->furniture_collected_bitfield, ARRAY_COUNT(priv->furniture_collected_bitfield));
+  n += pc_ap_catalogsanity_bits(priv->wall_collected_bitfield, ARRAY_COUNT(priv->wall_collected_bitfield));
+  n += pc_ap_catalogsanity_bits(priv->carpet_collected_bitfield, ARRAY_COUNT(priv->carpet_collected_bitfield));
+  n += pc_ap_catalogsanity_bits(priv->paper_collected_bitfield, ARRAY_COUNT(priv->paper_collected_bitfield));
+  n += pc_ap_catalogsanity_bits(priv->music_collected_bitfield, ARRAY_COUNT(priv->music_collected_bitfield));
+  n -= pc_ap_catalogsanity_journal_bits(priv, PC_AP_CATALOG_INSECT_IDX, INSECT_ONLY_NUM);
+  n -= pc_ap_catalogsanity_journal_bits(priv, PC_AP_CATALOG_FISH_IDX, FISH_NUM);
+  return n;
 }
