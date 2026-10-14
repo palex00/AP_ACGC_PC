@@ -7,11 +7,18 @@ typedef signed   short int     s16;
 typedef unsigned short int     u16;
 typedef signed   long          s32;
 typedef unsigned long          u32;
-typedef signed   long long int s64;
-typedef unsigned long long int u64;
+#if defined(TARGET_PC) && defined(__linux__)
+// i386 SysV aligns 64-bit struct members to 4; GC and Windows use 8. Saves are raw structs.
+#define PC_ALIGN8 __attribute__((aligned(8)))
+#else
+#define PC_ALIGN8
+#endif
+
+typedef signed   long long int s64 PC_ALIGN8;
+typedef unsigned long long int u64 PC_ALIGN8;
 
 typedef float  f32;
-typedef double f64;
+typedef double f64 PC_ALIGN8;
 
 typedef char *Ptr;
 #ifndef TARGET_PC
