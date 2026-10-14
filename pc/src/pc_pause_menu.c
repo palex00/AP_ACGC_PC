@@ -308,10 +308,14 @@ int pc_pause_menu_handle_event(const SDL_Event* e) {
 
 static void draw_main_page(struct game_s* game) {
     main_update();
-    pc_menu_draw_centered(game, "- Paused -", 80.0f, 255, 255, 255, 255, 1.0f);
-
-    f32 y = 110.0f;
+    // Center title + entries vertically (y is a row's top, rows are 16 high)
     f32 line_h = 18.0f;
+    f32 title_gap = 30.0f; // title top to first entry top
+    f32 block_h = title_gap + (main_count - 1) * line_h + mFont_TEX_CHAR_HEIGHT_F32;
+    f32 top = (SCREEN_HEIGHT_F - block_h) * 0.5f;
+    pc_menu_draw_centered(game, "- Paused -", top, 255, 255, 255, 255, 1.0f);
+
+    f32 y = top + title_gap;
     for (int i = 0; i < main_count; i++) {
         int r, g, b, a;
         int selected = (i == main_sel);
