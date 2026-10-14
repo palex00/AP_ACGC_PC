@@ -714,8 +714,8 @@ class FossilSpawns(Choice):
     """
     Which fossil a dug-up fossil turns out to be. Works without Museumsanity too.
     Vanilla: the game's odds.
-    Dynamic: fossils whose check isn't sent yet (or, with no checks, that are missing from the museum) are more
-    likely.
+    Dynamic: every fossil starts equally likely; fossils whose check isn't sent yet (or, with no checks, that are
+    missing from the museum) are more likely.
     Season Locked: each fossil only comes out in one season (Spring: March-May, Summer: June-August,
     Autumn: September-November, Winter: December-February). With Timesanity, fossil checks need a month of
     their season.
