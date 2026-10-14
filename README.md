@@ -20,7 +20,8 @@ The game reads all assets directly from the disc image at startup. No extraction
 
 - **podman**
 - **Animal Crossing (USA) disc image** (ISO, GCM, or CISO format)
-
+- Linux build only: glibc 2.36+ and 32-bit OpenGL, X11 and PulseAudio/ALSA libraries (already
+  installed if you have Steam; package names per distro in [docs/setup_en.md](docs/setup_en.md#linux-version))
 
 ### Build Steps
 
@@ -30,26 +31,18 @@ The game reads all assets directly from the disc image at startup. No extraction
    cd AP_ACGC_PC
    ```
 
-2. Build (in bash or something; bash for windows might work?)
-   ```bash
-   ./build_podman.sh
-   ```
+2. Build (from a bash shell):
 
-3. Place your disc image in the `rom/` folder:
-   ```
-   build/windows32/bin/rom/YourGame.ciso
-   ```
+   | | Windows | Linux |
+   |---|---|---|
+   | Command | `./build_podman.sh` | `./build_podman.sh --linux` |
+   | Output | `build/windows32/bin/` | `build/linux32/bin/` |
+   | Run | `AnimalCrossing.exe` | `AnimalCrossing` |
 
-4. Run:
-   ```bash
-   build/windows32/bin/AnimalCrossing.exe
-   ```
+3. Put your disc image in the output folder's `rom/` folder, e.g. `build/windows32/bin/rom/YourGame.ciso`.
 
-Native Linux build: `./build_podman.sh --linux`, output in `build/linux32/bin/` (run `AnimalCrossing`
-there, ROM in its `rom/` folder). It's a 32-bit program: it needs glibc 2.36+ and 32-bit OpenGL,
-X11 and PulseAudio/ALSA libraries (installed already if you have Steam; package names per distro in
-[docs/setup_en.md](docs/setup_en.md#linux-version)). Everything else is linked in. On Wayland, run `install-desktop-entry.sh`
-from that folder once for a launcher entry and taskbar icon.
+4. Run the game from the output folder. On Linux with Wayland, run `install-desktop-entry.sh` there once
+   for a launcher entry and taskbar icon.
 
 ## Controls
 
