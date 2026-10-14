@@ -37,15 +37,15 @@ The game reads all assets directly from the disc image at startup. No extraction
 
 3. Place your disc image in the `rom/` folder:
    ```
-   pc/build/windows32/bin/rom/YourGame.ciso
+   build/windows32/bin/rom/YourGame.ciso
    ```
 
 4. Run:
    ```bash
-   pc/build/windows32/bin/AnimalCrossing.exe
+   build/windows32/bin/AnimalCrossing.exe
    ```
 
-Native Linux build: `./build_podman.sh --linux`, output in `pc/build/linux32/bin/` (run `AnimalCrossing`
+Native Linux build: `./build_podman.sh --linux`, output in `build/linux32/bin/` (run `AnimalCrossing`
 there, ROM in its `rom/` folder). It's a 32-bit program: it needs glibc 2.36+ and 32-bit OpenGL,
 X11 and PulseAudio/ALSA libraries (installed already if you have Steam; package names per distro in
 [docs/setup_en.md](docs/setup_en.md#linux-version)). Everything else is linked in. On Wayland, run `install-desktop-entry.sh`

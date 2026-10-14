@@ -19,7 +19,7 @@ SDL2_VERSION="${SDL2_VERSION:-2.30.10}"
 SDL2_DIR="${SDL2_DIR:-/opt/SDL2-${SDL2_VERSION}/i686-linux-gnu}"
 OPENSSL_VERSION="${OPENSSL_VERSION:-3.5.8}"
 OPENSSL_DIR="${OPENSSL_DIR:-/opt/openssl-${OPENSSL_VERSION}/i686-linux-gnu}"
-BUILD_DIR="${BUILD_DIR:-pc/build/linux32}"
+BUILD_DIR="${BUILD_DIR:-build/linux32}"
 
 for dir in "$SDL2_DIR" "$OPENSSL_DIR"; do
   if [ ! -d "$dir" ]; then

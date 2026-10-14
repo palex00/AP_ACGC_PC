@@ -3,7 +3,7 @@
 # haloopdy 2026
 # Options are passed to build_mingw.sh (e.g. --clean to remove compiled outputs first).
 # --linux (first option) builds the native Linux version instead (Dockerfile.linux, build_linux.sh,
-# output in pc/build/linux32/bin).
+# output in build/linux32/bin).
 # THIS is the file to run if you want to build! Should work on any system with podman installed?
 
 # Host networking avoids pasta, which fails on some hosts (e.g. Ubuntu AppArmor). The build needs
