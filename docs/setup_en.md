@@ -64,6 +64,12 @@ password=
 Then run the game. It connects on startup and shows its connection status
 on screen.
 
+### Text Client
+
+The game has no chat, and its on-screen messages disappear quickly. To see the full message log, chat, or
+use hint commands (e.g. `!hint <item>`), open the Archipelago Text Client from the Archipelago Launcher and
+connect it to the same server and slot name while you play.
+
 ## Playing Without a Server
 
 To play with only the quality-of-life options (no multiworld), replace the contents of
