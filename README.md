@@ -1,14 +1,12 @@
-# Animal Crossing PC Port
+# Animal Crossing PC Port + Archipelago
 
-A native PC port of Animal Crossing (GameCube) built on top of the [ac-decomp](https://github.com/ACreTeam/ac-decomp) decompilation project.
-
-The game's original C code runs natively on x86, with a custom translation layer replacing the GameCube's GX graphics API with OpenGL 3.3.
+A fork of the [Animal Crossing PC Port](https://github.com/flyngmt/ACGC-PC-Port) which
+adds MANY changes for Archipelago support. This is a full port with full Archipelago
+support; you do not need a separate client or mod.
 
 This repository does not contain any game assets or assembly whatsoever. An existing copy of the game is required.
 
 Supported versions: GAFE01_00: Rev 0 (USA)
-
-The game reads all assets directly from the disc image at startup. No extraction or preprocessing step is needed.
 
 ## Setup
 - Setup guide: [docs/setup_en.md](docs/setup_en.md)
@@ -86,28 +84,40 @@ Graphics settings are stored in `settings.ini` and can be edited manually or thr
 - MSAA (anti-aliasing)
 - Texture Loading/Caching (No need to enable if you aren't using a texture pack)
 
+### AP settings
+
+Archipelago connection settings, such as the host, slotname, and password, go into a separate
+`ap_config.ini` file next to the exe. There is no in-game way to set these values (to keep
+things simple; Animal Crossing does not have a robust text entry builtin), so you must set
+these values for the game to function. See [docs/setup_en.md](docs/setup_en.md)
+
 ## Texture Packs
 
 Custom textures can be placed in `texture_pack/`. Dolphin-compatible format (XXHash64, DDS).
 
-I highly recommend the following texture pack from the talented artists of Animal Crossing community.
+The original PC port author highly recommended the following texture pack from the 
+talented artists of Animal Crossing community.
 
 [HD Texture Pack](https://forums.dolphin-emu.org/Thread-animal-crossing-hd-texture-pack-version-23-feb-22nd-2026)
 
 ## Save Data
 
-Save files are stored in `save/` using the standard GCI format, compatible with Dolphin emulator saves. Place a Dolphin GCI export in the save directory to import an existing save.
+Save files are stored in `saves/` using the standard GCI format, compatible with Dolphin emulator saves. 
 
-## Credits
+Each slot saves to a separate folder, so you don't have to worry about save management per
+session. The folder name is the "seed" you see on the title screen, if you need to find a save
+for a specific session.
 
-This project would not be possible without the work of the [ACreTeam](https://github.com/ACreTeam) decompilation team. Their complete C decompilation of Animal Crossing is the foundation this port is built on.
+## Offline mode
+
+Normally, you cannot start a game until you connect to Archipelago. This is required to get
+information from the server for your save file. However, if you are finished with your
+multiworld but still want to play on your old save file, you can do this with "offline mode".
+
+More info to come.
 
 ## AI Notice
 
 Original notice retained from parent of fork (https://github.com/flyngmt/ACGC-PC-Port):
 
 > AI tools such as Claude were used in this project (PC port code only).
-
-## FAQ
-
-See [FAQ](FAQ.md) for more info.
