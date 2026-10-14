@@ -300,10 +300,12 @@ void pc_ap_overlay_draw(struct game_s* game) {
   }
   // Title screen (logo actor alive, from its fade-in on) or the pause menu
   int menu_screen = g_pc_paused || Common_Get(clip.animal_logo_clip) != NULL;
-  int show_status = menu_screen || g_pc_settings.ap_status_always;
+  // Settings and pause submenus are full pages: no status, seed, version or tracker over them
+  int submenu = pc_settings_menu_active() || pc_pause_menu_submenu_open();
+  int show_status = (menu_screen || g_pc_settings.ap_status_always) && !submenu;
   // Offline has nothing to track
-  int show_tracker = (menu_screen || g_pc_settings.ap_tracker_always) && !pc_settings_menu_active() &&
-                     !pc_pause_menu_submenu_open() && ap_getconnectstate()->state != AP_CSTATE_OFFLINE;
+  int show_tracker = (menu_screen || g_pc_settings.ap_tracker_always) && !submenu &&
+                     ap_getconnectstate()->state != AP_CSTATE_OFFLINE;
   int show_toasts = s_toast_count > 0;
   if(!menu_screen && !show_status && !show_tracker && !show_toasts) {
     return;
@@ -316,7 +318,7 @@ void pc_ap_overlay_draw(struct game_s* game) {
       pc_ap_draw_seed(game, status_y);
     }
   }
-  if(menu_screen) {
+  if(menu_screen && !submenu) {
     pc_ap_draw_version(game);
   }
   if(show_tracker) {
