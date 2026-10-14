@@ -194,6 +194,8 @@ mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island);
 // Player_actor_setup_main_Pickup: nonzero for a Shellsanity beach item, which never goes into the
 // pockets (the caller clears its tile); sends the next unsent check of its month, if any.
 int pc_ap_beach_pickup(mActor_name_t item);
+// mIN_copy_name_str: name of a Shellsanity beach item in the game charset (mIN_ITEM_NAME_LEN chars)
+void pc_ap_beach_item_name(mActor_name_t item, u8* dst);
 
 // Time hooks (on top of pc_ap_timesanity.h): frozen clock, date changes,
 // normalized time travel.

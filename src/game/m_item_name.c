@@ -5,6 +5,10 @@
 #include "m_room_type.h"
 #include "m_actor_type.h"
 #include "m_font.h"
+#ifdef TARGET_PC
+#include "pc_ap_shellsanity.h"
+#include "pc_ap_logic.h"
+#endif
 
 static u8 itemArt_Paper[PAPER_NUM] = {
     mIN_ARTICLE_NONE, mIN_ARTICLE_NONE, mIN_ARTICLE_NONE, mIN_ARTICLE_NONE, mIN_ARTICLE_NONE, mIN_ARTICLE_NONE,
@@ -504,6 +508,14 @@ extern void mIN_copy_name_str(u8* dst, mActor_name_t item) {
     u32 itm = item;
     mActor_name_t item_no = mRmTp_FtrItemNo2Item1ItemNo(item, FALSE);
 
+#ifdef TARGET_PC
+    /* AP Shellsanity: beach items sit past the ETC name table */
+    if (pc_ap_shellsanity_is_item(item_no)) {
+        pc_ap_beach_item_name(item_no, dst);
+        return;
+    }
+#endif
+
     if (mNT_check_unknown(item_no) == TRUE) {
         mem_copy(dst, unknown_item_str, mIN_ITEM_NAME_LEN);
     } else {
@@ -572,6 +584,13 @@ extern int mIN_get_item_article(mActor_name_t item) {
     int article = mIN_ARTICLE_NONE;
     mActor_name_t item_no = mRmTp_FtrItemNo2Item1ItemNo(item, FALSE);
     int index = item_no & 0xFF;
+
+#ifdef TARGET_PC
+    /* AP Shellsanity: beach items sit past the ETC article table */
+    if (pc_ap_shellsanity_is_item(item_no)) {
+        return mIN_ARTICLE_AN;
+    }
+#endif
 
     switch (ITEM_NAME_GET_TYPE(item_no)) {
         case NAME_TYPE_ITEM1: {

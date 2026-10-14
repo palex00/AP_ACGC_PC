@@ -44,6 +44,8 @@
 #include "m_room_type.h"
 #include "m_shop.h"
 #include "m_name_table.h"
+#include "m_item_name.h"
+#include "pc_menu_util.h"
 #include "libc64/qrand.h"
 #include "ac_set_manager.h"
 
@@ -507,6 +509,13 @@ int pc_ap_beach_pickup(mActor_name_t item) {
     ap_send_location(id);
   }
   return 1;
+}
+
+void pc_ap_beach_item_name(mActor_name_t item, u8* dst) {
+  char name[mIN_ITEM_NAME_LEN + 1];
+  pc_ap_shellsanity_name(item, name, mIN_ITEM_NAME_LEN);
+  pc_menu_fixtext(name);
+  memcpy(dst, name, mIN_ITEM_NAME_LEN);
 }
 
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,

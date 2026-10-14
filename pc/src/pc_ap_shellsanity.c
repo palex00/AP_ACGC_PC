@@ -1,6 +1,8 @@
 #include "pc_ap_shellsanity.h"
 #include "ap_archipelago.h"
 
+#include <stdio.h>
+
 void pc_ap_shellsanity_init(pc_ap_shellsanity* s, const ap_slotdata* sd) {
   s->per_month = sd->valid ? sd->beach_per_month : 0;
   s->chance = sd->beach_item_chance;
@@ -56,4 +58,20 @@ int64_t pc_ap_shellsanity_pickup(const pc_ap_shellsanity* s, mActor_name_t item)
     }
   }
   return -1;
+}
+
+void pc_ap_shellsanity_name(mActor_name_t item, char* out, int len) {
+  static const char* months[PC_AP_MONTHS] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+  int month = item - PC_AP_BEACH_ITEM_START;
+  int n;
+
+  if (!pc_ap_shellsanity_is_item(item)) {
+    month = 0;
+  }
+  n = snprintf(out, len + 1, "AP Shell %s", months[month]);
+  for (; n < len; n++) {
+    out[n] = ' ';
+  }
+  out[len] = 0;
 }

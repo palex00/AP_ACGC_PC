@@ -54,6 +54,10 @@ mActor_name_t pc_ap_shellsanity_wash_up(const pc_ap_shellsanity* s, mActor_name_
 // Picking up beach item: the location to send (next unsent check of its month), -1 if none left
 int64_t pc_ap_shellsanity_pickup(const pc_ap_shellsanity* s, mActor_name_t item);
 
+// Item name of beach item in ASCII ("AP Shell Jan"), padded with spaces to len chars;
+// out holds len + 1 (NUL-terminated)
+void pc_ap_shellsanity_name(mActor_name_t item, char* out, int len);
+
 #ifdef __cplusplus
 }
 #endif
