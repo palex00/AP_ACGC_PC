@@ -13,6 +13,7 @@
 
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
+#include "pc_ap_shellsanity.h"
 #endif
 
 /**
@@ -78,6 +79,12 @@ extern int mPB_get_keep_item_sum() {
  * @param item_no The item to add
  **/
 extern void mPB_keep_item(mActor_name_t item_no) {
+#ifdef TARGET_PC
+    /* AP Shellsanity: beach items are never kept (another one washes up later) */
+    if (pc_ap_shellsanity_is_item(item_no)) {
+        return;
+    }
+#endif
     if (ITEM_IS_ITEM1(item_no) || ITEM_IS_FTR(item_no)) {
         int keep_item_sum = mPB_get_keep_item_sum();
         if (keep_item_sum >= mPB_POLICE_BOX_ITEM_STORAGE_COUNT) {
@@ -130,6 +137,13 @@ extern void mPB_keep_all_item_in_block(int blk_x, int blk_z) {
 
         /* only accept items in the 0x1XXX, 2XXX, and 3XXX range */
         item_type = ITEM_NAME_GET_TYPE(item);
+#ifdef TARGET_PC
+        /* AP Shellsanity: a beach item is removed, never kept (another one washes up later) */
+        if (pc_ap_shellsanity_is_item(item)) {
+            *block_items = EMPTY_NO;
+            item_type = -1;
+        }
+#endif
         if (item_type == NAME_TYPE_FTR0 || item_type == NAME_TYPE_ITEM1 || item_type == NAME_TYPE_FTR1) {
             if (count < mPB_POLICE_BOX_ITEM_STORAGE_COUNT) {
                 /* space is still available, so directly add it */

@@ -1,0 +1,24 @@
+// AP Shellsanity: draw part of the beach item, included by each bg_item variant's data table
+// (bg_item, cherry, winter, xmas) after its shell parts. The shell A quad with the AP logo
+// material (pc_ap_beach_logo.c); flags 2 = the shells' random position offset.
+#include "pc_ap_shellsanity.h"
+
+_Static_assert(bIT_DRAW_TYPE_AP_BEACH == bIT_TYPE_BASE + PC_AP_ITEM_TYPE_BEACH,
+               "PC_AP_ITEM_TYPE_BEACH must map to bIT_DRAW_TYPE_AP_BEACH");
+
+extern Gfx pc_ap_beach_mat_model[];
+
+static Gfx* ap_beach_DL_table[] = {
+    pc_ap_beach_mat_model,
+    obj_item_shellAT_gfx_model,
+};
+
+static bg_item_draw_list_c ap_beach_list = { &bg_item_common_draw_loop_type1, 0, 1 };
+
+static bg_item_draw_list_c* ap_beach_list_table[] = {
+    &ap_beach_list,
+};
+
+static bg_item_draw_part_c ap_beach_part = {
+    ap_beach_DL_table, 1, ap_beach_list_table, 0, NULL, 0.0f, NULL, NULL,
+};

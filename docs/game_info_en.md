@@ -26,6 +26,8 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   Progressive Catalog Pool unlocks the next. Nook's shop stocks items you still need, and Catalog
   Sources picks what else can give them (favors, trades, presents, the dump...). Passwords don't work.
 - **Favors (Favorsanity):** a number of villager favors (errands and contests) send checks.
+- **Beach (Shellsanity, off by default):** Archipelago items sometimes wash up on the town beach in place
+  of shells. Picking one up sends a check for the month it washed up in (Beach Items per Month each).
 - **Nook's store:** by default each upgrade (Nook 'n' Go, Nookway, Nookington's) is a Progressive Nook
   Store item. It can also go by Bells spent or catalog size instead. Nookington's never needs a visitor.
 

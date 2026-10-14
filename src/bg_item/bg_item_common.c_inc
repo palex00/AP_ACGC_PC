@@ -1,6 +1,11 @@
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
 #include "pc_ap_catalogsanity.h"
+#include "pc_ap_shellsanity.h"
+/* AP Shellsanity: beach items get the shells' random position offset */
+#define bIT_IS_SHELL(item) (((item) >= ITM_SHELL0 && (item) <= ITM_SHELL7) || pc_ap_shellsanity_is_item(item))
+#else
+#define bIT_IS_SHELL(item) ((item) >= ITM_SHELL0 && (item) <= ITM_SHELL7)
 #endif
 
 static void bit_cmn_single_drawS(GAME* game, bg_item_common_info_c* common_info, mActor_name_t fg_item, xyz_t* pos,
@@ -426,7 +431,7 @@ static void bIT_actor_rand_pos_get_plus(mActor_name_t fg_item, xyz_t* pos, const
     xyz_t_move(&tpos, check_pos);
 
     /* If the item is a weed or a shell then slightly offset their position */
-    if (valid && (IS_ITEM_GRASS(fg_item) || (fg_item >= ITM_SHELL_START && fg_item <= ITM_SHELL7))) {
+    if (valid && (IS_ITEM_GRASS(fg_item) || bIT_IS_SHELL(fg_item))) {
         bIT_actor_rand_pos_get_blk_correct(&x, &z, ut_x, ut_z);
         tpos.x += x;
         tpos.z += z;
@@ -933,7 +938,7 @@ static int fruit_set(mActor_name_t fg_item, int ut_x, int ut_z, s16 num, int dro
             drop.wait_counter = 0;
 
             /* If the item is something that has offset positions, apply that */
-            if (IS_ITEM_GRASS(drop.fg_item) || (drop.fg_item >= ITM_SHELL0 && drop.fg_item <= ITM_SHELL7)) {
+            if (IS_ITEM_GRASS(drop.fg_item) || bIT_IS_SHELL(drop.fg_item)) {
                 xyz_t temp_pos;
 
                 bIT_actor_rand_pos_get_plus(drop.fg_item, &temp_pos, &drop.target_position);
@@ -985,7 +990,7 @@ static int fruit_set(mActor_name_t fg_item, int ut_x, int ut_z, s16 num, int dro
             drop._6E = 0;
             drop.wait_counter = 0;
 
-            if (IS_ITEM_GRASS(drop.fg_item) || (drop.fg_item >= ITM_SHELL0 && drop.fg_item <= ITM_SHELL7)) {
+            if (IS_ITEM_GRASS(drop.fg_item) || bIT_IS_SHELL(drop.fg_item)) {
                 xyz_t temp_pos;
 
                 bIT_actor_rand_pos_get_plus(drop.fg_item, &temp_pos, &drop.target_position);
@@ -1423,7 +1428,7 @@ static void bIT_actor_fly_entry(mActor_name_t fg_item, xyz_t* pos, s16 angle_y) 
     drop.actorx_p = NULL;
     drop.wait_counter = 0;
 
-    if (IS_ITEM_GRASS(drop.fg_item) || (drop.fg_item >= ITM_SHELL0 && drop.fg_item <= ITM_SHELL7)) {
+    if (IS_ITEM_GRASS(drop.fg_item) || bIT_IS_SHELL(drop.fg_item)) {
         xyz_t tpos;
 
         bIT_actor_rand_pos_get_plus(drop.fg_item, &tpos, &drop.target_position);
@@ -1468,7 +1473,7 @@ static int bIT_actor_drop_entry(bg_item_drop_table_c* drop_info, mActor_name_t f
     drop.actorx_p = NULL;
     drop._8A = 0.0f;
 
-    if (IS_ITEM_GRASS(drop.fg_item) || (drop.fg_item >= ITM_SHELL0 && drop.fg_item <= ITM_SHELL7)) {
+    if (IS_ITEM_GRASS(drop.fg_item) || bIT_IS_SHELL(drop.fg_item)) {
         xyz_t tpos;
 
         bIT_actor_rand_pos_get_plus(drop.fg_item, &tpos, &drop.target_position);

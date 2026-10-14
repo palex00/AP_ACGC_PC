@@ -56,6 +56,16 @@ static void Player_actor_setup_main_Pickup(ACTOR* actorx, GAME* game) {
     /* bells go straight to wallet when the whole amount fits; otherwise the bag is picked up normally */
     {
         u32 bell_amount = mPr_GetAmountForMoneyItem(item);
+#ifdef TARGET_PC
+        /* AP Shellsanity: a beach item sends its check and never goes into the pockets
+           (putaway_money then just means "nothing entered a pocket") */
+        if (pc_ap_beach_pickup(item)) {
+            if (target_pos_p != NULL) {
+                mFI_SetFG_common(EMPTY_NO, *target_pos_p, TRUE);
+            }
+            putaway_money = TRUE;
+        } else
+#endif
         if (bell_amount > 0 && mPr_GivePossessionBells(bell_amount)) {
             sAdo_SysTrgStart(SE_REGISTER);
             if (target_pos_p != NULL) {

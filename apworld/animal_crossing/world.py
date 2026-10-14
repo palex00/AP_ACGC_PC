@@ -12,7 +12,8 @@ from worlds.generic.Rules import add_rule, set_rule
 from .catalog import CATALOG_ELIGIBLE, catalog_location_name, make_pools
 from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOOK_STORE_UPGRADES,
                     PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_HOUSE, PROGRESSIVE_NOOK_STORE, SHOVEL, TIME_SLOTS, TOOLS)
-from .locations import LOANS, LOCATION_NAME_TO_ID, favor_location_name, loan_location_name, split_loan_checks
+from .locations import (LOANS, LOCATION_NAME_TO_ID, beach_location_name, favor_location_name, loan_location_name,
+                        split_loan_checks)
 from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
                      MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS,
                      museum_donate_name, museum_find_name, museum_item_name)
@@ -120,6 +121,11 @@ class AnimalCrossingWeb(WebWorld):
             options.CritterSpawns,
             options.FossilSpawns,
             options.MuseumGoalPercent,
+        ]),
+        OptionGroup("Shellsanity", [
+            options.Shellsanity,
+            options.BeachItemsPerMonth,
+            options.BeachItemChance,
         ]),
         OptionGroup("Nook's Cranny", [
             options.NookStoreUpgrades,
@@ -312,6 +318,7 @@ class AnimalCrossingWorld(World):
 
         locations = sum(self.loan_checks) + self.options.favorsanity.value + len(self.museum_locations)
         locations += sum(len(pool) for pool in self.catalog_pools)
+        locations += len(self.beach_locations())
         if locations == 0:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favorsanity must be "
                               f"at least 1.")
@@ -330,6 +337,7 @@ class AnimalCrossingWorld(World):
         names += [favor_location_name(n) for n in range(1, self.options.favorsanity.value + 1)]
         names += self.museum_locations
         names += [catalog_location_name(item_id) for pool in self.catalog_pools for item_id in pool]
+        names += self.beach_locations()
         menu.add_locations({name: LOCATION_NAME_TO_ID[name] for name in names}, AnimalCrossingLocation)
         self.multiworld.regions.append(menu)
 
@@ -405,6 +413,13 @@ class AnimalCrossingWorld(World):
                     add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
                                                                    self.player))
 
+        # Shellsanity: an item washes up for the current month only
+        if self.options.timesanity:
+            for m in range(len(MONTHS)):
+                for k in range(1, self.beach_per_month() + 1):
+                    location = self.multiworld.get_location(beach_location_name(m, k), self.player)
+                    set_rule(location, lambda state, month=MONTHS[m]: state.has(month, self.player))
+
         # Bugs and fish (catch and donate): a month and a time slot it spawns in
         if self.options.timesanity:
             for c, critters in ((MUSEUM_BUG, BUGS), (MUSEUM_FISH, FISH)):
@@ -455,6 +470,13 @@ class AnimalCrossingWorld(World):
         if self.options.timesanity:
             chosen.append(lambda state: state.has_any(("Evening Hours", "Night Hours"), self.player))
         self.multiworld.completion_condition[self.player] = lambda state: all(goal(state) for goal in chosen)
+
+    def beach_per_month(self) -> int:
+        # Shellsanity checks per month, 0 when off
+        return self.options.beach_items_per_month.value if self.options.shellsanity else 0
+
+    def beach_locations(self) -> list[str]:
+        return [beach_location_name(m, k) for m in range(len(MONTHS)) for k in range(1, self.beach_per_month() + 1)]
 
     def set_museum_rule(self, category: int, name: str, rule) -> None:
         # Find and donate locations of one museum thing, the ones that exist
@@ -516,6 +538,9 @@ class AnimalCrossingWorld(World):
             "turnips_never_spoil": self.options.turnips_never_spoil.value,
             "no_falling_stalks": self.options.no_falling_stalks.value,
             "coconuts_wash_up": self.options.coconuts_wash_up.value,
+            "shellsanity": self.options.shellsanity.value,
+            "beach_items_per_month": self.options.beach_items_per_month.value,
+            "beach_item_chance": self.options.beach_item_chance.value,
             "normalized_time_travel": self.options.normalized_time_travel.value,
             "goal": sorted(self.options.goal.value),
             "loans": self.loans,

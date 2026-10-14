@@ -312,6 +312,8 @@ set(PC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_newgame.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_qol.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_shells.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_shellsanity.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_beach_logo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_state.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_mail.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_strings.c

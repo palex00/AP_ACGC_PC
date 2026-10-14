@@ -1,5 +1,5 @@
-// Beach shells. Every shell the game washes up (mFI_GetShell, town and island) goes through
-// pc_ap_shell_item, the one place for shell options.
+// Coconuts Wash Up (QoL): some town shells are coconuts. Called from the facade's
+// pc_ap_shell_item (pc_ap_logic.h), where every washed-up shell goes through.
 #ifndef PC_AP_SHELLS_H
 #define PC_AP_SHELLS_H
 
@@ -14,10 +14,8 @@ extern "C" {
 // ~20 shells per full beach walk (research/coconuts.md): about one coconut every two walks.
 #define PC_AP_SHELLS_COCONUT_PERCENT 3
 
-// The item to wash up instead of the game's pick (shell, or a coconut on the island)
-mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island);
-
-// pc_ap_shell_item without slot_data or RNG: roll is 0-99
+// The item to wash up instead of the game's shell: a coconut in town when coconuts is on and
+// the roll (0-99) hits, else shell
 mActor_name_t pc_ap_shells_pick(mActor_name_t shell, int is_island, int coconuts, int roll);
 
 #ifdef __cplusplus

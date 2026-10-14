@@ -140,6 +140,9 @@ enum {
     bIT_DRAW_TYPE_DIARY,
     bIT_DRAW_TYPE_FORK,
     bIT_DRAW_TYPE_FISH2,
+#ifdef TARGET_PC
+    bIT_DRAW_TYPE_AP_BEACH, /* AP Shellsanity (pc_ap_beach_draw.c_inc) */
+#endif
     bIT_DRAW_TYPE_NONE,
 
     bIT_DRAW_TYPE_MAX

@@ -3,6 +3,9 @@
 #include "m_actor.h"
 #include "m_npc_personal_id.h"
 #include "m_common_data.h"
+#ifdef TARGET_PC
+#include "pc_ap_shellsanity.h"
+#endif
 
 s16 move_obj_profile_table[] = {
     mAc_PROFILE_AIRPLANE,        mAc_PROFILE_BALL,         mAc_PROFILE_MY_ROOM,      mAc_PROFILE_MBG,
@@ -173,6 +176,13 @@ extern int mNT_get_itemTableNo(mActor_name_t item) {
                                                 item1_4_tableNo, item1_5_tableNo, item1_6_tableNo, item1_7_tableNo,
                                                 item1_8_tableNo, item1_9_tableNo, item1_A_tableNo, item1_B_tableNo,
                                                 item1_C_tableNo, item1_D_tableNo, item1_E_tableNo, item1_F_tableNo };
+
+#ifdef TARGET_PC
+    /* AP Shellsanity: beach items have their own draw type (past the ETC table's end) */
+    if (pc_ap_shellsanity_is_item(item)) {
+        return PC_AP_ITEM_TYPE_BEACH;
+    }
+#endif
 
     switch (ITEM_NAME_GET_TYPE(item)) {
         case NAME_TYPE_FTR0:

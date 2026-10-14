@@ -188,6 +188,13 @@ mActor_name_t pc_ap_catalog_safe_item(mActor_name_t item, int source);
 // table) by Catalog Sources; EMPTY_NO if they're empty. 0 = vanilla (Catalogsanity off).
 int pc_ap_wisp_item(mActor_name_t* const* lists, int list_count, mActor_name_t* item);
 
+// mFI_GetShell: what washes up instead of the game's shell (town and island). Shellsanity
+// beach item of the current month first, then Coconuts Wash Up, else shell.
+mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island);
+// Player_actor_setup_main_Pickup: nonzero for a Shellsanity beach item, which never goes into the
+// pockets (the caller clears its tile); sends the next unsent check of its month, if any.
+int pc_ap_beach_pickup(mActor_name_t item);
+
 // Time hooks (on top of pc_ap_timesanity.h): frozen clock, date changes,
 // normalized time travel.
 

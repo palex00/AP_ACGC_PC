@@ -550,6 +550,37 @@ class NoFallingStalks(Toggle):
     display_name = "No Falling Stalks"
 
 
+class Shellsanity(Toggle):
+    """
+    Archipelago items sometimes wash up on the town beach in place of a shell.
+    Picking one up sends a check for the month it washed up in (see Beach Items
+    per Month). They stay on the beach until picked up, like shells.
+    """
+    display_name = "Shellsanity"
+
+
+class BeachItemsPerMonth(Range):
+    """
+    Shellsanity checks per month (12 months: 3 makes 36 checks). No more of a
+    month's items lie on the beach than it has checks left.
+    """
+    display_name = "Beach Items per Month"
+    range_start = 1
+    range_end = 20
+    default = 3
+
+
+class BeachItemChance(Range):
+    """
+    Chance (percent) that a shell washing up is an Archipelago item instead,
+    while the current month has checks left. A full beach walk is about 20 shells.
+    """
+    display_name = "Beach Item Chance"
+    range_start = 1
+    range_end = 100
+    default = 8
+
+
 class CoconutsWashUp(DefaultOnToggle):
     """
     Coconuts sometimes wash up on the town beach in place of a shell (about one
@@ -876,4 +907,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     turnips_never_spoil: TurnipsNeverSpoil
     no_falling_stalks: NoFallingStalks
     coconuts_wash_up: CoconutsWashUp
+    shellsanity: Shellsanity
+    beach_items_per_month: BeachItemsPerMonth
+    beach_item_chance: BeachItemChance
     normalized_time_travel: NormalizedTimeTravel

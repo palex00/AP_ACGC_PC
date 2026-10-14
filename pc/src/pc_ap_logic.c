@@ -9,6 +9,8 @@
 #include "pc_ap_tools.h"
 #include "pc_ap_store.h"
 #include "pc_ap_catalogsanity.h"
+#include "pc_ap_shellsanity.h"
+#include "pc_ap_shells.h"
 #include "pc_ap_overlay.h"
 #include "pc_ap_strings.h"
 #include "pc_ap_weather.h"
@@ -96,6 +98,7 @@ typedef struct {
   pc_ap_tools tools;
   pc_ap_store store;
   pc_ap_catalogsanity catalog;
+  pc_ap_shellsanity shells;
   int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
   int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
   pc_ap_reload reload;
@@ -116,6 +119,7 @@ void pc_ap_init(void) {
   pc_ap_tools_init(&g_ap.tools, sd);
   pc_ap_store_init(&g_ap.store, sd);
   pc_ap_catalogsanity_init(&g_ap.catalog, sd);
+  pc_ap_shellsanity_init(&g_ap.shells, sd);
   // Cleared here as when they were timesanity fields
   memset(&g_ap.reload, 0, sizeof(g_ap.reload));
   g_ap.time_change_allowed = 0;
@@ -459,6 +463,50 @@ int pc_ap_catalog_first_unfinished_pool(void) {
 
 void pc_ap_catalog_source(int source) {
   g_ap.catalog_source = source;
+}
+
+// Town beach acres (mFI_GetShell's l_sandy_beach_bx/bz without the island ones)
+#define PC_AP_BEACH_BX_FIRST 1
+#define PC_AP_BEACH_BX_LAST  5
+#define PC_AP_BEACH_BZ       6
+
+// How many of item lie on the town beach
+static int pc_ap_beach_count(mActor_name_t item) {
+  int count = 0;
+  for(int bx = PC_AP_BEACH_BX_FIRST; bx <= PC_AP_BEACH_BX_LAST; bx++) {
+    mActor_name_t* fg = mFI_BkNumtoUtFGTop(bx, PC_AP_BEACH_BZ);
+    if(fg == NULL) {
+      continue;
+    }
+    for(int ut = 0; ut < UT_TOTAL_NUM; ut++) {
+      count += fg[ut] == item;
+    }
+  }
+  return count;
+}
+
+mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island) {
+  ap_slotdata* sd = ap_getslotdata();
+  if(!is_island && g_ap.shells.per_month > 0 && pc_ap_accepting()) {
+    int month = Common_Get(time.rtc_time.month) - 1;
+    int on_beach = pc_ap_beach_count(PC_AP_BEACH_ITEM_START + month);
+    mActor_name_t item = pc_ap_shellsanity_wash_up(&g_ap.shells, shell, month, on_beach, RANDOM(100));
+    if(item != shell) {
+      return item;
+    }
+  }
+  return pc_ap_shells_pick(shell, is_island, sd->valid && sd->coconuts_wash_up, RANDOM(100));
+}
+
+int pc_ap_beach_pickup(mActor_name_t item) {
+  if(!pc_ap_shellsanity_is_item(item)) {
+    return 0;
+  }
+  int64_t id = pc_ap_shellsanity_pickup(&g_ap.shells, item);
+  if(id >= 0 && pc_ap_accepting()) {
+    ap_send_location(id);
+  }
+  return 1;
 }
 
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,

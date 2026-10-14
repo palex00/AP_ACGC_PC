@@ -1,5 +1,6 @@
 # Location names and ids. The table is static (ids never depend on options); each seed uses a subset.
 from .catalog import CATALOG_LOCATION_NAME_TO_ID
+from .items import MONTHS
 from .museum import MUSEUM_LOCATION_NAME_TO_ID
 
 # Loans in the order they happen (house upgrades go Medium -> Basement -> Large -> Upper).
@@ -7,10 +8,12 @@ LOANS = ["Starting", "Medium", "Basement", "Large", "Upper"]
 LOAN_CHECKS_MIN = 1    # every loan sends at least one check
 LOAN_CHECKS_MAX = 196  # total_loan_checks max (200) minus the other four loans' minimum
 FAVORS_MAX = 100       # favorsanity max
+BEACH_PER_MONTH_MAX = 20  # beach_items_per_month max
 
 LOAN_BASE_ID = 0x10000  # loan k, check j (1-based): LOAN_BASE_ID + k * 0x1000 + j
 FAVOR_BASE_ID = 0x20000  # favor n (1-based): FAVOR_BASE_ID + n
 # Museum locations: 0x30000+, see museum.py. Catalog locations: 0x40000+, see catalog.py
+BEACH_BASE_ID = 0x50000  # Shellsanity month m (0-11), check k (1-based): BEACH_BASE_ID + m * 0x100 + k
 
 
 def loan_location_name(loan: int, check: int) -> str:
@@ -21,12 +24,19 @@ def favor_location_name(favor: int) -> str:
     return f"Favor {favor}"
 
 
+def beach_location_name(month: int, check: int) -> str:
+    return f"Beach: {MONTHS[month]} {check}"
+
+
 LOCATION_NAME_TO_ID = {}
 for _k in range(len(LOANS)):
     for _j in range(1, LOAN_CHECKS_MAX + 1):
         LOCATION_NAME_TO_ID[loan_location_name(_k, _j)] = LOAN_BASE_ID + _k * 0x1000 + _j
 for _n in range(1, FAVORS_MAX + 1):
     LOCATION_NAME_TO_ID[favor_location_name(_n)] = FAVOR_BASE_ID + _n
+for _m in range(len(MONTHS)):
+    for _k in range(1, BEACH_PER_MONTH_MAX + 1):
+        LOCATION_NAME_TO_ID[beach_location_name(_m, _k)] = BEACH_BASE_ID + _m * 0x100 + _k
 LOCATION_NAME_TO_ID.update(MUSEUM_LOCATION_NAME_TO_ID)
 LOCATION_NAME_TO_ID.update(CATALOG_LOCATION_NAME_TO_ID)
 

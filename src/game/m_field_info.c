@@ -10,7 +10,8 @@
 #include "m_bg_type.h"
 #include "m_fg_type.h"
 #ifdef TARGET_PC
-#include "pc_ap_shells.h"
+#include "pc_ap_logic.h"
+#include "pc_ap_shellsanity.h"
 #endif
 
 static mCoBG_Collision_u l_edge_ut = { { 0, 31, 31, 31, 31, 31, mCoBG_ATTRIBUTE_GRASS0 } };
@@ -3015,7 +3016,12 @@ static int mFI_GetCanSetShellNum(u8* shell_num, int bx, int bz) {
             for (ut_x = 0; ut_x < UT_X_NUM; ut_x++) {
                 if (*fg_p == EMPTY_NO && mCoBG_CheckWaveAttr(col_p->data.unit_attribute) == TRUE) {
                     valid_ut_num++;
-                } else if (((*fg_p >= ITM_SHELL0 && *fg_p <= ITM_SHELL7) || *fg_p == ITM_FOOD_COCONUT) &&
+                } else if (((*fg_p >= ITM_SHELL0 && *fg_p <= ITM_SHELL7) || *fg_p == ITM_FOOD_COCONUT
+#ifdef TARGET_PC
+                            /* AP Shellsanity: beach items count as shells */
+                            || pc_ap_shellsanity_is_item(*fg_p)
+#endif
+                                ) &&
                            mFI_GetBlockDeposit(deposit_p, ut_x, ut_z) == FALSE) {
                     shell_num[0]++;
                 }
