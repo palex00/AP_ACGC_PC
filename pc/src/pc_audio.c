@@ -106,6 +106,14 @@ void AIInit(u8* stack) {
     want.callback = pc_audio_callback;
 
     audio_device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    if (audio_device == 0) {
+        // No usable output device: the ring would never drain and the game would stall
+        // on a black screen. SDL's dummy driver drains it in real time (silent).
+        printf("[AUDIO] Failed to open: %s; using silent dummy audio\n", SDL_GetError());
+        if (SDL_AudioInit("dummy") == 0) {
+            audio_device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+        }
+    }
     if (audio_device != 0) {
         printf("[AUDIO] Opened: freq=%d fmt=0x%04X ch=%d samples=%d (requested: freq=%d)\n",
                have.freq, have.format, have.channels, have.samples, want.freq);
