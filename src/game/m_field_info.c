@@ -9,6 +9,9 @@
 #include "m_player_lib.h"
 #include "m_bg_type.h"
 #include "m_fg_type.h"
+#ifdef TARGET_PC
+#include "pc_ap_shells.h"
+#endif
 
 static mCoBG_Collision_u l_edge_ut = { { 0, 31, 31, 31, 31, 31, mCoBG_ATTRIBUTE_GRASS0 } };
 
@@ -3191,7 +3194,11 @@ static mActor_name_t mFI_GetShell(int is_island) {
 
     /* Return a random shell from the selected table */
     index = (int)RANDOM_F(shell_max[table]);
+#ifdef TARGET_PC
+    return pc_ap_shell_item(shell_table[table][index], is_island);
+#else
     return shell_table[table][index];
+#endif
 }
 
 static void mFI_SetShellBlock(mActor_name_t* fg_p, mCoBG_Collision_u* col_p, int shell_num, u8* can_set_ut_num,

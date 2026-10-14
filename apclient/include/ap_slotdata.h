@@ -77,6 +77,7 @@ typedef struct {
   int villagers_never_sleep;  // asleep in the schedule = awake at home
   int turnips_never_spoil;
   int no_falling_stalks;      // stalk market never rolls the falling pattern
+  int coconuts_wash_up;       // town shells are sometimes coconuts
   int normalized_time_travel; // date changes count as one day passing
   // Goal / checks
   int goal;                          // AP_GOAL_* bits; all set goals are required

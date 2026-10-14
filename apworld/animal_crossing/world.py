@@ -139,6 +139,7 @@ class AnimalCrossingWeb(WebWorld):
             options.VillagersNeverSleep,
             options.TurnipsNeverSpoil,
             options.NoFallingStalks,
+            options.CoconutsWashUp,
             options.NormalizedTimeTravel,
         ]),
     ]
@@ -514,6 +515,7 @@ class AnimalCrossingWorld(World):
             "villagers_never_sleep": self.options.villagers_never_sleep.value,
             "turnips_never_spoil": self.options.turnips_never_spoil.value,
             "no_falling_stalks": self.options.no_falling_stalks.value,
+            "coconuts_wash_up": self.options.coconuts_wash_up.value,
             "normalized_time_travel": self.options.normalized_time_travel.value,
             "goal": sorted(self.options.goal.value),
             "loans": self.loans,

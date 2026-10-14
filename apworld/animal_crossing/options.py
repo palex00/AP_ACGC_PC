@@ -550,6 +550,14 @@ class NoFallingStalks(Toggle):
     display_name = "No Falling Stalks"
 
 
+class CoconutsWashUp(DefaultOnToggle):
+    """
+    Coconuts sometimes wash up on the town beach in place of a shell (about one
+    in every two full beach walks). Plant one on the beach row to grow a palm tree.
+    """
+    display_name = "Coconuts Wash Up"
+
+
 class NormalizedTimeTravel(DefaultOnToggle):
     """
     A new date always counts as one day passing, however far it jumps, forward
@@ -867,4 +875,5 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     villagers_never_sleep: VillagersNeverSleep
     turnips_never_spoil: TurnipsNeverSpoil
     no_falling_stalks: NoFallingStalks
+    coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel
