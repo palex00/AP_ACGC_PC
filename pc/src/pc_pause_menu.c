@@ -44,7 +44,7 @@ typedef enum {
 typedef enum {
     MAIN_RESUME,
     MAIN_TIME,
-    MAIN_QUICKSAVE,
+    MAIN_SAVE,
     MAIN_CATALOG, // Catalogsanity only
     MAIN_BUGS,
     MAIN_FISH,
@@ -73,7 +73,7 @@ static void main_update(void) {
     main_count = 0;
     main_items[main_count++] = MAIN_RESUME;
     main_items[main_count++] = MAIN_TIME;
-    main_items[main_count++] = MAIN_QUICKSAVE;
+    main_items[main_count++] = MAIN_SAVE;
     if (pc_ap_catalog_pools_total() > 0) {
         main_items[main_count++] = MAIN_CATALOG;
     }
@@ -91,7 +91,7 @@ static const char* main_label(MainItem item) {
     switch (item) {
         case MAIN_RESUME:   return "Resume";
         case MAIN_TIME:     return "Date & Time";
-        case MAIN_QUICKSAVE: return "Quicksave";
+        case MAIN_SAVE:     return "Save";
         case MAIN_CATALOG:  return "Catalog";
         case MAIN_BUGS:     return "Bugs";
         case MAIN_FISH:     return "Fish";
@@ -104,7 +104,7 @@ static const char* main_label(MainItem item) {
 
 // Greyed out where it can't open
 static int main_disabled(MainItem item) {
-    if (item == MAIN_TIME || item == MAIN_QUICKSAVE) return !pc_ap_time_change_allowed_now();
+    if (item == MAIN_TIME || item == MAIN_SAVE) return !pc_ap_time_change_allowed_now();
     if (item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS) return !pc_ap_accepting();
     return 0;
 }
@@ -140,12 +140,12 @@ static void main_activate(void) {
                 pc_ap_overlay_toast("Date & Time: only outdoors in your own town");
             }
             break;
-        case MAIN_QUICKSAVE: /* same gate as Date & Time; saves on the next play frame */
+        case MAIN_SAVE: /* same gate as Date & Time; the reload starts on the next play frame */
             if (pc_ap_time_change_allowed_now()) {
-                pc_ap_quicksave_request();
+                pc_ap_save_request();
                 pc_pause_menu_toggle();
             } else {
-                pc_ap_overlay_toast("Quicksave: only outdoors in your own town");
+                pc_ap_overlay_toast("Save: only outdoors in your own town");
             }
             break;
         case MAIN_CATALOG: /* needs a loaded save (the catalog is the player's) */

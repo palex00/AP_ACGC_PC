@@ -220,10 +220,10 @@ int pc_ap_time_change_allowed(struct game_play_s* play);
 // The gate on the last play frame, for the pause menu (which runs between frames); 0 during a reload
 int pc_ap_time_change_allowed_now(void);
 
-// Quicksave (pause menu): a save & continue (mCD_SaveHome_bg mode 1, no reload) on the next play
-// frame if the Date & Time gate still passes, then a toast. Mode 0 would eat Wisp items, reset the
-// money rock and disarm Resetti; Actor_info_save_actor would stop actors saving (research/midplay_save.md).
-void pc_ap_quicksave_request(void);
+// Save (pause menu): on the next play frame, if the Date & Time gate still passes, the Date & Time
+// reload without the date change (save and quit, load again), then a toast. Saving inside the live
+// scene breaks the town: structures are dummy tiles until the scene ends (research/midplay_save.md).
+void pc_ap_save_request(void);
 
 // Date & Time change request (item 3). The pause menu only requests; pc_ap_tick applies it on
 // the next play frame. A newer request replaces an unapplied one. If the gate fails then, the

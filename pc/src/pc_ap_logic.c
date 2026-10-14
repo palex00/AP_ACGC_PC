@@ -82,11 +82,21 @@ enum {
   PC_AP_RELOAD_LEAVING,       // started, screen covered until player select is left
 };
 
-// Date & Time reload in progress (not saved). pc_ap_time_tick starts it, the
-// pc_ap_time_reload_* hooks step it.
+// Date & Time / Save reload in progress (not saved). pc_ap_request_tick
+// starts it (pc_ap_reload_start), the pc_ap_time_reload_* hooks step it.
+// Pause menu request (Date & Time or Save), applied on the next play frame by pc_ap_request_tick.
+// A newer request replaces an unapplied one.
+typedef struct {
+  int pending;
+  int save_only;     // Save: reload without a date change
+  lbRTC_time_c date; // Date & Time: the wanted date and hour
+} pc_ap_request;
+
 typedef struct {
   int step;          // PC_AP_RELOAD_*
   lbRTC_time_c date; // new date, set right before the save
+  int keep_date;     // Save: no date change, toast the result at the end
+  int saved;         // the save worked (for that toast)
   int player;        // player_no to start again
 } pc_ap_reload;
 
@@ -105,7 +115,7 @@ typedef struct {
   int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
   pc_ap_reload reload;
   int time_change_allowed; // Date & Time gate on the last play frame (pause menu reads it)
-  int save_requested;      // Quicksave from the pause menu, done on the next play frame
+  pc_ap_request request;
   int initialized;    // module config set from slot_data
 } pc_ap;
 
@@ -126,7 +136,7 @@ void pc_ap_init(void) {
   // Cleared here as when they were timesanity fields
   memset(&g_ap.reload, 0, sizeof(g_ap.reload));
   g_ap.time_change_allowed = 0;
-  g_ap.save_requested = 0;
+  memset(&g_ap.request, 0, sizeof(g_ap.request));
   g_ap.goal_letter_sent = 0; // persisted: pc_ap_load sets it
   g_ap.initialized = 1;
 }
@@ -609,7 +619,14 @@ int pc_ap_time_start(lbRTC_time_c* start) {
 }
 
 void pc_ap_time_request(const lbRTC_time_c* time) {
-  pc_ap_timesanity_request(&g_ap.time, time);
+  g_ap.request.pending = 1;
+  g_ap.request.save_only = 0;
+  g_ap.request.date = *time;
+}
+
+void pc_ap_save_request(void) {
+  g_ap.request.pending = 1;
+  g_ap.request.save_only = 1;
 }
 
 void pc_ap_time_set_date(const lbRTC_time_c* time) {
@@ -695,20 +712,40 @@ int pc_ap_time_change_allowed_now(void) {
   return g_ap.time_change_allowed;
 }
 
-// Applies a pending Date & Time request. Runs before pc_ap_tick's gate and re-checks
+// Fade out of the town, then save and load again (pc_ap_time_reload_save). date NULL = keep the date.
+static void pc_ap_reload_start(GAME_PLAY* play, const lbRTC_time_c* date) {
+  g_ap.reload.step = PC_AP_RELOAD_FADE;
+  g_ap.reload.keep_date = date == NULL;
+  if(date != NULL) {
+    g_ap.reload.date = *date;
+  }
+  g_ap.reload.player = Common_Get(player_no);
+  // The save villager's quit (aNRST_think_title): fade to black, then the trademark scene
+  play->fb_wipe_type = WIPE_TYPE_FADE_BLACK;
+  play->fb_fade_type = FADE_TYPE_OUT_RETURN_TITLE;
+  mPlib_request_main_invade_type1((GAME*)play);
+  Actor_info_save_actor(play);
+}
+
+// Applies a pending Date & Time or Save request. Runs before pc_ap_tick's gate and re-checks
 // it itself (pause runs between frames): if it fails, the request is dropped with a toast.
-static void pc_ap_time_tick(GAME_PLAY* play) {
-  lbRTC_time_c want;
+static void pc_ap_request_tick(GAME_PLAY* play) {
+  lbRTC_time_c want = g_ap.request.date;
   lbRTC_time_c now;
 
-  if(!pc_ap_timesanity_take_request(&g_ap.time, &want)) {
+  if(!g_ap.request.pending) {
     return;
   }
+  g_ap.request.pending = 0;
   if(g_ap.reload.step != PC_AP_RELOAD_NONE) {
     return; // a reload is already running
   }
   if(!pc_ap_time_change_allowed(play)) {
-    pc_ap_overlay_toast("Can't change the date right now");
+    pc_ap_overlay_toast(g_ap.request.save_only ? "Can't save right now" : "Can't change the date right now");
+    return;
+  }
+  if(g_ap.request.save_only) {
+    pc_ap_reload_start(play, NULL);
     return;
   }
   lbRTC_GetTime(&now);
@@ -724,14 +761,7 @@ static void pc_ap_time_tick(GAME_PLAY* play) {
     mBGMFieldNorm_delete_req();
     mBGMFieldNorm_make_req();
   } else {
-    g_ap.reload.step = PC_AP_RELOAD_FADE;
-    g_ap.reload.date = want;
-    g_ap.reload.player = Common_Get(player_no);
-    // The save villager's quit (aNRST_think_title): fade to black, then the trademark scene
-    play->fb_wipe_type = WIPE_TYPE_FADE_BLACK;
-    play->fb_fade_type = FADE_TYPE_OUT_RETURN_TITLE;
-    mPlib_request_main_invade_type1((GAME*)play);
-    Actor_info_save_actor(play);
+    pc_ap_reload_start(play, &want);
   }
 }
 
@@ -740,13 +770,16 @@ void pc_ap_time_reload_save(void) {
     return;
   }
   pc_ap_overlay_screen_cover(1);
-  pc_ap_time_set_date(&g_ap.reload.date);
+  if(!g_ap.reload.keep_date) {
+    pc_ap_time_set_date(&g_ap.reload.date);
+  }
   // Like aNRST_before_save. After set_date: it mails/deletes fish records against the clock.
   Save_Set(cheated_flag, FALSE);
   Save_Set(npc_force_go_home, FALSE);
   mNtc_set_auto_nwrite_data();
   // Mode 0 = the quit save. Synchronous on PC (pc_m_card.c).
-  if(mCD_SaveHome_bg(0, NULL) != mCD_TRANS_ERR_NONE) {
+  g_ap.reload.saved = mCD_SaveHome_bg(0, NULL) == mCD_TRANS_ERR_NONE;
+  if(!g_ap.reload.saved) {
     OSReport("[AP] Date & Time reload: save failed, loading the last save\n");
   }
   g_ap.reload.step = PC_AP_RELOAD_TITLE;
@@ -814,33 +847,15 @@ static void pc_ap_time_reload_update(void) {
   if(g_ap.reload.step == PC_AP_RELOAD_LEAVING && Save_Get(scene_no) != SCENE_PLAYERSELECT_2) {
     g_ap.reload.step = PC_AP_RELOAD_NONE;
     pc_ap_overlay_screen_cover(0);
-  }
-}
-
-void pc_ap_quicksave_request(void) {
-  g_ap.save_requested = 1;
-}
-
-static void pc_ap_quicksave_tick(GAME_PLAY* play) {
-  if(!g_ap.save_requested) {
-    return;
-  }
-  g_ap.save_requested = 0;
-  if(g_ap.reload.step != PC_AP_RELOAD_NONE || !pc_ap_time_change_allowed(play)) {
-    pc_ap_overlay_toast("Can't save right now");
-    return;
-  }
-  if(mCD_SaveHome_bg(1, NULL) == mCD_TRANS_ERR_NONE) {
-    pc_ap_overlay_toast("Game saved");
-  } else {
-    pc_ap_overlay_toast("Save failed");
+    if(g_ap.reload.keep_date) {
+      pc_ap_overlay_toast(g_ap.reload.saved ? "Game saved" : "Save failed");
+    }
   }
 }
 
 void pc_ap_tick(GAME_PLAY* play) {
   pc_crash_note_frame(play);
-  pc_ap_time_tick(play); // before the gate: a blocked request is dropped with a toast
-  pc_ap_quicksave_tick(play);
+  pc_ap_request_tick(play); // before the gate: a blocked request is dropped with a toast
   // Not while paused (Game_play_move returns first), so the pause menu sees the last frame's
   g_ap.time_change_allowed = g_ap.reload.step == PC_AP_RELOAD_NONE && pc_ap_time_change_allowed(play);
   if(!pc_ap_in_game(play)) {

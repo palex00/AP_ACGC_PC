@@ -68,20 +68,6 @@ int pc_ap_timesanity_owned_slots(const pc_ap_timesanity* t) {
   return slots;
 }
 
-void pc_ap_timesanity_request(pc_ap_timesanity* t, const lbRTC_time_c* time) {
-  t->request = *time;
-  t->request_pending = 1;
-}
-
-int pc_ap_timesanity_take_request(pc_ap_timesanity* t, lbRTC_time_c* time) {
-  if(!t->request_pending) {
-    return 0;
-  }
-  *time = t->request;
-  t->request_pending = 0;
-  return 1;
-}
-
 void pc_ap_timesanity_day_before(lbRTC_time_c* out, const lbRTC_time_c* date) {
   *out = *date;
   out->hour = 0;

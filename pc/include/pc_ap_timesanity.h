@@ -36,8 +36,6 @@ typedef struct {
   int start_slot;
   int normalized;   // normalized_time_travel: a date change counts as one day passing
   // Transient (not saved)
-  int request_pending;
-  lbRTC_time_c request; // Date & Time change waiting for the next play frame
   int spoil_pending;
   int spoil;            // turnip decision from the last normalize, for the next grow tick
 } pc_ap_timesanity;
@@ -58,11 +56,6 @@ int pc_ap_timesanity_start(const pc_ap_timesanity* t, lbRTC_time_c* start);
 int pc_ap_timesanity_owned_months(const pc_ap_timesanity* t);
 // Received time slots, bit s = slot s (0 = Morning)
 int pc_ap_timesanity_owned_slots(const pc_ap_timesanity* t);
-
-// Date & Time change request. A newer request replaces an unapplied one.
-void pc_ap_timesanity_request(pc_ap_timesanity* t, const lbRTC_time_c* time);
-// Takes the pending request into time and clears it. Returns 0 when there is none.
-int pc_ap_timesanity_take_request(pc_ap_timesanity* t, lbRTC_time_c* time);
 
 // date's day before, 00:00:00, weekday recomputed (lbRTC_Sub_DD leaves it stale).
 void pc_ap_timesanity_day_before(lbRTC_time_c* out, const lbRTC_time_c* date);
