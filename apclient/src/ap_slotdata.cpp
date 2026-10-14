@@ -99,7 +99,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
       slot_data.value("town_name", "pelago").c_str());
   snprintf(sd->player_name, sizeof(sd->player_name), "%s",
       slot_data.value("player_name", "archi").c_str());
-  sd->skip_intro = slot_data.value("skip_intro", 0) % 3;
+  sd->skip_intro = slot_data.value("skip_intro", 2) % 3;
   sd->gender = slot_data.value("gender", 0) % 2;
   sd->face = slot_data.value("face", 0) % 8;
   sd->starting_shirt = slot_data.value("starting_shirt", 16);
@@ -115,10 +115,10 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
       slot_data.value("loan_letter_text", "Your loan is ready for\npayoff at the post office!").c_str());
   read_npc_list(slot_data, "villager_blacklist", sd->villager_blacklist);
   read_npc_list(slot_data, "starting_villagers", sd->starting_villagers);
-  sd->no_cockroaches = slot_data.value("no_cockroaches", 0) % 2;
-  sd->shops_always_open = slot_data.value("shops_always_open", 0) % 2;
+  sd->no_cockroaches = slot_data.value("no_cockroaches", 1) % 2;
+  sd->shops_always_open = slot_data.value("shops_always_open", 1) % 2;
   sd->no_weeds = slot_data.value("no_weeds", 0) % 2;
-  sd->more_favors = slot_data.value("more_favors", 0) % 2;
+  sd->more_favors = slot_data.value("more_favors", 1) % 2;
   sd->villagers_dont_leave = slot_data.value("villagers_dont_leave", 0) % 2;
   sd->villagers_never_sleep = slot_data.value("villagers_never_sleep", 0) % 2;
   sd->turnips_never_spoil = slot_data.value("turnips_never_spoil", 0) % 2;
@@ -126,7 +126,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->normalized_time_travel = slot_data.value("normalized_time_travel", 1) % 2;
 
   // Defaults match the apworld's option defaults
-  static const int default_loans[AP_LOAN_NUM] = { 5000, 10000, 10000, 20000, 30000 };
+  static const int default_loans[AP_LOAN_NUM] = { 10000, 30000, 20000, 40000, 50000 };
   static const int default_loan_checks[AP_LOAN_NUM] = { 1, 2, 2, 4, 6 };
   sd->goal = read_goal(slot_data);
   sd->loansanity = slot_data.value("loansanity", 1) % 2;
@@ -143,7 +143,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->fossil_checks = slot_data.value("fossil_checks", 0) % 4;
   sd->painting_checks = slot_data.value("painting_checks", 0) % 4;
   sd->museum_goal_count = slot_data.value("museum_goal_count", 0);
-  sd->critter_spawns = slot_data.value("critter_spawns", 0) % 3;
+  sd->critter_spawns = slot_data.value("critter_spawns", 1) % 3;
   sd->fossil_spawns = slot_data.value("fossil_spawns", 1) % 3;
   // WARN: copy of the apworld's FOSSIL_SEASONS (museum.py), the default for offline play
   static const int default_fossil_seasons[AP_FOSSIL_NUM] = {

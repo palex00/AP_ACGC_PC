@@ -22,6 +22,7 @@ RUN curl -fsSL --retry 5 --retry-all-errors -o /tmp/sdl2.tar.gz \
   && mkdir -p ${SDL2_DIR}/bin ${SDL2_DIR}/lib/cmake/SDL2 ${SDL2_DIR}/lib/pkgconfig \
   && make -C /tmp/SDL2-${SDL2_VERSION} install-package \
        arch=i686-w64-mingw32 prefix=${SDL2_DIR} \
+  && cp /tmp/SDL2-${SDL2_VERSION}/LICENSE.txt ${SDL2_DIR}/LICENSE.txt \
   && rm -rf /tmp/SDL2-${SDL2_VERSION}
 
 # Static OpenSSL for wss:// support in apclientpp (no DLLs to ship)

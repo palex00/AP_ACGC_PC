@@ -117,6 +117,11 @@ fi
 cmp -s "$SDL2_DIR/bin/SDL2.dll" "$BUILD_DIR/bin/SDL2.dll" || cp "$SDL2_DIR/bin/SDL2.dll" "$BUILD_DIR/bin/"
 
 
-# Third-party license text for statically linked OpenSSL
+# Third-party license texts: statically linked OpenSSL, shipped SDL2.dll
 mkdir -p "$BUILD_DIR/bin/licenses"
 cp "$OPENSSL_DIR/LICENSE.txt" "$BUILD_DIR/bin/licenses/OpenSSL-LICENSE.txt"
+if [ -f "$SDL2_DIR/LICENSE.txt" ]; then
+  cp "$SDL2_DIR/LICENSE.txt" "$BUILD_DIR/bin/licenses/SDL2-LICENSE.txt"
+else
+  echo "WARNING: $SDL2_DIR/LICENSE.txt missing, rebuild the build image (Dockerfile keeps it now)" >&2
+fi

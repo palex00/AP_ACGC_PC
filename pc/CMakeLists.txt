@@ -492,6 +492,14 @@ endif()
 # Archipelago client DLL (see ../apclient/CMakeLists.txt)
 target_link_libraries(ac_pc ap_client)
 
+# Licence texts of vendored libraries linked into the exe (the DLL copies its own)
+add_custom_command(TARGET ac_pc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/LICENSE" "${CMAKE_BINARY_DIR}/bin/licenses/glad-LICENSE.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/fixnes/LICENSE" "${CMAKE_BINARY_DIR}/bin/licenses/fixNES-LICENSE.txt"
+)
+
 # Apworld version (one place to bump: the apworld manifest), shown on the AP overlay
 set(AP_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/../apworld/animal_crossing/archipelago.json)
 file(READ ${AP_MANIFEST} AP_MANIFEST_JSON)

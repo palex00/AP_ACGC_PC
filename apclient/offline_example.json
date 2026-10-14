@@ -35,7 +35,7 @@
   "turnips_never_spoil": 0,
   "no_falling_stalks": 0,
   "normalized_time_travel": 1,
-  "critter_spawns": 0,
+  "critter_spawns": 1,
   "fossil_spawns": 1,
   "loans": [17400, 148000, 49800, 398000, 798000]
 }
