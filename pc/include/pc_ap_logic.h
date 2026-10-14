@@ -196,6 +196,9 @@ mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island);
 int pc_ap_beach_pickup(mActor_name_t item);
 // mIN_copy_name_str: name of a Shellsanity beach item in the game charset (mIN_ITEM_NAME_LEN chars)
 void pc_ap_beach_item_name(mActor_name_t item, u8* dst);
+// Shells page: Shellsanity checks per month (0 = off), and checks of month (0-11) not sent yet
+int pc_ap_shells_per_month(void);
+int pc_ap_shells_left(int month);
 
 // Time hooks (on top of pc_ap_timesanity.h): frozen clock, date changes,
 // normalized time travel.

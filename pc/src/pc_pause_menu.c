@@ -6,6 +6,7 @@
 #include "pc_ap_time_menu.h"
 #include "pc_ap_catalog_menu.h"
 #include "pc_ap_critter_menu.h"
+#include "pc_ap_shell_menu.h"
 #include "pc_ap_logic.h"
 #include "pc_ap_overlay.h"
 
@@ -36,6 +37,7 @@ typedef enum {
     PAGE_TIME = 3,
     PAGE_CATALOG = 4,
     PAGE_CRITTERS = 5, /* Bugs or Fish */
+    PAGE_SHELLS = 6,
 } PauseMenuPage;
 
 // Main page entries; which ones show is decided by main_update
@@ -45,6 +47,7 @@ typedef enum {
     MAIN_CATALOG, // Catalogsanity only
     MAIN_BUGS,
     MAIN_FISH,
+    MAIN_SHELLS, // Shellsanity only
     MAIN_SETTINGS,
     MAIN_QUIT,
     MAIN_MAX,
@@ -62,6 +65,7 @@ static int confirm_sel = 0; /* 0=No (default), 1=Yes */
 static pc_ap_time_menu time_menu;
 static pc_ap_catalog_menu catalog_menu;
 static pc_ap_critter_menu critter_menu; // Bugs or Fish
+static pc_ap_shell_menu shell_menu;
 
 // Rebuilds the main page entries (Catalogsanity can turn on while paused on the title)
 static void main_update(void) {
@@ -73,6 +77,9 @@ static void main_update(void) {
     }
     main_items[main_count++] = MAIN_BUGS;
     main_items[main_count++] = MAIN_FISH;
+    if (pc_ap_shells_per_month() > 0) {
+        main_items[main_count++] = MAIN_SHELLS;
+    }
     main_items[main_count++] = MAIN_SETTINGS;
     main_items[main_count++] = MAIN_QUIT;
     if (main_sel >= main_count) main_sel = 0;
@@ -85,6 +92,7 @@ static const char* main_label(MainItem item) {
         case MAIN_CATALOG:  return "Catalog";
         case MAIN_BUGS:     return "Bugs";
         case MAIN_FISH:     return "Fish";
+        case MAIN_SHELLS:   return "Shells";
         case MAIN_SETTINGS: return "Settings";
         case MAIN_QUIT:     return "Quit Game";
         default:            return "";
@@ -94,7 +102,7 @@ static const char* main_label(MainItem item) {
 // Greyed out where it can't open
 static int main_disabled(MainItem item) {
     if (item == MAIN_TIME)    return !pc_ap_time_change_allowed_now();
-    if (item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH) return !pc_ap_accepting();
+    if (item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS) return !pc_ap_accepting();
     return 0;
 }
 
@@ -147,6 +155,14 @@ static void main_activate(void) {
                                                                       : "Bugs: load your save first");
             }
             break;
+        case MAIN_SHELLS:
+            if (pc_ap_accepting()) {
+                cur_page = PAGE_SHELLS;
+                pc_ap_shell_menu_enter(&shell_menu);
+            } else {
+                pc_ap_overlay_toast("Shells: load your save first");
+            }
+            break;
         case MAIN_SETTINGS:
             cur_page = PAGE_SETTINGS;
             pc_settings_menu_enter();
@@ -190,11 +206,12 @@ static void handle_action(pc_menu_action act) {
         return;
     }
 
-    /* Date & Time, Catalog, Bugs/Fish: each page handles its own input. */
-    if (cur_page == PAGE_TIME || cur_page == PAGE_CATALOG || cur_page == PAGE_CRITTERS) {
+    /* Date & Time, Catalog, Bugs/Fish, Shells: each page handles its own input. */
+    if (cur_page == PAGE_TIME || cur_page == PAGE_CATALOG || cur_page == PAGE_CRITTERS || cur_page == PAGE_SHELLS) {
         int result;
         if (cur_page == PAGE_TIME)         result = pc_ap_time_menu_input(&time_menu, act);
         else if (cur_page == PAGE_CATALOG) result = pc_ap_catalog_menu_input(&catalog_menu, act);
+        else if (cur_page == PAGE_SHELLS)  result = pc_ap_shell_menu_input(&shell_menu, act);
         else                               result = pc_ap_critter_menu_input(&critter_menu, act);
         if (result == PC_MENU_BACK) {
             cur_page = PAGE_MAIN;
@@ -355,6 +372,8 @@ void pc_pause_menu_draw(struct game_s* game) {
         pc_ap_catalog_menu_draw(&catalog_menu, game);
     } else if (cur_page == PAGE_CRITTERS) {
         pc_ap_critter_menu_draw(&critter_menu, game);
+    } else if (cur_page == PAGE_SHELLS) {
+        pc_ap_shell_menu_draw(&shell_menu, game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
         if (cur_page == PAGE_MAIN)              draw_main_page(game);

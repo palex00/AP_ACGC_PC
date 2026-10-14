@@ -322,6 +322,7 @@ set(PC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_time_menu.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_catalog_menu.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_critter_menu.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_shell_menu.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_critter_data.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_menu_list.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_weather.c

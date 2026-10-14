@@ -518,6 +518,14 @@ void pc_ap_beach_item_name(mActor_name_t item, u8* dst) {
   memcpy(dst, name, mIN_ITEM_NAME_LEN);
 }
 
+int pc_ap_shells_per_month(void) {
+  return g_ap.shells.per_month;
+}
+
+int pc_ap_shells_left(int month) {
+  return pc_ap_shellsanity_left(&g_ap.shells, month);
+}
+
 int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, int exist_count, int category,
                        int list_type, int unowned_only, mActor_name_t** lists) {
   // Catalog bits are the current player's (mSP_CollectCheck)
