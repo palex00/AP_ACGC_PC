@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
-from Options import Choice, DefaultOnToggle, FreeText, NamedRange, OptionSet, PerGameCommonOptions, Range, Toggle
+from Options import (
+    Choice, DefaultOnToggle, FreeText, NamedRange, OptionSet,
+    PerGameCommonOptions, Range, Toggle
+)
 
 from .museum import CHECK_DONATE, CHECK_FIND
 from .villagers import PERSONALITIES, VILLAGERS
@@ -21,8 +24,8 @@ class SkipIntro(Choice):
 
 class PlayerName(FreeText):
     """
-    Your character's name (max 8 characters). Empty uses your slot name (truncated).
-    Only used with Skip Intro.
+    Your character's name (max 8 characters). Empty uses your slot name
+    (truncated). Only used with Skip Intro.
     """
     display_name = "Player Name"
     default = ""
@@ -61,8 +64,9 @@ class Face(Choice):
 
 class StartingShirt(Choice):
     """
-    The shirt you start with. The game picks from 8 shirts per gender: flame to speedway for boys,
-    folk to gelato for girls. Random (Gender) keeps that; any shirt can be chosen for either gender.
+    The shirt you start with. The game normally picks from 8 shirts per gender:
+    flame to speedway for boys, folk to gelato for girls. Random (Gender) keeps
+    vanilla behavior. Any shirt can be chosen for either gender.
     """
     display_name = "Starting Shirt"
     option_flame_shirt = 0
@@ -102,7 +106,9 @@ class House(Choice):
 
 
 class TownFruit(Choice):
-    """Your town's native fruit (applies to every new town, with or without the intro skip)."""
+    """
+    Your town's native fruit (applies to every new town, regardless of intro skip).
+    """
     display_name = "Town Fruit"
     option_apple = 0
     option_cherry = 1
@@ -122,7 +128,9 @@ class GrassShape(Choice):
 
 
 class TrainStation(Choice):
-    """Your town's train station: wood, stone or brick, with five roof colors each."""
+    """
+    Your town's train station: wood, stone or brick, with five roof colors each.
+    """
     display_name = "Train Station"
     option_wood_green_roof = 0
     option_wood_light_red_roof = 1
@@ -166,22 +174,28 @@ class TrainStation(Choice):
 
 
 class LetterSender(FreeText):
-    """Signature at the bottom of letters from Archipelago (max 32 characters). Empty uses "Archipelago".
-    The mailbox list still shows "AP" (sender names there are max 8 characters)."""
+    """
+    Signature at the bottom of letters from Archipelago (max 32 characters).
+    Empty uses "Archipelago". The mailbox list still shows "AP"
+    """
     display_name = "Letter Sender"
     default = "Archipelago"
 
 
 class LoanLetterText(FreeText):
-    """Text of the letter Archipelago sends when your loan is ready for payoff at the post office
-    (max 192 characters, printable ASCII). Use | for a line break: the game doesn't wrap lines by itself.
-    Empty uses the default."""
+    """
+    Text of the letter Archipelago sends when your loan is ready for payoff
+    at the post office (max 192 characters, printable ASCII). Use | for a line
+    break: the game doesn't wrap lines by itself. Empty uses the default.
+    """
     display_name = "Loan Letter Text"
     default = "Your loan is ready for|payoff at the post office!"
 
 
 class LetterPaper(Choice):
-    """Stationery for letters from Archipelago (e.g. "your loan is ready for payoff")."""
+    """
+    Stationery for letters from Archipelago (e.g. "your loan is ready for payoff").
+    """
     display_name = "Letter Paper"
     option_airmail_paper = 0
     option_sparkly_paper = 1
@@ -252,8 +266,8 @@ class LetterPaper(Choice):
 
 class TownDay(Range):
     """
-    The day in July of your town's Town Day. 4 is the Fireworks Festival, so it's
-    replaced with a random day.
+    The day in July of your town's Town Day. 4 is reserved for the Fireworks
+    Festival, so it's replaced with a random day.
     """
     display_name = "Town Day"
     range_start = 1
@@ -283,41 +297,41 @@ class LoanAmount(NamedRange):
 class StartingLoan(LoanAmount):
     """The loan for your starting house. Vanilla: 17,400."""
     display_name = "Starting Loan"
-    default = 5000
-    special_range_names = {"default": 5000, "vanilla": 17400}
+    default = 10000
+    special_range_names = {"default": 10000, "vanilla": 17400}
 
 
 class MediumLoan(LoanAmount):
     """The loan for the first house upgrade (bigger main floor). Vanilla: 148,000."""
     display_name = "Medium House Loan"
-    default = 10000
-    special_range_names = {"default": 10000, "vanilla": 148000}
+    default = 30000
+    special_range_names = {"default": 30000, "vanilla": 148000}
 
 
 class BasementLoan(LoanAmount):
     """The loan for the basement (the second upgrade). Vanilla: 49,800."""
     display_name = "Basement Loan"
-    default = 10000
-    special_range_names = {"default": 10000, "vanilla": 49800}
+    default = 20000
+    special_range_names = {"default": 20000, "vanilla": 49800}
 
 
 class LargeLoan(LoanAmount):
     """The loan for the third house upgrade (biggest main floor). Vanilla: 398,000."""
     display_name = "Large House Loan"
-    default = 20000
-    special_range_names = {"default": 20000, "vanilla": 398000}
+    default = 40000
+    special_range_names = {"default": 40000, "vanilla": 398000}
 
 
 class UpperLoan(LoanAmount):
     """The loan for the upper floor (the last upgrade). Vanilla: 798,000."""
     display_name = "Upper Floor Loan"
-    default = 30000
-    special_range_names = {"default": 30000, "vanilla": 798000}
+    default = 50000
+    special_range_names = {"default": 50000, "vanilla": 798000}
 
 
 class Loansanity(DefaultOnToggle):
     """
-    Paying off loans sends checks, and each house upgrade needs a Progressive House item.
+    Paying off loans sends checks, next loan gated by Progressive House item.
     Off: no loan checks, and Tom Nook offers upgrades as usual (the loan amounts still apply).
     Must be on for the Statue goal.
     """
@@ -337,17 +351,20 @@ class TotalLoanChecks(Range):
 
 class FillerBellsPercent(Range):
     """
-    Total Bells sent as filler items, as a percentage of the total debt of all loans.
-    AP Bells pay your current loan; 100 or more can pay off everything by itself.
+    Filler bell total = this percentage of total debt. Filler bells go directly
+    towards loan or savings.
     """
     display_name = "Filler Bells Percent"
     range_start = 0
     range_end = 200
-    default = 50
+    default = 80
 
 
 class Favorsanity(Range):
-    """Number of villager favors (errands and contests) that send a check, in the order you complete them."""
+    """
+    Number of villager favors (errands and contests) that send a check. Any
+    favor that gets completed from any villager counts
+    """
     display_name = "Favorsanity"
     range_start = 0
     range_end = 100
@@ -356,15 +373,17 @@ class Favorsanity(Range):
 
 class ToolsInPool(DefaultOnToggle):
     """
-    The net, fishing rod and shovel are items. Tom Nook doesn't sell one (and it's not in the lost and found)
-    until you receive it; it's mailed to you when you do. The axe stays vanilla.
+    The net, fishing rod and shovel are items. The tool is unobtainable through
+    normal means (store, lost and found, etc) until you receive it.
+    Tools and other items are mailed to you. Axe stays vanilla.
     """
     display_name = "Tools in Pool"
 
 
 class StartingTool(Choice):
     """
-    A tool you start with, mailed to you. Without Tools in Pool it's a freebie on top of the vanilla tools.
+    A tool you start with, mailed to you. Without Tools in Pool it's a freebie
+    on top of the vanilla tools.
     """
     display_name = "Starting Tool"
     option_none = 0
@@ -377,11 +396,12 @@ class StartingTool(Choice):
 
 class NookStoreUpgrades(Choice):
     """
-    What upgrades Tom Nook's store (Nook's Cranny -> Nook 'n' Go -> Nookway -> Nookington's). Nookington's never
-    needs a visitor from another town. Each upgrade still takes two days of renovation, one level at a time.
+    What upgrades Tom Nook's store (Nook's Cranny -> Nook 'n' Go -> Nookway -> Nookington's). 
+    Nookington's never needs a visitor from another town. Each upgrade still
+    takes two days of renovation, one level at a time.
     Progressive: three Progressive Nook Store items in the pool, one upgrade each.
-    Sales: total Bells spent at the store reaches the Nook Store Sales amounts.
-    Catalog: the number of entries in your catalog reaches the Nook Store Catalog counts.
+    Sales: total Bells spent at the store reaches the Nook Store Sales amounts (Vanilla behavior).
+    Catalog: the number of entries in your catalog reaches the Nook Store Catalog counts (any, not just Catalogsanity).
     """
     display_name = "Nook Store Upgrades"
     option_progressive = 1
@@ -455,9 +475,9 @@ VILLAGER_KEYS = {personality_key(p) for p in PERSONALITIES} | {villager_key(name
 
 class VillagerBlacklist(OptionSet):
     """
-    Villagers that never move into your town (as a starting villager, a move-in or a summer camper).
-    "Personality: Cranky" (or Normal, Peppy, Lazy, Jock, Snooty) blacklists every villager with it.
-    At least 6 villagers must stay allowed. Villagers already living in an existing save stay.
+    Villagers in this list will never move in, show up at the start, be a summer
+    camper, etc. "Personality: Cranky" (or Normal, Peppy, Lazy, Jock, Snooty)
+    blacklists all villagers with that personality. At least 6 villagers must stay allowed.
     """
     display_name = "Villager Blacklist"
     valid_keys = VILLAGER_KEYS
@@ -466,9 +486,10 @@ class VillagerBlacklist(OptionSet):
 
 class StartingVillagers(OptionSet):
     """
-    Villagers that start in a new town. With 6 or fewer, all of them start and the rest is random;
-    with more, the 6 starters are picked from this list. "Personality: Cranky" (or Normal, Peppy,
-    Lazy, Jock, Snooty) adds every villager with it. Blacklisted villagers are skipped.
+    Villagers that start in a new town. With 6 or fewer, all of them start and
+    the rest is random; with more, the 6 starters are picked from this list at
+    random. "Personality: Cranky" (or Normal, Peppy, Lazy, Jock, Snooty) adds
+    every villager with it. Blacklisted villagers are skipped.
     Only applies when the town is made, not to an existing save.
     """
     display_name = "Starting Villagers"
@@ -498,38 +519,45 @@ class MoreFavors(DefaultOnToggle):
 
 class VillagersDontLeave(Toggle):
     """
-    Villagers never move out, and nobody talks about moving. Once your town has 15 villagers,
-    nobody new moves in either.
+    Villagers never move out, and nobody talks about moving. Once your town has
+    15 villagers, nobody new moves in either.
     """
     display_name = "Villagers Don't Leave"
 
 
 class VillagersNeverSleep(Toggle):
     """
-    Villagers never go to sleep: when they would, they stay awake at home, so you can always visit
-    them (handy for favors when you only have early-morning or night hours).
+    Villagers never go to sleep: when they would, they stay awake at home,
+    so you can always visit them (handy for favors when you only have
+    early-morning or night hours).
     """
     display_name = "Villagers Never Sleep"
 
 
 class TurnipsNeverSpoil(Toggle):
-    """Turnips never spoil, not when the week ends and not when you go back in time.
-    Ants only appear on spoiled turnips or candy, so with Timesanity the ant then needs October (candy is
-    sold Oct 16-30)."""
+    """
+    Turnips never spoil, not when the week ends and not when you go back in time.
+    Ants only appear on spoiled turnips or candy, so with Timesanity the ant
+    adds logic to need October (candy is sold Oct 16-30).
+    """
     display_name = "Turnips Never Spoil"
 
 
 class NoFallingStalks(Toggle):
-    """The stalk market never rolls the falling pattern (prices only go down all week)."""
+    """
+    The stalk market never rolls the falling pattern (prices only go down all week).
+    """
     display_name = "No Falling Stalks"
 
 
 class NormalizedTimeTravel(DefaultOnToggle):
     """
-    A new date always counts as one day passing, however far it jumps, forward or back: changing
-    the date (pause menu or the game's own clock setting) or coming back after days away.
-    Off: the game sees the real jump, so a big jump forward is like being away that long
-    (weeds, villagers moving out) and going back in time has the usual penalties.
+    A new date always counts as one day passing, however far it jumps, forward
+    or back: changing the date (pause menu or the game's own clock setting) or
+    coming back after days away.
+    Off: the game sees the real jump, so a big jump forward is like being away
+    that long (weeds, villagers moving out) and going back in time has the
+    usual penalties.
     """
     display_name = "Normalized Time Travel"
 
@@ -543,7 +571,10 @@ class Timesanity(DefaultOnToggle):
 
 
 class StartingMonth(Choice):
-    """With timesanity, the month you start with. The game starts on its 1st."""
+    """
+    With timesanity, the month you start with. The game starts on the 1st of
+    the month.
+    """
     display_name = "Starting Month"
     option_january = 0
     option_february = 1
@@ -561,7 +592,10 @@ class StartingMonth(Choice):
 
 
 class StartingTime(Choice):
-    """With timesanity, the time slot you start with. The game starts at its first hour."""
+    """
+    With timesanity, the time slot you start with. The game starts on the
+    first hour of the time slot.
+    """
     display_name = "Starting Time"
     option_morning = 0
     option_day = 1
@@ -572,8 +606,9 @@ class StartingTime(Choice):
 
 class Catalogsanity(DefaultOnToggle):
     """
-    Catalog items are split into pools. Getting an item of an unlocked pool into your catalog (picking it up,
-    wearing it, ...) sends a check. Pool 1 is open from the start, each Progressive Catalog Pool unlocks the next.
+    Catalog items are split into pools. Getting an item of an unlocked pool
+    into your catalog (picking it up, wearing it, ...) sends a check. Pool 1
+    is open from the start, each Progressive Catalog Pool unlocks the next.
     Must be on for the Catalog goal.
     """
     display_name = "Catalogsanity"
@@ -581,9 +616,9 @@ class Catalogsanity(DefaultOnToggle):
 
 class CatalogPools(Range):
     """
-    How far Catalogsanity is gated. Pool 1 is open from the start; the rest need one Progressive Catalog Pool
-    each (Pools - 1 items). Pools x Pool Size is the number of catalog checks, at most 575
-    (furniture, clothes, carpets and wallpaper; no stationery or diaries).
+    Catalog is split into pools, each one requiring a Progressive Catalog Pool
+    unlock. You always start with 1. Pools x Pool Size = total catalog checks,
+    at most 575 (furniture, clothes, carpets and wallpaper; no stationery or diaries).
     """
     display_name = "Catalog Pools"
     range_start = 1
@@ -593,8 +628,9 @@ class CatalogPools(Range):
 
 class CatalogPoolSize(Range):
     """
-    Catalog checks unlocked per Progressive Catalog Pool. Items are picked at random, with every pool getting
-    a similar mix of furniture, clothes, carpets and wallpaper.
+    Catalog checks unlocked per Progressive Catalog Pool. Items are picked at
+    random, with every pool getting a similar mix of furniture, clothes,
+    carpets and wallpaper.
     """
     display_name = "Catalog Pool Size"
     range_start = 1
@@ -604,26 +640,43 @@ class CatalogPoolSize(Range):
 
 class NewItemChance(Range):
     """
-    How often a random item you get (Nook's shop, favors, balloon presents, ...) is a catalog check you can send
-    right now, while any are left.
+    How often a random item you get from Catalogsanity sources is new
+    (Nook's shop, favors, balloon presents, ...)
     """
     display_name = "New Item Chance"
     range_start = 5
     range_end = 100
-    default = 75
+    default = 50
 
 
-CATALOG_SOURCES = ["Favors", "Trades", "Lost and Found", "Dump", "Letters", "Trees", "Presents", "Grab Bags", "Wisp"]
+CATALOG_SOURCES = [
+    "Favors",
+    "Trades",
+    "Lost and Found",
+    "Dump",
+    "Letters",
+    "Trees",
+    "Presents",
+    "Grab Bags",
+    "Wisp"
+]
 
 
 class CatalogSources(OptionSet):
     """
-    With Catalogsanity, what besides Nook's shop can give you catalog checks (New Item Chance per item; rare ones
-    always when one is left). Turned off, a source only gives items that aren't checks (or are already in your
-    catalog). Nook's shop is always a source, so this never changes what is reachable.
-    Favors: villager favor rewards. Trades: villagers trading or selling in a chat. Lost and Found: the daily item.
-    Dump: the daily items. Letters: villager reply presents and letter-quality rewards. Trees: furniture from
-    shaking trees. Presents: from trees and balloons. Grab Bags: Nook's sale day bags. Wisp: his reward.
+    With Catalogsanity, what can give you catalog checks. Turned off, a source
+    only gives items that aren't checks (or are already in your catalog).
+    Nook's shop is always a source and will eventually sell everything, so this
+    never changes what is reachable.
+    Favors: villager favor rewards.
+    Trades: villagers trading or selling in a chat.
+    Lost and Found: the daily item.
+    Dump: the daily items.
+    Letters: villager reply presents and letter-quality rewards.
+    Trees: furniture from shaking trees.
+    Presents: from trees and balloons.
+    Grab Bags: Nook's sale day bags.
+    Wisp: his reward.
     """
     display_name = "Catalog Sources"
     valid_keys = set(CATALOG_SOURCES)
@@ -631,7 +684,10 @@ class CatalogSources(OptionSet):
 
 
 class CatalogGoalPercent(Range):
-    """For the Catalog goal: percentage of the Catalogsanity items you need in your catalog."""
+    """
+    For the Catalog goal: percentage of the Catalogsanity items you need in
+    your catalog.
+    """
     display_name = "Catalog Goal Percent"
     range_start = 1
     range_end = 100
@@ -640,8 +696,9 @@ class CatalogGoalPercent(Range):
 
 class Museumsanity(DefaultOnToggle):
     """
-    Museum donations are items: your own donations never fill the museum, it shows the donation items
-    you received. Catching, digging up or donating things sends checks (see the options below).
+    Museum donations are items: your own donations never fill the museum.
+    Museum shows the donation items you received. Catching, digging up or
+    donating things sends checks (see the options below).
     Must be on for the Museum goal.
     """
     display_name = "Museumsanity"
@@ -728,18 +785,23 @@ class FossilSpawns(Choice):
 
 
 class PaintingChecks(Choice):
-    """With Museumsanity, what sends a check for each painting. Not available yet."""
+    """
+    With Museumsanity, what sends a check for each painting. Not available yet.
+    """
     display_name = "Painting Checks"
     option_disabled = 0
     default = 0
 
 
 class MuseumGoalPercent(Range):
-    """For the Museum goal: percentage of the museum donation items you need to receive."""
+    """
+    For the Museum goal: percentage of the museum donation items you need to
+    receive.
+    """
     display_name = "Museum Goal Percent"
     range_start = 1
     range_end = 100
-    default = 70
+    default = 65
 
 
 @dataclass
