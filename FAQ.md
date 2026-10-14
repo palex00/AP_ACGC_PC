@@ -23,9 +23,9 @@ onto that would be a likely security nightmare.
 
 ## Does it work on Linux / Steam Deck?
 
-The Windows binary runs under Proton/Wine and seems to work fine from what I've
-heard. Native Linux is not officially supported yet, hopefully will happen in the
-future.
+There's a native Linux build (the `-linux.tar.gz` release). It's 32-bit, so it needs
+glibc 2.36+ (Ubuntu 24.04, Debian 12 or newer) and your distro's 32-bit OpenGL driver,
+which Steam already installs. The Windows binary also runs under Proton/Wine.
 
 ## Is this vibecoded?
 

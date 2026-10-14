@@ -31,6 +31,7 @@ if(WIN32)
     set(AP_OPENSSL_LIBS ${OPENSSL_SSL_LIB} ${OPENSSL_CRYPTO_LIB}
         ws2_32 mswsock crypt32 gdi32 advapi32 user32)
 else()
+    set(OPENSSL_USE_STATIC_LIBS TRUE)
     find_package(OpenSSL REQUIRED)
     set(AP_OPENSSL_INCLUDE "")
     set(AP_OPENSSL_LIBS OpenSSL::SSL OpenSSL::Crypto)
@@ -44,6 +45,7 @@ if(WIN32)
     find_library(ZLIB_STATIC_LIB libz.a REQUIRED)
     set(AP_ZLIB_LIBS ${ZLIB_STATIC_LIB})
 else()
+    set(ZLIB_USE_STATIC_LIBS ON)
     find_package(ZLIB REQUIRED)
     set(AP_ZLIB_LIBS ZLIB::ZLIB)
 endif()
@@ -110,6 +112,10 @@ if(WIN32)
     target_link_options(ap_client PRIVATE -static)
 else()
     set_target_properties(ap_client PROPERTIES BUILD_RPATH "$ORIGIN")
+    # Own static C++ runtime with local binding, like the DLL: otherwise ELF binds the .so's
+    # operator new to the game's (JKRHeap), which is unusable before main()
+    target_link_options(ap_client PRIVATE -static-libgcc -static-libstdc++
+        -Wl,--exclude-libs,ALL -Wl,-Bsymbolic)
 endif()
 
 set_target_properties(ap_client PROPERTIES

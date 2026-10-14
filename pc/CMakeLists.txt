@@ -454,6 +454,9 @@ add_executable(ac_pc
 # Link SDL2 without SDL2main (we define SDL_MAIN_HANDLED)
 if(TARGET SDL2::SDL2)
     target_link_libraries(ac_pc glad SDL2::SDL2)
+elseif(TARGET SDL2::SDL2-static)
+    # Static-only SDL2 (Linux build, see Dockerfile.linux)
+    target_link_libraries(ac_pc glad SDL2::SDL2-static)
 else()
     list(FILTER SDL2_LIBRARIES EXCLUDE REGEX "SDL2main")
     target_link_libraries(ac_pc glad ${SDL2_LIBRARIES})
@@ -462,8 +465,16 @@ endif()
 if(WIN32)
     target_link_libraries(ac_pc opengl32 winmm imm32 version setupapi)
 else()
-    find_package(OpenGL REQUIRED)
-    target_link_libraries(ac_pc OpenGL::GL dl pthread m)
+    # glibc vs decomp header clashes, see the header
+    target_compile_options(ac_pc PRIVATE
+        "SHELL:-include ${CMAKE_CURRENT_SOURCE_DIR}/include/pc_linux_compat.h"
+        # Only GCC on glibc flags these; the snprintf truncations are intentional
+        -Wno-format-truncation)
+    # No libGL link: glad loads every GL function through SDL_GL_GetProcAddress
+    target_link_libraries(ac_pc dl pthread m)
+    target_link_options(ac_pc PRIVATE -static-libgcc -static-libstdc++)
+    # Find libap_client.so next to the exe only, never the absolute build path
+    set_target_properties(ac_pc PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN")
 endif()
 
 # Archipelago client DLL (see ../apclient/CMakeLists.txt)

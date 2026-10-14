@@ -234,11 +234,15 @@ void LCDisable(void) {}
 /* --- Init --- */
 void OSInit(void) {
     if (!arena_memory) {
-        arena_memory = (u8*)malloc(PC_MAIN_MEMORY_SIZE);
-        if (!arena_memory) {
+        // 32-byte aligned like GC RAM: JW_Init sizes the system heap as the whole arena minus
+        // 0xD0, which only fits if JKRHeap's 32-byte roundings lose nothing. glibc's malloc
+        // only gives 16 (the heap then fails at boot); never freed, so the raw pointer can go.
+        u8* raw = (u8*)malloc(PC_MAIN_MEMORY_SIZE + 31);
+        if (!raw) {
             fprintf(stderr, "Failed to allocate main memory arena\n");
             exit(1);
         }
+        arena_memory = (u8*)(((uintptr_t)raw + 31) & ~(uintptr_t)31);
         memset(arena_memory, 0, PC_MAIN_MEMORY_SIZE);
 
         /* GC system info at phys addr 0; offset 0x28 = mem size for JKRHeap */

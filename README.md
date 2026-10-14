@@ -45,6 +45,11 @@ The game reads all assets directly from the disc image at startup. No extraction
    pc/build32/bin/AnimalCrossing.exe
    ```
 
+Native Linux build: `./build_podman.sh --linux`, output in `pc/build/linux32/bin/` (run `AnimalCrossing`
+there, ROM in its `rom/` folder). It's a 32-bit program: it needs glibc 2.36+ and the 32-bit OpenGL
+driver (`lib32-mesa`/`lib32-nvidia-utils` on Arch, `libgl1:i386 libgl1-mesa-dri:i386` on Debian/Ubuntu;
+installed already if you have Steam). Everything else is linked in.
+
 ## Controls
 
 Keyboard bindings are customizable via `keybindings.ini` (next to the executable). Mouse buttons (Mouse1/Mouse2/Mouse3) can also be assigned.

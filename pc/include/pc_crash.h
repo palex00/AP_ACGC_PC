@@ -1,9 +1,9 @@
 #ifndef PC_CRASH_H
 #define PC_CRASH_H
 
-// Crash log: on an unhandled exception, writes crash_<date>_<time>.txt next to the exe
-// (exception, registers, stack scan, last game state, loaded modules, AP log tail) and
-// shows an error box. Decode with ignore/tools/crash_decode.sh. Windows only; no-ops elsewhere.
+// Crash log: on an unhandled exception (Windows) or a fatal signal (Linux), writes
+// crash_<date>_<time>.txt next to the exe (exception, registers, stack scan, last game state,
+// loaded modules, AP log tail) and shows an error box. Decode with ignore/tools/crash_decode.sh.
 
 struct game_play_s;
 
