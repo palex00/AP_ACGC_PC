@@ -334,6 +334,9 @@ set(PC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_assets.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_disc.c
 )
+if(NOT WIN32)
+    list(APPEND PC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_window_icon.c)
+endif()
 
 # =============================================================================
 # fixNES — vendored NES emulator (MIT License, by FIX94)
@@ -475,6 +478,15 @@ else()
     target_link_options(ac_pc PRIVATE -static-libgcc -static-libstdc++)
     # Find libap_client.so next to the exe only, never the absolute build path
     set_target_properties(ac_pc PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN")
+    # Window icon (also the .desktop icon), the Wayland launcher entry script, stb licence
+    add_custom_command(TARGET ac_pc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/res/icon_128.png" "${CMAKE_BINARY_DIR}/bin/icon.png"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/res/install-desktop-entry.sh" "${CMAKE_BINARY_DIR}/bin/install-desktop-entry.sh"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/LICENSE" "${CMAKE_BINARY_DIR}/bin/licenses/stb-LICENSE.txt"
+    )
 endif()
 
 # Archipelago client DLL (see ../apclient/CMakeLists.txt)

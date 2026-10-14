@@ -14,6 +14,7 @@
 #include "ap_archipelago.h"
 #include "pc_ap_logic.h"
 #include "pc_crash.h"
+#include "pc_window_icon.h"
 
 // Single implementation of the vendored ini.h (pc/lib/ini) for the exe
 #define INI_IMPLEMENTATION
@@ -54,6 +55,9 @@ void pc_platform_init(void) {
 #ifdef _WIN32
     SetProcessDPIAware();
     SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "1");
+#else
+    // Wayland app id / X11 window class (default: exe name), matched by install-desktop-entry.sh
+    setenv("SDL_VIDEO_X11_WMCLASS", "AnimalCrossingAP", 0);
 #endif
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
@@ -92,6 +96,9 @@ void pc_platform_init(void) {
         SDL_Quit();
         exit(1);
     }
+#ifndef _WIN32
+    pc_window_icon_set(g_pc_window);
+#endif
 
     g_pc_gl_context = SDL_GL_CreateContext(g_pc_window);
     if (!g_pc_gl_context) {
