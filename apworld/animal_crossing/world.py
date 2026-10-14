@@ -122,11 +122,6 @@ class AnimalCrossingWeb(WebWorld):
             options.FossilSpawns,
             options.MuseumGoalPercent,
         ]),
-        OptionGroup("Shellsanity", [
-            options.Shellsanity,
-            options.BeachItemsPerMonth,
-            options.BeachItemChance,
-        ]),
         OptionGroup("Nook's Cranny", [
             options.NookStoreUpgrades,
             options.NookNGoSales,
@@ -473,7 +468,7 @@ class AnimalCrossingWorld(World):
 
     def beach_per_month(self) -> int:
         # Shellsanity checks per month, 0 when off
-        return self.options.beach_items_per_month.value if self.options.shellsanity else 0
+        return self.options.shellsanity.value
 
     def beach_locations(self) -> list[str]:
         return [beach_location_name(m, k) for m in range(len(MONTHS)) for k in range(1, self.beach_per_month() + 1)]
@@ -539,7 +534,6 @@ class AnimalCrossingWorld(World):
             "no_falling_stalks": self.options.no_falling_stalks.value,
             "coconuts_wash_up": self.options.coconuts_wash_up.value,
             "shellsanity": self.options.shellsanity.value,
-            "beach_items_per_month": self.options.beach_items_per_month.value,
             "beach_item_chance": self.options.beach_item_chance.value,
             "normalized_time_travel": self.options.normalized_time_travel.value,
             "goal": sorted(self.options.goal.value),

@@ -8,7 +8,7 @@ LOANS = ["Starting", "Medium", "Basement", "Large", "Upper"]
 LOAN_CHECKS_MIN = 1    # every loan sends at least one check
 LOAN_CHECKS_MAX = 196  # total_loan_checks max (200) minus the other four loans' minimum
 FAVORS_MAX = 100       # favorsanity max
-BEACH_PER_MONTH_MAX = 20  # beach_items_per_month max
+BEACH_PER_MONTH_MAX = 20  # shellsanity max
 
 LOAN_BASE_ID = 0x10000  # loan k, check j (1-based): LOAN_BASE_ID + k * 0x1000 + j
 FAVOR_BASE_ID = 0x20000  # favor n (1-based): FAVOR_BASE_ID + n
