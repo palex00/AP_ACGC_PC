@@ -33,6 +33,8 @@ MIN_YEAR, MAX_YEAR = 2001, 2100  # mTM_MIN_YEAR / mTM_MAX_YEAR (PC)
 # a tool name), so they're not restored as options
 UT_NOT_OPTIONS = {"villager_blacklist", "starting_villagers", "catalog_pools", "starting_tool"}
 ITEM_ID_TO_NAME = {item_id: name for name, item_id in ITEM_NAME_TO_ID.items()}
+# Tools in Pool: the tool each museum category needs
+CATEGORY_TOOLS = {MUSEUM_BUG: NET, MUSEUM_FISH: FISHING_ROD, MUSEUM_FOSSIL: SHOVEL}
 
 
 class AnimalCrossingItem(Item):
@@ -155,6 +157,11 @@ class AnimalCrossingWorld(World):
     item_name_to_id = ITEM_NAME_TO_ID
     location_name_to_id = LOCATION_NAME_TO_ID
 
+    # Set in generate_early. Item link groups (create_group) never run it but still call create_item: "nothing
+    # chosen" is right for them, as link_items ORs in the linked players' own classifications.
+    museum_progression: frozenset[str] | set[str] = frozenset()
+    museum_modes: dict[int, int] = {}
+
     # Universal Tracker regenerates the world from slot_data (no yaml needed): see ut_restore_options
     ut_can_gen_without_yaml = True
 
@@ -209,8 +216,6 @@ class AnimalCrossingWorld(World):
                     self.museum_locations.append(museum_find_name(c, name))
                 if self.museum_modes[c] & CHECK_DONATE:
                     self.museum_locations.append(museum_donate_name(name))
-        # Tools in Pool: the tool each museum category needs, and the tools that go in the pool
-        self.category_tools = {MUSEUM_BUG: NET, MUSEUM_FISH: FISHING_ROD, MUSEUM_FOSSIL: SHOVEL}
         # Starting tool: also without Tools in Pool (a freebie, mailed at the start)
         self.starting_tool = None
         choice = self.options.starting_tool.value
@@ -220,6 +225,7 @@ class AnimalCrossingWorld(World):
             self.starting_tool = TOOLS[choice - 1]
         if ut is not None and "starting_tool" in ut:
             self.starting_tool = ut["starting_tool"]
+        # Tools in Pool: the tools that go in the pool
         self.pool_tools = []
         if self.options.tools_in_pool:
             self.pool_tools = [tool for tool in TOOLS if tool != self.starting_tool]
@@ -360,7 +366,8 @@ class AnimalCrossingWorld(World):
             classification = ItemClassification.useful
         elif name in TOOLS:
             # Progression when a museum category with checks needs it (only with Tools in Pool)
-            needed = self.options.tools_in_pool and any(self.museum_modes[c] for c, tool in self.category_tools.items() if tool == name)
+            needed = self.options.tools_in_pool and any(self.museum_modes.get(c) for c, tool in CATEGORY_TOOLS.items()
+                                                        if tool == name)
             classification = ItemClassification.progression if needed else ItemClassification.useful
         elif name == PROGRESSIVE_NOOK_STORE:
             classification = ItemClassification.useful
@@ -423,9 +430,9 @@ class AnimalCrossingWorld(World):
         # Tools in Pool: catching, digging up and donating need the tool (on top of the rules above)
         if self.options.tools_in_pool:
             for c, names in enumerate(MUSEUM_NAMES):
-                if c in self.category_tools:
+                if c in CATEGORY_TOOLS:
                     for name in names:
-                        self.add_museum_rule(c, name, lambda state, tool=self.category_tools[c]:
+                        self.add_museum_rule(c, name, lambda state, tool=CATEGORY_TOOLS[c]:
                                              state.has(tool, self.player))
 
         # All chosen goals are required
