@@ -332,6 +332,8 @@ void pc_gx_shutdown(void);
 void pc_gx_flush_vertices(void);
 void pc_gx_flush_if_begin_complete(void);
 void pc_gx_draw_pending(void);
+extern int g_pc_gx_frame_begun;
+void pc_gx_clear_black(void);
 void pc_gx_texture_bind_cache_invalidate(void);
 void pc_gx_viewport_state_invalidate(void);
 

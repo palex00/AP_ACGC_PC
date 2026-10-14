@@ -374,7 +374,23 @@ void pc_gx_init(void) {
     g_gx.dirty = PC_GX_DIRTY_ALL;
 }
 
+// Set by the first real frame; until then swaps show a cleared black screen
+int g_pc_gx_frame_begun = 0;
+
+// Boot swaps before any frame began: clear the window to black, else the driver shows
+// whatever was in the buffer (garbage on some GPUs)
+void pc_gx_clear_black(void) {
+    glDepthMask(GL_TRUE);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glDisable(GL_SCISSOR_TEST);
+    glViewport(0, 0, g_pc_window_w, g_pc_window_h);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    DIRTY(PC_GX_DIRTY_DEPTH | PC_GX_DIRTY_COLOR_MASK);
+}
+
 void pc_gx_begin_frame(void) {
+    g_pc_gx_frame_begun = 1;
     /* Profiler frame opens in graph_main so game_main is captured */
     Uint64 prof_start = pc_profiler_begin_timer();
     pc_emu64_frame_cmds = 0;

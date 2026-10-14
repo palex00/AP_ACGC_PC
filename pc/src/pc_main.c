@@ -120,6 +120,11 @@ void pc_platform_init(void) {
 #endif
 
     pc_gx_init();
+    // Black window right away (both buffers) instead of uninitialized video memory
+    for (int i = 0; i < 2; i++) {
+        pc_gx_clear_black();
+        SDL_GL_SwapWindow(g_pc_window);
+    }
     pc_texture_pack_init();
 #ifdef PC_ENHANCEMENTS
     if (g_pc_settings.preload_textures) {
@@ -171,6 +176,9 @@ void pc_platform_update_window_size(void) {
 
 void pc_platform_swap_buffers(void) {
     pc_gx_draw_pending();
+    if (!g_pc_gx_frame_begun) {
+        pc_gx_clear_black();
+    }
     SDL_GL_SwapWindow(g_pc_window);
 }
 

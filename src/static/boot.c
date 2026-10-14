@@ -326,7 +326,9 @@ void sound_initial() {
   OSReport("sizeof(nintendo_hi_0)=%08x\n", 0x9900);
   OSReport("実際のnintendo_hi_0.awのサイズ=%08x \n", 0x66a0); /* Real nintendo_hi_0.aw size=%08x */
   OSReport("ニンテンドー発生タイムラグまで寝てます(%dms)" VT_RST "\n", 2500); /* Sleeping until Nintendo latency time (%dms) occurs */
+#ifndef TARGET_PC
   msleep(2500);
+#endif
 }
 
 /**

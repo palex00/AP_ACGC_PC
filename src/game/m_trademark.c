@@ -35,7 +35,12 @@
 #include "pc_ap_logic.h"
 #endif
 
+#ifdef TARGET_PC
+// The boot logo thread (initial_menu) never runs on PC, so show the logo here on first boot too
+static int mTR_first_flag = FALSE;
+#else
 static int mTR_first_flag = TRUE;
+#endif
 
 static Door_data_c demo_1_door_data = { SCENE_TITLE_DEMO, 4, FALSE, 0, { 2180, 200, 824 }, EMPTY_NO, 3, { 0, 0, 0 } };
 
