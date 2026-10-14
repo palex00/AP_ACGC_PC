@@ -13,7 +13,7 @@ int pc_ap_ini_get_int(ini_t * ini, const char * section, const char * key, int d
   if (ini == NULL) {
     return def;
   }
-  int s = ini_find_section(ini, section, 0);
+  int s = section == NULL ? INI_GLOBAL_SECTION : ini_find_section(ini, section, 0);
   if (s == INI_NOT_FOUND) {
     return def;
   }
@@ -25,7 +25,7 @@ int pc_ap_ini_get_int(ini_t * ini, const char * section, const char * key, int d
 }
 
 void pc_ap_ini_set_int(ini_t * ini, const char * section, const char * key, int value) {
-  int s = ini_find_section(ini, section, 0);
+  int s = section == NULL ? INI_GLOBAL_SECTION : ini_find_section(ini, section, 0);
   if (s == INI_NOT_FOUND) {
     s = ini_section_add(ini, section, 0);
   }

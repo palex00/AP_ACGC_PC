@@ -60,6 +60,12 @@ extern int mSP_ItemNo2GoodsListCategory(mActor_name_t item_no);
 #define PC_AP_HOUR_FADE_STOP   0x168
 #define PC_AP_HOUR_FADE_FRAMES 60
 
+// g_ap's own persisted fields go in the ini's global section (modules get their own)
+#define PC_AP_KEY_GOAL_LETTER_SENT "goal_letter_sent"
+// "Goals done" letter (max 192 chars, '\n' = line break)
+#define PC_AP_GOAL_LETTER \
+  "All your goals are done!\nListen to K.K. Slider\nplay on a Saturday night\nto finish the game."
+
 // All AP game state: the only global. Everything below is the facade that
 // hands it (and the game/DLL state) to the modules.
 // Date & Time reload steps: fade out, save on the way to the title, player select
@@ -91,6 +97,7 @@ typedef struct {
   pc_ap_store store;
   pc_ap_catalogsanity catalog;
   int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
+  int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
   pc_ap_reload reload;
   int time_change_allowed; // Date & Time gate on the last play frame (pause menu reads it)
   int initialized;    // module config set from slot_data
@@ -112,6 +119,7 @@ void pc_ap_init(void) {
   // Cleared here as when they were timesanity fields
   memset(&g_ap.reload, 0, sizeof(g_ap.reload));
   g_ap.time_change_allowed = 0;
+  g_ap.goal_letter_sent = 0; // persisted: pc_ap_load sets it
   g_ap.initialized = 1;
 }
 
@@ -130,6 +138,7 @@ void pc_ap_load(const char* filename) {
   pc_ap_credit_load(&g_ap.credit, ini);
   pc_ap_favorsanity_load(&g_ap.favors, ini);
   pc_ap_tools_load(&g_ap.tools, ini);
+  g_ap.goal_letter_sent = pc_ap_ini_get_int(ini, NULL, PC_AP_KEY_GOAL_LETTER_SENT, 0);
   if(ini != NULL) {
     ini_destroy(ini);
   }
@@ -141,6 +150,7 @@ int pc_ap_save(const char* filename) {
   pc_ap_credit_save(&g_ap.credit, ini);
   pc_ap_favorsanity_save(&g_ap.favors, ini);
   pc_ap_tools_save(&g_ap.tools, ini);
+  pc_ap_ini_set_int(ini, NULL, PC_AP_KEY_GOAL_LETTER_SENT, g_ap.goal_letter_sent);
   int ok = pc_ap_state_write(filename, ini);
   ini_destroy(ini);
   return ok;
@@ -346,6 +356,16 @@ static void pc_ap_loan_letter(int paid) {
   // No home or mailbox full: stays pending, try again next time
   if(pc_ap_mail_send(&g_ap.mail, pc_ap_my_home(), Now_Private, g_ap.loans.letter_text, EMPTY_NO)) {
     pc_ap_loansanity_letter_sent(&g_ap.loans);
+  }
+}
+
+// The "goals done" letter, once; mailbox full = next tick
+static void pc_ap_goal_letter(void) {
+  if(g_ap.goal_letter_sent || !pc_ap_goals_done()) {
+    return;
+  }
+  if(pc_ap_mail_send(&g_ap.mail, pc_ap_my_home(), Now_Private, PC_AP_GOAL_LETTER, EMPTY_NO)) {
+    g_ap.goal_letter_sent = 1;
   }
 }
 
@@ -762,6 +782,7 @@ void pc_ap_tick(GAME_PLAY* play) {
   pc_ap_apply_credit(paid);
   pc_ap_loan_letter(paid); // credit stops at 100 owed, so paid is unchanged
   pc_ap_tools_mail();
+  pc_ap_goal_letter();
   pc_ap_museumsanity_sync(&g_ap.museum, &Save_Get(museum_display));
 }
 
