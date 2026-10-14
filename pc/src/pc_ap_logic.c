@@ -105,6 +105,7 @@ typedef struct {
   int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
   pc_ap_reload reload;
   int time_change_allowed; // Date & Time gate on the last play frame (pause menu reads it)
+  int save_requested;      // Quicksave from the pause menu, done on the next play frame
   int initialized;    // module config set from slot_data
 } pc_ap;
 
@@ -125,6 +126,7 @@ void pc_ap_init(void) {
   // Cleared here as when they were timesanity fields
   memset(&g_ap.reload, 0, sizeof(g_ap.reload));
   g_ap.time_change_allowed = 0;
+  g_ap.save_requested = 0;
   g_ap.goal_letter_sent = 0; // persisted: pc_ap_load sets it
   g_ap.initialized = 1;
 }
@@ -815,9 +817,30 @@ static void pc_ap_time_reload_update(void) {
   }
 }
 
+void pc_ap_quicksave_request(void) {
+  g_ap.save_requested = 1;
+}
+
+static void pc_ap_quicksave_tick(GAME_PLAY* play) {
+  if(!g_ap.save_requested) {
+    return;
+  }
+  g_ap.save_requested = 0;
+  if(g_ap.reload.step != PC_AP_RELOAD_NONE || !pc_ap_time_change_allowed(play)) {
+    pc_ap_overlay_toast("Can't save right now");
+    return;
+  }
+  if(mCD_SaveHome_bg(1, NULL) == mCD_TRANS_ERR_NONE) {
+    pc_ap_overlay_toast("Game saved");
+  } else {
+    pc_ap_overlay_toast("Save failed");
+  }
+}
+
 void pc_ap_tick(GAME_PLAY* play) {
   pc_crash_note_frame(play);
   pc_ap_time_tick(play); // before the gate: a blocked request is dropped with a toast
+  pc_ap_quicksave_tick(play);
   // Not while paused (Game_play_move returns first), so the pause menu sees the last frame's
   g_ap.time_change_allowed = g_ap.reload.step == PC_AP_RELOAD_NONE && pc_ap_time_change_allowed(play);
   if(!pc_ap_in_game(play)) {

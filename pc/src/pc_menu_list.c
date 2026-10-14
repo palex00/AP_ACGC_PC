@@ -3,7 +3,7 @@
 
 #include "game.h"
 
-#define PC_MENU_LIST_Y0     66.0f // first row
+#define PC_MENU_LIST_Y0     58.0f // first row
 #define PC_MENU_LIST_LINE_H 14.0f
 
 void pc_menu_list_set(pc_menu_list* l, int count, int columns, int rows) {
@@ -46,11 +46,11 @@ f32 pc_menu_list_y(const pc_menu_list* l, int i) {
 void pc_menu_list_draw(struct game_s* game, const pc_menu_list* l, const char* header, const char* status,
                        int status_dim) {
   pc_menu_dim_rect(game->graph, 180);
-  pc_menu_draw_centered(game, header, 22.0f, 255, 255, 255, 255, 1.0f);
+  pc_menu_draw_centered(game, header, 14.0f, 255, 255, 255, 255, 1.0f);
   if(status_dim) {
-    pc_menu_draw_centered(game, status, 38.0f, 150, 150, 150, 220, 1.0f);
+    pc_menu_draw_centered(game, status, 30.0f, 150, 150, 150, 220, 1.0f);
   } else {
-    pc_menu_draw_centered(game, status, 38.0f, 230, 230, 230, 255, 1.0f);
+    pc_menu_draw_centered(game, status, 30.0f, 230, 230, 230, 255, 1.0f);
   }
 
   // More above / below
