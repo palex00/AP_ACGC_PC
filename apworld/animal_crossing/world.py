@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import math
 from collections.abc import Mapping
@@ -28,6 +29,10 @@ LETTER_TEXT_MAX = 192  # MAIL_BODY_LEN in the game
 BELLS_ROUND = 100  # Bell credit amounts are rounded to this
 MIN_VILLAGERS = 6  # the game starts with 6 villagers
 MIN_YEAR, MAX_YEAR = 2001, 2100  # mTM_MIN_YEAR / mTM_MAX_YEAR (PC)
+# Universal Tracker: slot_data keys named like an option but holding something else (villager indices, the pools,
+# a tool name), so they're not restored as options
+UT_NOT_OPTIONS = {"villager_blacklist", "starting_villagers", "catalog_pools", "starting_tool"}
+ITEM_ID_TO_NAME = {item_id: name for name, item_id in ITEM_NAME_TO_ID.items()}
 
 
 class AnimalCrossingItem(Item):
@@ -150,7 +155,30 @@ class AnimalCrossingWorld(World):
     item_name_to_id = ITEM_NAME_TO_ID
     location_name_to_id = LOCATION_NAME_TO_ID
 
+    # Universal Tracker regenerates the world from slot_data (no yaml needed): see ut_restore_options
+    ut_can_gen_without_yaml = True
+
+    @staticmethod
+    def interpret_slot_data(slot_data: dict[str, Any]) -> dict[str, Any]:
+        return slot_data
+
+    def ut_slot_data(self) -> dict[str, Any] | None:
+        # The real seed's slot_data while Universal Tracker regenerates, else None
+        return getattr(self.multiworld, "re_gen_passthrough", {}).get(self.game)
+
+    def ut_restore_options(self, slot_data: dict[str, Any]) -> None:
+        # Every option with a slot_data key of its name. Missing keys (older seeds) keep the default.
+        for field in dataclasses.fields(self.options):
+            if field.name in slot_data and field.name not in UT_NOT_OPTIONS:
+                option = getattr(self.options, field.name)
+                setattr(self.options, field.name, type(option).from_any(slot_data[field.name]))
+
     def generate_early(self) -> None:
+        # Universal Tracker: options and random rolls come from the real seed. Rolls still happen below (and are
+        # then replaced), so self.random advances the same way.
+        ut = self.ut_slot_data()
+        if ut is not None:
+            self.ut_restore_options(ut)
         if not self.options.goal.value:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Goal needs at least one goal.")
         if "Statue" in self.options.goal.value and not self.options.loansanity:
@@ -190,15 +218,21 @@ class AnimalCrossingWorld(World):
             self.starting_tool = self.random.choice(TOOLS)
         elif choice != options.StartingTool.option_none:
             self.starting_tool = TOOLS[choice - 1]
+        if ut is not None and "starting_tool" in ut:
+            self.starting_tool = ut["starting_tool"]
         self.pool_tools = []
         if self.options.tools_in_pool:
             self.pool_tools = [tool for tool in TOOLS if tool != self.starting_tool]
         self.museum_goal_count = math.ceil(len(self.museum_item_names) * self.options.museum_goal_percent.value / 100)
+        if ut is not None and "museum_goal_count" in ut:
+            self.museum_goal_count = ut["museum_goal_count"]
         # Museum goal: only the donation items it needs are progression (picked at random), the rest are useful.
         # The client counts every donation item received, so a useful one still counts in game.
         self.museum_progression = set()
         if "Museum" in self.options.goal.value:
             self.museum_progression = set(self.random.sample(self.museum_item_names, self.museum_goal_count))
+        if ut is not None and "museum_progression" in ut:
+            self.museum_progression = {ITEM_ID_TO_NAME[item_id] for item_id in ut["museum_progression"]}
         self.ac_player_name = clamp_name(self.options.player_name.value) or clamp_name(self.player_name)
         self.ac_town_name = clamp_name(self.options.town_name.value) or DEFAULT_TOWN
         self.ac_letter_sender = (clamp_name(self.options.letter_sender.value, LETTER_SENDER_MAX)
@@ -229,6 +263,9 @@ class AnimalCrossingWorld(World):
             self.loan_checks = split_loan_checks(self.loans, self.options.total_loan_checks.value)
         else:
             self.loan_checks = [0] * len(LOANS)
+        if ut is not None:
+            self.loans = ut.get("loans", self.loans)
+            self.loan_checks = ut.get("loan_checks", self.loan_checks)
 
         # Nook store upgrades: Progressive Nook Store items, or the thresholds of the chosen mode
         self.store_items = 0
@@ -252,9 +289,13 @@ class AnimalCrossingWorld(World):
                                   f"{pools * size}, at most {CATALOG_ELIGIBLE} (with {pools} pools: size at most "
                                   f"{CATALOG_ELIGIBLE // pools}).")
             self.catalog_pools = make_pools(self.random, pools, size)
+        if ut is not None and "catalog_pools" in ut:
+            self.catalog_pools = ut["catalog_pools"]
         self.catalog_pool_items = max(len(self.catalog_pools) - 1, 0)
         catalog_total = sum(len(pool) for pool in self.catalog_pools)
         self.catalog_goal_count = math.ceil(catalog_total * self.options.catalog_goal_percent.value / 100)
+        if ut is not None and "catalog_goal_count" in ut:
+            self.catalog_goal_count = ut["catalog_goal_count"]
         # Catalog goal: pools needed to hold catalog_goal_count items, so k-1 Progressive Catalog Pool
         self.catalog_goal_pools = 0
         held = 0
@@ -473,6 +514,8 @@ class AnimalCrossingWorld(World):
             "loan_checks": self.loan_checks,
             "favorsanity": self.options.favorsanity.value,
             "tools_in_pool": self.options.tools_in_pool.value,
+            # Resolved starting tool (item name, None for none); for Universal Tracker
+            "starting_tool": self.starting_tool,
             "nook_store_upgrades": self.options.nook_store_upgrades.value,
             # Bells (sales) or catalog entries (catalog) per upgrade; empty with progressive
             "nook_store_thresholds": self.store_thresholds,
@@ -492,6 +535,8 @@ class AnimalCrossingWorld(World):
             "fossil_checks": self.museum_modes[MUSEUM_FOSSIL],
             "painting_checks": self.museum_modes[MUSEUM_PAINTING],
             "museum_goal_count": self.museum_goal_count,
+            # Museum donation items that are progression (Museum goal); for Universal Tracker
+            "museum_progression": sorted(ITEM_NAME_TO_ID[name] for name in self.museum_progression),
             "critter_spawns": self.options.critter_spawns.value,
             "fossil_spawns": self.options.fossil_spawns.value,
             "fossil_seasons": FOSSIL_SEASONS,
