@@ -37,12 +37,12 @@ The game reads all assets directly from the disc image at startup. No extraction
 
 3. Place your disc image in the `rom/` folder:
    ```
-   pc/build32/bin/rom/YourGame.ciso
+   pc/build/windows32/bin/rom/YourGame.ciso
    ```
 
 4. Run:
    ```bash
-   pc/build32/bin/AnimalCrossing.exe
+   pc/build/windows32/bin/AnimalCrossing.exe
    ```
 
 Native Linux build: `./build_podman.sh --linux`, output in `pc/build/linux32/bin/` (run `AnimalCrossing`

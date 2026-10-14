@@ -100,8 +100,8 @@ fork of the ACGC-PC port.
 ## Build
 - Changed to use podman instead of requiring a specific setup on your pc
   - Podman is a generally easy install on most systems...: https://podman.io/docs/installation
-- Build goes to ./pc/build32, which is where the original put it. I'm not a fan but I don't 
-  feel like changing it right now.
+- Builds go to ./pc/build/windows32 and ./pc/build/linux32; releases (ignore/generate_release.sh)
+  build in ./pc/release/windows32 and ./pc/release/linux32, with the zip, tarball and apworld in ./pc/release.
 - I'm using a clang lsp, there's some issues:
   - Needed to produce compile_commands.json, but we're using a container, so it's a bit complicated
     - Bunch of sed crap to edit the compile commands to not point at /build

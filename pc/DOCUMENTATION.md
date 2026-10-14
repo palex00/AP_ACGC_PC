@@ -58,7 +58,7 @@ User provides disc image (.ciso/.iso/.gcm)
 1. **Transforms source files in-place**: replaces inline `#include` with sized-array declarations and lazy-load code under `#ifdef TARGET_PC`
 2. **Generates `pc/src/pc_assets.c`** (~30K lines): central loader with asset table mapping ~2500 assets to their ROM offsets, byte-swap types, and source (DOL or REL)
 3. **Generates `pc/include/pc_assets.h`**: public API (`pc_assets_init`, `pc_load_asset`)
-4. **Copies `.bin` fallback files** to `pc/build32/bin/assets/` for non-disc-image builds
+4. **Copies `.bin` fallback files** to `pc/build/windows32/bin/assets/` for non-disc-image builds
 
 ### Fallback Chain
 
@@ -325,12 +325,12 @@ Actor profile validation remains in `m_actor.c` to skip NULL/invalid profiles be
 ### Quick Start
 
 ```bash
-# 1. Place disc image in pc/build32/bin/rom/
+# 1. Place disc image in pc/build/windows32/bin/rom/
 # 2. Build (from MSYS2 MINGW32 shell):
 ./build_pc.sh
 
 # 3. Run:
-pc/build32/bin/AnimalCrossing.exe --verbose
+pc/build/windows32/bin/AnimalCrossing.exe --verbose
 ```
 
 `build_pc.sh` handles CMake configuration and build in one step.

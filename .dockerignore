@@ -2,6 +2,6 @@
 # folder with the Dockerfile into its context? IDK, whatever I guess, not a lot to add
 .git
 orig/
-pc/build32/
-ignore/
 pc/build/
+pc/release/
+ignore/

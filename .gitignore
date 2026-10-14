@@ -2,6 +2,7 @@
 ignore/
 .clangd
 /release/
+pc/release/
 
 # IDE folders
 .idea/
