@@ -1100,6 +1100,9 @@ void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
   if(g_ap.museum.critter_odds != AP_CRITTER_ODDS_VANILLA) {
     u8 wanted[PC_AP_CRITTER_NUM];
     pc_ap_critter_wanted(mMmd_CATEGORY_FISH, wanted);
+    if(!mFI_CheckInIsland()) {
+      pc_ap_museumsanity_fish_unwant_locked(&g_ap.museum, rows, n, wanted);
+    }
     pc_ap_museumsanity_fish_spawns(&g_ap.museum, wanted, rows, n);
   }
   // Fish passes: town only (island rows are tagged sea too, the island isn't part of it)

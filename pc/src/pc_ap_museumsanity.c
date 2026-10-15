@@ -445,6 +445,26 @@ void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_
   }
 }
 
+void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aSOG_gyoei_spawn_info_weight_f_c* rows,
+                                           int n, u8 wanted[PC_AP_CRITTER_NUM]) {
+  if(m->fish_availability != AP_FISH_AVAIL_PROGRESSIVE) {
+    return;
+  }
+  u8 open[PC_AP_CRITTER_NUM] = { 0 };
+  for(int i = 0; i < n; i++) {
+    int s = pc_ap_fish_species(rows[i].type);
+    int pass = pc_ap_museumsanity_fish_row_pass(rows[i].type, rows[i].spawn_area);
+    if(s >= 0 && (pass < 0 || pc_ap_museumsanity_fish_pass_open(m, pass))) {
+      open[s] = 1;
+    }
+  }
+  for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
+    if(!open[s]) {
+      wanted[s] = 0;
+    }
+  }
+}
+
 // Spawn list type -> species (journal index), -1 = not a museum bug (spirit, nothing)
 static int pc_ap_insect_species(int type) {
   return type >= 0 && type < PC_AP_CRITTER_NUM ? type : -1;

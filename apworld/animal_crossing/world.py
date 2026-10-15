@@ -194,8 +194,9 @@ class AnimalCrossingWorld(World):
                 setattr(self.options, field.name, type(option).from_any(slot_data[field.name]))
 
     def generate_early(self) -> None:
-        # Universal Tracker: options and random rolls come from the real seed. Rolls still happen below (and are
-        # then replaced), so self.random advances the same way.
+        # Universal Tracker: options and random rolls come from the real seed. Rolls below may still happen, but
+        # self.random does NOT follow the real seed (e.g. random_tool, a restored town_day): every rolled result
+        # must be replaced from slot_data.
         ut = self.ut_slot_data()
         if ut is not None:
             self.ut_restore_options(ut)

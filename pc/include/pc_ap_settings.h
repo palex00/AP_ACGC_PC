@@ -43,7 +43,7 @@ enum {
 };
 
 #define PC_AP_SET_ODDS_NUM    3
-#define PC_AP_SET_PERCENT_MIN 1
+#define PC_AP_SET_PERCENT_MIN 1 // all percents; the apworld has higher minimums for some (New Item Chance 5), kept on purpose
 #define PC_AP_SET_PERCENT_MAX 100
 #define PC_AP_SET_PERCENT_STEP 5
 

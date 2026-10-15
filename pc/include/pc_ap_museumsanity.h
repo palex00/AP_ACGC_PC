@@ -134,6 +134,10 @@ int pc_ap_museumsanity_fish_row_pass(int type, int area);
 // its weight but gets an invalid spawn area, so picking it spawns nothing (the others
 // keep vanilla odds). Not for the island (its rows are tagged sea too).
 void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n);
+// Fish Availability x dynamic odds: a species with no open row in the list isn't wanted
+// (no boost for fish that can't spawn). Call before the odds; not for the island.
+void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aSOG_gyoei_spawn_info_weight_f_c* rows,
+                                           int n, u8 wanted[PC_AP_CRITTER_NUM]);
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
 
