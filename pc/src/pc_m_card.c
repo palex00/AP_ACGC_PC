@@ -864,17 +864,21 @@ void mCD_LoadLand(void) {
     pc_ap_settings_open();
   }
   int backup_no;
-  if (pc_save_check_and_load(&backup_no)) {
+  int loaded = pc_save_check_and_load(&backup_no);
+  if (loaded) {
     Common_Set(copy_protect, Save_Get(copy_protect));
   }
 
   // The sidecar that matches the loaded GCI. Missing file (new town, or a
   // backup from before sidecars were rotated) leaves the AP state zeroed,
-  // which only errs toward giving Bells again.
-  {
+  // which only errs toward giving Bells again. No GCI = new town, so a
+  // leftover sidecar is ignored.
+  if (loaded) {
     char ap_path[PC_PATHSIZE];
     pc_ap_state_path(ap_path, sizeof(ap_path), backup_no);
     pc_ap_load(ap_path);
+  } else {
+    pc_ap_load(NULL);
   }
 
   Common_Set(save_error_type, 0);

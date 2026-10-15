@@ -154,6 +154,10 @@ static int load_config(const char * path, ap_config * out) {
   if (offlinep != INI_NOT_FOUND) {
     snprintf(out->offline, sizeof(out->offline), "%s", ini_property_value(ini, INI_GLOBAL_SECTION, offlinep));
     ini_destroy(ini);
+    if (!out->offline[0]) {
+      APLOG_WARN("Malformed AP config file at %s (offline is empty)", path);
+      return 1;
+    }
     return 0;
   }
   if (hostp == INI_NOT_FOUND || slotp == INI_NOT_FOUND) {

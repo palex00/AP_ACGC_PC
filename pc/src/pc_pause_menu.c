@@ -68,8 +68,18 @@ static pc_ap_catalog_menu catalog_menu;
 static pc_ap_critter_menu critter_menu; // Bugs or Fish
 static pc_ap_shell_menu shell_menu;
 
-// Rebuilds the main page entries (Catalogsanity can turn on while paused on the title)
+// Index of item in main_items, 0 (Resume) if it isn't shown
+static int main_find(MainItem item) {
+    for (int i = 0; i < main_count; i++) {
+        if (main_items[i] == item) return i;
+    }
+    return 0;
+}
+
+// Rebuilds the main page entries (Catalogsanity can turn on while paused on the title).
+// The cursor stays on the same entry when others appear or disappear.
 static void main_update(void) {
+    MainItem prev = (main_sel < main_count) ? main_items[main_sel] : MAIN_RESUME;
     main_count = 0;
     main_items[main_count++] = MAIN_RESUME;
     main_items[main_count++] = MAIN_TIME;
@@ -84,7 +94,7 @@ static void main_update(void) {
     }
     main_items[main_count++] = MAIN_SETTINGS;
     main_items[main_count++] = MAIN_QUIT;
-    if (main_sel >= main_count) main_sel = 0;
+    main_sel = main_find(prev);
 }
 
 static const char* main_label(MainItem item) {
@@ -193,7 +203,7 @@ static void confirm_activate(void) {
         g_pc_running = 0;
     } else {
         cur_page = PAGE_MAIN;
-        main_sel = 0;
+        main_sel = main_find(MAIN_QUIT);
     }
 }
 

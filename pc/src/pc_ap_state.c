@@ -61,6 +61,7 @@ int pc_ap_state_write(const char * filename, ini_t * ini) {
 }
 
 ini_t * pc_ap_state_read(const char * filename) {
+  if(!filename) { return NULL; }
   FILE * f = fopen(filename, "rb");
   if(!f) { return NULL; }
   char buf[PCAP_MAXFILE];
