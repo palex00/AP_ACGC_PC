@@ -204,7 +204,7 @@ void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
   for(int i = 0; i < m->month_count; i++) {
     has += pc_ap_critter_status(m->cat, m->month_species[i]) > 0;
   }
-  snprintf(status, sizeof(status), "%d / %d caught", has, m->month_count);
+  snprintf(status, sizeof(status), "%d / %d found", has, m->month_count);
   pc_menu_fixtext(status);
   pc_menu_list_draw(game, &m->list, header, status, 0);
   for(int i = pc_menu_list_first(&m->list); i < pc_menu_list_end(&m->list); i++) {

@@ -1,5 +1,6 @@
 /* pc_mtx.c - C replacements for PPC paired-singles matrix/vector math */
 #include "pc_platform.h"
+#include "pc_actor_probe.h"
 #include <math.h>
 
 typedef f32 Mtx34[3][4];
@@ -300,6 +301,8 @@ void guMtxF2L(float mf[4][4], Mtx* m) {
             *(ai++) = (e1 & 0xffff0000) | ((e2 >> 16) & 0xffff);
             *(af++) = ((e1 << 16) & 0xffff0000) | (e2 & 0xffff);
         }
+
+    if (g_pc_actor_probe) pc_actor_probe_mtx(mf, m);
 }
 
 void guMtxIdent(Mtx* m) {

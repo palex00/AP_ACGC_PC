@@ -20,6 +20,7 @@
 #include "m_common_data.h"
 #ifdef TARGET_PC
 #include "pc_platform.h"
+#include "pc_actor_probe.h"
 #endif
 
 #ifdef MUST_MATCH
@@ -271,6 +272,9 @@ static void Actor_draw(GAME_PLAY* play, ACTOR* actor) {
     Matrix_scale(actor->scale.x, actor->scale.y, actor->scale.z, MTX_MULT);
 
     /* Draw actor */
+#ifdef TARGET_PC
+    if (g_pc_actor_probe) pc_actor_probe_begin(actor, play);
+#endif
     Actor_draw_ta_set(actor, play);
     (*actor->dw_proc)(actor, &play->game);
     Actor_draw_ta_clr(actor, play);
@@ -279,6 +283,9 @@ static void Actor_draw(GAME_PLAY* play, ACTOR* actor) {
     if (actor->shape_info.shadow_proc != NULL) {
         (*actor->shape_info.shadow_proc)(actor, lights, play);
     }
+#ifdef TARGET_PC
+    if (g_pc_actor_probe) pc_actor_probe_end();
+#endif
 }
 
 extern int Actor_draw_actor_no_culling_check(ACTOR* actor) {

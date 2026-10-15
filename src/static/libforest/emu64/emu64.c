@@ -15,6 +15,7 @@
 
 #ifdef TARGET_PC
 #include "pc_platform.h"
+#include "pc_actor_probe.h"
 #endif
 
 // this pragma may be unnecessary
@@ -4557,6 +4558,9 @@ void emu64::dl_G_MTX() {
                 bcopy(mtx44, &this->position_mtx, sizeof(GC_Mtx)); /* Last row of Mtx44 is ignored */
             }
         } else { /* Modelview */
+#ifdef TARGET_PC
+            if (g_pc_actor_probe) pc_actor_probe_gpu_mtx(mtx);
+#endif
             GC_Mtx& concat_src = this->model_view_mtx_stack[this->mtx_stack_size];
 
             if ((mtx_gfx->type & G_MTX_PUSH) == G_MTX_NOPUSH) {

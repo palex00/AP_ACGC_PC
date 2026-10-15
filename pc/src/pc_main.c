@@ -14,6 +14,7 @@
 #include "ap_archipelago.h"
 #include "pc_ap_logic.h"
 #include "pc_crash.h"
+#include "pc_actor_probe.h"
 #include "pc_window_icon.h"
 
 // Single implementation of the vendored ini.h (pc/lib/ini) for the exe
@@ -328,6 +329,7 @@ int main(int argc, char* argv[]) {
             printf("  --rain [intensity]  Force rainy weather; intensity is light, normal, or heavy\n");
             printf("  --uber-shader       Disable shader specialization (single uber shader)\n");
             printf("  --crash-test        Crash on purpose after startup, to check the crash report\n");
+            printf("  --actor-probe       Log actors that jump far in one frame to actor_probe.txt\n");
             printf("  --help, -h          Show this help message\n");
             return 0;
         } else if (strcmp(argv[i], "--framelimit") == 0) {
@@ -378,6 +380,8 @@ int main(int argc, char* argv[]) {
             i++;
         } else if (strcmp(argv[i], "--crash-test") == 0) {
             crash_test = 1;
+        } else if (strcmp(argv[i], "--actor-probe") == 0) {
+            g_pc_actor_probe = 1;
         } else if (strcmp(argv[i], "--rain") == 0) {
             g_pc_weather_override = mEnv_WEATHER_RAIN;
             g_pc_weather_intensity_override = mEnv_WEATHER_INTENSITY_HEAVY;
@@ -405,6 +409,7 @@ int main(int argc, char* argv[]) {
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
     }
+    pc_actor_probe_init();
 
     /* exe image range for seg2k0 — BSS can overlap N64 segment addresses */
 #ifdef _WIN32

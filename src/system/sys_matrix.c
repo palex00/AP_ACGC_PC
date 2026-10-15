@@ -5,6 +5,9 @@
 #include "libc64/math64.h"
 #include "MSL_C/w_math.h"
 #include "libforest/gbi_extensions.h"
+#ifdef TARGET_PC
+#include "pc_actor_probe.h"
+#endif
 
 // clang-format off
 Mtx Mtx_clear = gdSPDefMtx(
@@ -557,6 +560,9 @@ Mtx* _MtxF_to_Mtx(MtxF* src, Mtx* dest) {
 #endif
     }
 
+#ifdef TARGET_PC
+    if (g_pc_actor_probe) pc_actor_probe_mtx(src->mf, dest);
+#endif
     return dest;
 }
 
