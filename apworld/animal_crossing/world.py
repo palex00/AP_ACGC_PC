@@ -4,7 +4,7 @@ import math
 from collections.abc import Mapping
 from typing import Any
 
-from BaseClasses import Item, ItemClassification, Location, Region
+from BaseClasses import CollectionState, Item, ItemClassification, Location, Region
 from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule, set_rule
@@ -342,10 +342,6 @@ class AnimalCrossingWorld(World):
         if locations == 0:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favor Pools must be "
                               f"at least 1.")
-        # Catalog checks all need a Progressive Catalog Pool, so they can't be the only checks
-        if locations == catalog_total:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Catalog checks can't be the only checks (no "
-                              f"pool is open at the start). Turn on Loansanity or set Favor Pools to at least 1.")
         # Every non-filler item needs a location (the starting month and slot are given at the start)
         items = len(LOANS) - 1 if self.options.loansanity else 0
         if self.options.timesanity:
@@ -516,6 +512,14 @@ class AnimalCrossingWorld(World):
         if self.options.timesanity:
             chosen.append(lambda state: state.has_any(("Evening Hours", "Night Hours"), self.player))
         self.multiworld.completion_condition[self.player] = lambda state: all(goal(state) for goal in chosen)
+
+        # Something must be reachable with only the start inventory, else the fill fails with a FillError
+        # (e.g. only catalog checks, only checks needing a tool not given, only shop checks at Morning)
+        start = CollectionState(self.multiworld)  # every player's precollected items
+        if not any(location.can_reach(start) for location in self.get_locations()):
+            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] No check can be done at the start with "
+                              f"these options. Turn on Loansanity, set Favor Pools or Shellsanity to at least 1, "
+                              f"or add a Starting Tool or Shops Always Open.")
 
     def beach_per_month(self) -> int:
         # Shellsanity checks per month, 0 when off
