@@ -69,6 +69,11 @@ void pc_ap_newgame_shirt(void) {
 // What the train asks: name, town, gender, face
 static void pc_ap_newgame_identity(ap_slotdata* sd) {
   pc_ap_name_to_game(Now_Private->player_ID.player_name, PLAYER_NAME_LEN, sd->player_name);
+  // Blank (hand-written offline json): the game's name compares fail for an all-space name, so
+  // nothing would ever be "you" (house owner, mail, pc_ap_accepting). Same default as the apworld.
+  if (mPr_NullCheckPlayerName(Now_Private->player_ID.player_name)) {
+    pc_ap_name_to_game(Now_Private->player_ID.player_name, PLAYER_NAME_LEN, "-");
+  }
   pc_ap_name_to_game(Save_Get(land_info).name, LAND_NAME_SIZE, sd->town_name);
   Now_Private->gender = sd->gender == 1 ? mPr_SEX_FEMALE : mPr_SEX_MALE;
   Now_Private->face = mPr_FACE_TYPE0 + sd->face;

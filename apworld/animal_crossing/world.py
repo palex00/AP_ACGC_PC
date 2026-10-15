@@ -26,6 +26,7 @@ from .villagers import PERSONALITIES, VILLAGERS
 GAME_NAME = "Animal Crossing"
 NAME_MAX = 8  # PLAYER_NAME_LEN / LAND_NAME_SIZE in the game
 DEFAULT_TOWN = "Archi"
+DEFAULT_PLAYER_NAME = "-"  # a blank name breaks the game's name compares (no one is ever "you")
 LETTER_SENDER_MAX = 32  # MAIL_FOOTER_LEN in the game
 DEFAULT_LETTER_SENDER = "Archipelago"
 LETTER_TEXT_MAX = 192  # MAIL_BODY_LEN in the game
@@ -261,7 +262,8 @@ class AnimalCrossingWorld(World):
             self.museum_progression = set(self.random.sample(self.museum_item_names, self.museum_goal_count))
         if ut is not None and "museum_progression" in ut:
             self.museum_progression = {ITEM_ID_TO_NAME[item_id] for item_id in ut["museum_progression"]}
-        self.ac_player_name = clamp_name(self.options.player_name.value) or clamp_name(self.player_name)
+        self.ac_player_name = (clamp_name(self.options.player_name.value) or clamp_name(self.player_name)
+                               or DEFAULT_PLAYER_NAME)
         self.ac_town_name = clamp_name(self.options.town_name.value) or DEFAULT_TOWN
         self.ac_letter_sender = (clamp_name(self.options.letter_sender.value, LETTER_SENDER_MAX)
                                  or DEFAULT_LETTER_SENDER)

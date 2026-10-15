@@ -25,7 +25,8 @@ class SkipIntro(Choice):
 class PlayerName(FreeText):
     """
     Your character's name (max 8 characters). Empty uses your slot name
-    (truncated). Only used with Skip Intro.
+    (truncated), or "-" if it has no plain (ASCII) characters. Only used with
+    Skip Intro.
     """
     display_name = "Player Name"
     default = ""
