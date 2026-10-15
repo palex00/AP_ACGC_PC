@@ -573,6 +573,14 @@ class NoFishingTrash(DefaultOnToggle):
     display_name = "No Fishing Trash"
 
 
+class SkipHRATalk(DefaultOnToggle):
+    """
+    Tom Nook never stops you in his shop to talk about the Happy Room Academy.
+    The Academy starts judging your house the day after you move in.
+    """
+    display_name = "Skip HRA Talk"
+
+
 class EasierCritterCatch(Toggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
@@ -918,5 +926,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     no_falling_stalks: NoFallingStalks
     no_fishing_trash: NoFishingTrash
     easier_critter_catch: EasierCritterCatch
+    skip_hra_talk: SkipHRATalk
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel

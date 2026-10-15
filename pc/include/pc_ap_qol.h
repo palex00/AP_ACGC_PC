@@ -52,6 +52,10 @@ int pc_ap_qol_no_falling_stalks(void);
 // and aGKK (coelacanth), which swap the fish for a can, boot or tire 1 in 20.
 int pc_ap_qol_no_fishing_trash(void);
 
+// Nonzero when Nook's Happy Room Academy talk is skipped. Hooked in
+// mEv_RenewalDataEveryDay: the "wait a day" flag is cleared without setting the talk flag.
+int pc_ap_qol_skip_hra_talk(void);
+
 // Easier Critter Catch. Frames added to a fish's hook window (vanilla 20-90 at 60 Hz),
 // 0 when off; hooked in aGTT_bite_init and aGKK_bite_init.
 int pc_ap_qol_bite_window_bonus(void);

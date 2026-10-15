@@ -47,6 +47,11 @@ int pc_ap_qol_no_fishing_trash(void) {
   return sd->valid && sd->no_fishing_trash;
 }
 
+int pc_ap_qol_skip_hra_talk(void) {
+  ap_slotdata* sd = ap_getslotdata();
+  return sd->valid && sd->skip_hra_talk;
+}
+
 // Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast
 #define PC_AP_QOL_BITE_WINDOW_BONUS 60
 #define PC_AP_QOL_BUG_STRESS_SCALE 0.5f
