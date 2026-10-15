@@ -14,6 +14,7 @@
 #include "m_time.h"
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
+#include "m_player_lib.h"
 #endif
 
 /* sizeof(aSOG_term_info_c) == 4 */
@@ -1449,6 +1450,40 @@ static int aSOG_gyoei_get_idx(aSOG_gyoei_spawn_info_weight_f_c* spawn_info, int 
  * @param type The index of the fish to spawn
  * @return TRUE when the data was successfully setup, FALSE otherwise
  **/
+#ifdef TARGET_PC
+/* Borderless acres: like aSOI_pc_drop_near_player, the acre is filled when the player walks
+ * into it in plain view, so drop candidate units within 5 units (tiles) of the player.
+ * Returns the new candidate count. */
+#define aSOG_PC_NEAR_PLAYER_DIST (5.0f * mFI_UT_WORLDSIZE_X_F)
+
+static int aSOG_pc_drop_near_player(u16* fg_idx, int num, int* block_xz) {
+  PLAYER_ACTOR* player;
+  int kept = 0;
+  int i;
+
+  if (!mPlib_IsWadeDisabled()) {
+    return num;
+  }
+  player = GET_PLAYER_ACTOR_NOW();
+  if (player == NULL) {
+    return num;
+  }
+  for (i = 0; i < num; i++) {
+    xyz_t pos;
+    f32 dx;
+    f32 dz;
+
+    mFI_BkandUtNum2CenterWpos(&pos, block_xz[0], block_xz[1], fg_idx[i] % UT_X_NUM, fg_idx[i] / UT_X_NUM);
+    dx = pos.x - player->actor_class.world.position.x;
+    dz = pos.z - player->actor_class.world.position.z;
+    if (dx * dx + dz * dz >= aSOG_PC_NEAR_PLAYER_DIST * aSOG_PC_NEAR_PLAYER_DIST) {
+      fg_idx[kept++] = fg_idx[i];
+    }
+  }
+  return kept;
+}
+#endif
+
 static int aSOG_gyoei_set_gyoei_data(aSOG_set_data_c* set_data, int* block_xz, int type) {
   #ifdef NONMATCHING
   static u16 fg_idx_table[UT_TOTAL_NUM - 1];
@@ -1567,6 +1602,9 @@ static int aSOG_gyoei_set_gyoei_data(aSOG_set_data_c* set_data, int* block_xz, i
       }
     }
 
+#ifdef TARGET_PC
+    valid_fg_num = aSOG_pc_drop_near_player(fg_idx_table, valid_fg_num, block_xz);
+#endif
     if (valid_fg_num == 0) {
       return FALSE; // no space to spawn a valid fish here
     }
