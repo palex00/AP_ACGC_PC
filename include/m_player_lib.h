@@ -13,6 +13,10 @@ extern "C" {
 extern int g_mPlib_wade_disabled;
 
 extern BOOL mPlib_IsWadeDisabled(void);
+#ifdef TARGET_PC
+/* m_player_common.c_inc: tree wiggle/shake effect (EffectBG_EFFECT_*) on the tree item at world unit ut_x, ut_z */
+extern void Player_actor_Set_EffectBgTree(GAME* game, mActor_name_t item, s16 bg_ef_type, int ut_x, int ut_z);
+#endif
 extern cKF_Animation_R_c* mPlib_Get_Pointer_Animation(int anim_idx);
 extern int mPlib_Get_BasicPlayerAnimeIndex_fromItemKind(int item_kind);
 extern int mPlib_Get_BasicPartTableIndex_fromAnimeIndex(int anim_idx);

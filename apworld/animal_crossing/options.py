@@ -602,6 +602,16 @@ class NoFishingTrash(DefaultOnToggle):
     display_name = "No Fishing Trash"
 
 
+class HiddenBugHints(DefaultOnToggle):
+    """
+    Bugs that hide give themselves away: a little dirt puffs up where a mole
+    cricket is buried, and a tree with a bagworm or spider in it wiggles now and
+    then.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
+    display_name = "Hidden Bug Hints"
+
+
 class SkipHRATalk(DefaultOnToggle):
     """
     Tom Nook never stops you in his shop to talk about the Happy Room Academy.
@@ -1020,6 +1030,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     no_falling_stalks: NoFallingStalks
     no_fishing_trash: NoFishingTrash
     easier_critter_catch: EasierCritterCatch
+    hidden_bug_hints: HiddenBugHints
     skip_hra_talk: SkipHRATalk
     short_shop_talk: ShortShopTalk
     coconuts_wash_up: CoconutsWashUp

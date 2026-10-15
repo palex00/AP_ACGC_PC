@@ -47,6 +47,10 @@ int pc_ap_qol_skip_hra_talk(void) {
   return pc_ap_setting(PC_AP_SET_SKIP_HRA_TALK);
 }
 
+int pc_ap_qol_hidden_bug_hints(void) {
+  return pc_ap_setting(PC_AP_SET_HIDDEN_BUG_HINTS);
+}
+
 int pc_ap_qol_short_shop_talk(void) {
   return pc_ap_setting(PC_AP_SET_SHORT_SHOP_TALK);
 }

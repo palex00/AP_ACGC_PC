@@ -17,6 +17,7 @@ static const pc_ap_setting_info l_settings[PC_AP_SET_NUM] = {
   [PC_AP_SET_NO_FALLING_STALKS] = { "no_falling_stalks", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_NO_FISHING_TRASH] = { "no_fishing_trash", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_EASIER_CRITTER_CATCH] = { "easier_critter_catch", PC_AP_SET_KIND_TOGGLE },
+  [PC_AP_SET_HIDDEN_BUG_HINTS] = { "hidden_bug_hints", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_SKIP_HRA_TALK] = { "skip_hra_talk", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_SHORT_SHOP_TALK] = { "short_shop_talk", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_COCONUTS_WASH_UP] = { "coconuts_wash_up", PC_AP_SET_KIND_TOGGLE },
@@ -62,6 +63,7 @@ void pc_ap_settings_init(pc_ap_settings* s, const ap_slotdata* sd) {
   v[PC_AP_SET_NO_FALLING_STALKS] = sd->no_falling_stalks;
   v[PC_AP_SET_NO_FISHING_TRASH] = sd->no_fishing_trash;
   v[PC_AP_SET_EASIER_CRITTER_CATCH] = sd->easier_critter_catch;
+  v[PC_AP_SET_HIDDEN_BUG_HINTS] = sd->hidden_bug_hints;
   v[PC_AP_SET_SKIP_HRA_TALK] = sd->skip_hra_talk;
   v[PC_AP_SET_SHORT_SHOP_TALK] = sd->short_shop_talk;
   v[PC_AP_SET_COCONUTS_WASH_UP] = sd->coconuts_wash_up;

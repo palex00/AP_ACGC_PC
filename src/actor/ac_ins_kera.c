@@ -8,6 +8,10 @@
 #include "m_name_table.h"
 #include "m_common_data.h"
 #include "m_player_lib.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#include "m_play.h"
+#endif
 
 // Actor-specific work variables
 #define aIKR_AVOID_TIMER(ins) ((ins)->s32_work0)
@@ -277,6 +281,23 @@ static void aIKR_let_escape(ACTOR* actorx, GAME* game) {
  * @param actorx Pointer to the mole cricket actor.
  * @param game Pointer to the current game state.
  */
+#ifdef TARGET_PC
+/* Hidden Bug Hints: a small dirt puff over the buried cricket every few seconds, when the
+ * player is near. Spread over frames by its unit (no per-cricket state). */
+static void aIKR_pc_hint(ACTOR* actorx, GAME* game) {
+    aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actorx;
+
+    if (!pc_ap_qol_hidden_bug_hints() || actorx->player_distance_xz > 400.0f) {
+        return;
+    }
+    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % 150 != 0) {
+        return;
+    }
+    eEC_CLIP->effect_make_proc(eEC_EFFECT_DIG_MUD, actorx->world.position, 2, actorx->shape_info.rotation.y, game,
+                               RSV_NO, 0, 0x4000 | 3);
+}
+#endif
+
 static void aIKR_hide(ACTOR* actorx, GAME* game) {
     if (aIKR_check_dig_hole_scoop(actorx) == TRUE) {
         int i;
@@ -288,6 +309,9 @@ static void aIKR_hide(ACTOR* actorx, GAME* game) {
         }
     } else {
         sAdo_OngenPos((u32)actorx, NA_SE_MOLE_CRICKET_HIDE, &actorx->world.position);
+#ifdef TARGET_PC
+        aIKR_pc_hint(actorx, game);
+#endif
     }
 }
 

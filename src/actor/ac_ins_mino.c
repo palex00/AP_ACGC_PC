@@ -11,6 +11,12 @@
 #include "m_name_table.h"
 #include "m_common_data.h"
 #include "m_player_lib.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#include "m_play.h"
+#include "m_field_info.h"
+#include "ac_effectbg.h"
+#endif
 
 // Actor-specific work variable getters
 #define aIMN_CURRENT_SHAKE(ins) ((ins)->s32_work0)
@@ -277,6 +283,29 @@ static void aIMN_let_escape(ACTOR* actorx, GAME* game) {
     }
 }
 
+#ifdef TARGET_PC
+/* Hidden Bug Hints: the tree the bagworm/spider hides in does the small wiggle (as when the
+ * player bumps into it, no sound) every few seconds, when the player is near. Spread over
+ * frames by its tree's unit (no per-bug state). */
+static void aIMN_pc_hint(ACTOR* actorx, GAME* game) {
+    aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actorx;
+    int ut_x = aIMN_TREE_UNIT_X(insect);
+    int ut_z = aIMN_TREE_UNIT_Z(insect);
+    mActor_name_t* fg;
+
+    if (!pc_ap_qol_hidden_bug_hints() || actorx->player_distance_xz > 400.0f) {
+        return;
+    }
+    if ((((GAME_PLAY*)game)->game_frame + ut_x * 7 + ut_z * 13) % 150 != 0) {
+        return;
+    }
+    fg = mFI_GetUnitFG(actorx->home.position);
+    if (fg != NULL && IS_ITEM_COLLIDEABLE_TREE(*fg)) {
+        Player_actor_Set_EffectBgTree(game, *fg, EffectBG_EFFECT_SHAKE_SMALL, ut_x, ut_z);
+    }
+}
+#endif
+
 static void aIMN_hide(ACTOR* actorx, GAME* game) {
     aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actorx;
 
@@ -285,6 +314,11 @@ static void aIMN_hide(ACTOR* actorx, GAME* game) {
     } else if (aIMN_check_shake_tree(actorx) == TRUE) {
         aIMN_setupAction(insect, aIMN_ACT_APPEAR, game);
     }
+#ifdef TARGET_PC
+    else {
+        aIMN_pc_hint(actorx, game);
+    }
+#endif
 }
 
 static void aIMN_appear(ACTOR* actorx, GAME* game) {
