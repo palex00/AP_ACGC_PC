@@ -393,7 +393,7 @@ class BeachItemChance(Range):
     display_name = "Beach Item Chance"
     range_start = 1
     range_end = 100
-    default = 8
+    default = 15
 
 
 class ToolsInPool(DefaultOnToggle):
