@@ -30,6 +30,14 @@
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
 #include "pc_ap_catalogsanity.h"
+
+// Drag marking: after X marks or unmarks a slot, keep X held; once it has been held
+// PC_TG_DRAG_FRAMES, every slot the cursor moves onto (same table) gets that same state.
+// The wait keeps a single X press from spilling onto the next slot.
+#define PC_TG_DRAG_FRAMES 30
+static int pc_tg_drag_mode = -1; // mTG_MARK_ON / mTG_MARK_OFF, -1 = not dragging
+static int pc_tg_drag_table;
+static int pc_tg_drag_frames;
 #endif
 
 static void mTG_mark_main_CLR(Submenu* submenu, const mSM_MenuInfo_c* menu_info);
@@ -7473,6 +7481,11 @@ static void mTG_mark_proc(Submenu* submenu, mSM_MenuInfo_c* menu_info, mTG_tag_c
         mTG_mark_main(submenu, menu_info, mTG_MARK_CHK, &chk_result)) {
         if (mTG_mark_main(submenu, menu_info, mTG_MARK_RVS, &chk_rvs_result)) {
             if (chk_result != chk_rvs_result) {
+#ifdef TARGET_PC
+                pc_tg_drag_mode = chk_rvs_result ? mTG_MARK_ON : mTG_MARK_OFF;
+                pc_tg_drag_table = tag_ovl->tags[0].table;
+                pc_tg_drag_frames = 0;
+#endif
                 if (chk_result == FALSE) {
                     if (menu_info->menu_type == mSM_OVL_INVENTORY && menu_info->data0 == mSM_IV_OPEN_NORMAL) {
                         mTG_tag_c* main_tag = &tag_ovl->tags[0];
@@ -7692,12 +7705,36 @@ static void mTG_move_move(Submenu* submenu, mSM_MenuInfo_c* menu_info, mTG_tag_c
         if (mTG_move_cursol_base(submenu, tag, menu_info)) {
             mTG_init_tag_data_item_win(submenu);
             sAdo_SysTrgStart(NA_SE_CURSOL);
+#ifdef TARGET_PC
+            if (pc_tg_drag_mode >= 0 && pc_tg_drag_frames >= PC_TG_DRAG_FRAMES && tag->table == pc_tg_drag_table &&
+                mTG_check_hand_condition(submenu)) {
+                int idx = mTG_get_table_idx(tag);
+                int before;
+                int after;
+
+                // Only when it changes, so a slot the mark rules refuse stays quiet
+                if (mTG_mark_mainX(submenu, menu_info, tag->table, idx, mTG_MARK_CHK, &before) &&
+                    mTG_mark_mainX(submenu, menu_info, tag->table, idx, pc_tg_drag_mode, &after) && before != after) {
+                    sAdo_SysTrgStart(after ? NA_SE_45E : NA_SE_45F);
+                }
+            }
+#endif
         }
     }
 }
 
 static void mTG_move_base(Submenu* submenu, mSM_MenuInfo_c* menu_info, mTG_tag_c* tag) {
     u32 trigger = submenu->overlay->menu_control.trigger;
+
+#ifdef TARGET_PC
+    if (pc_tg_drag_mode >= 0) {
+        if (getButton() & BUTTON_X) {
+            pc_tg_drag_frames++;
+        } else {
+            pc_tg_drag_mode = -1;
+        }
+    }
+#endif
 
     if (trigger & (BUTTON_B | BUTTON_START | BUTTON_Y)) {
         mTG_move_cancel(submenu, menu_info, tag);
