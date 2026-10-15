@@ -352,10 +352,11 @@ class TotalLoanChecks(Range):
 class FillerBellsPercent(Range):
     """
     Filler bell total = this percentage of total debt. Filler bells go directly
-    towards loan or savings.
+    towards loan or savings. With few Bells per filler item, the bigger Bell Credits
+    are left out (no credit is worth less than 100 Bells while that helps).
     """
     display_name = "Filler Bells Percent"
-    range_start = 0
+    range_start = 1
     range_end = 200
     default = 70
 

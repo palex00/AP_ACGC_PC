@@ -171,6 +171,8 @@ class AnimalCrossingWorld(World):
     # chosen" is right for them, as link_items ORs in the linked players' own classifications.
     museum_progression: frozenset[str] | set[str] = frozenset()
     museum_modes: dict[int, int] = {}
+    # Bell Credit tiers get_filler_item_name draws from (create_items may drop the big ones)
+    filler_tiers: tuple[str, ...] = tuple(BELL_CREDITS)
 
     # Universal Tracker regenerates the world from slot_data (no yaml needed): see ut_restore_options
     ut_can_gen_without_yaml = True
@@ -387,6 +389,7 @@ class AnimalCrossingWorld(World):
         # Everything else is filler. Bell credit amounts are set in fill_slot_data from what was actually placed,
         # so adding other items to the pool later doesn't break the total.
         free = len(self.multiworld.get_unfilled_locations(self.player)) - len(pool)
+        self.filler_tiers = tuple(self.bell_credit_tiers(free))
         pool += [self.create_filler() for _ in range(free)]
         self.multiworld.itempool += pool
 
@@ -410,8 +413,21 @@ class AnimalCrossingWorld(World):
             classification = ItemClassification.filler
         return AnimalCrossingItem(name, classification, ITEM_NAME_TO_ID[name], self.player)
 
+    def bell_credit_tiers(self, fillers: int) -> list[str]:
+        # Not enough Bells for the big credits: drop the largest tier while a Small Bell Credit would be under
+        # BELLS_ROUND (estimated from the filler count; the real amounts come later, bell_credit_amounts)
+        tiers = list(BELL_CREDITS)  # small to large
+        total_bells = sum(self.loans) * self.options.filler_bells_percent.value / 100
+        while len(tiers) > 1 and fillers > 0:
+            weights = sum(BELL_CREDITS[n][1] for n in tiers)
+            units_per_filler = sum(BELL_CREDITS[n][0] * BELL_CREDITS[n][1] for n in tiers) / weights
+            if total_bells / (fillers * units_per_filler) >= BELLS_ROUND:
+                break
+            tiers.pop()
+        return tiers
+
     def get_filler_item_name(self) -> str:
-        names = list(BELL_CREDITS)
+        names = self.filler_tiers
         return self.random.choices(names, weights=[BELL_CREDITS[n][1] for n in names])[0]
 
     def set_rules(self) -> None:
@@ -558,7 +574,15 @@ class AnimalCrossingWorld(World):
         total_bells = sum(self.loans) * self.options.filler_bells_percent.value / 100
         units = sum(counts[name] * BELL_CREDITS[name][0] for name in BELL_CREDITS)
         unit = total_bells / units if units else 0
-        return {name: round(unit * BELL_CREDITS[name][0] / BELLS_ROUND) * BELLS_ROUND for name in BELL_CREDITS}
+        amounts = {}
+        for name, (size, _) in BELL_CREDITS.items():
+            bells = unit * size
+            # Rounded to BELLS_ROUND; below that (only small credits left, very few Bells) the plain amount, at least 1
+            if bells >= BELLS_ROUND:
+                amounts[name] = round(bells / BELLS_ROUND) * BELLS_ROUND
+            else:
+                amounts[name] = max(1, round(bells))
+        return amounts
 
     def fill_slot_data(self) -> Mapping[str, Any]:
         # Random choices are already resolved here, so the client gets plain numbers.
