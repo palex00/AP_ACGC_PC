@@ -7,6 +7,7 @@
 #include "libc64/qrand.h"
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
+#include "m_player_lib.h"
 #endif
 #include "m_common_data.h"
 #include "m_time.h"
@@ -1995,6 +1996,44 @@ static void aSOI_make_live_ut(aSOI_set_data_c* set_data, int spawn_area, mActor_
   }
 }
 
+#ifdef TARGET_PC
+/* Borderless acres: the acre is filled when the player walks into it, in plain view (no
+ * scroll to hide it), so a bug could appear right next to them. Drop units within 5 units
+ * (tiles) of the player. */
+#define aSOI_PC_NEAR_PLAYER_DIST (5.0f * mFI_UT_WORLDSIZE_X_F)
+
+static void aSOI_pc_drop_near_player(aSOI_set_data_c* set_data, aSetMgr_player_pos_c* player_pos) {
+  PLAYER_ACTOR* player;
+  int ut_x;
+  int ut_z;
+
+  if (!mPlib_IsWadeDisabled()) {
+    return;
+  }
+  player = GET_PLAYER_ACTOR_NOW();
+  if (player == NULL) {
+    return;
+  }
+  for (ut_z = 2; ut_z < UT_Z_NUM - 2; ut_z++) {
+    for (ut_x = 2; ut_x < UT_X_NUM - 2; ut_x++) {
+      xyz_t pos;
+      f32 dx;
+      f32 dz;
+
+      if (!aSOI_get_live_ut_sub(set_data, ut_x, ut_z)) {
+        continue;
+      }
+      mFI_BkandUtNum2CenterWpos(&pos, player_pos->next_bx, player_pos->next_bz, ut_x, ut_z);
+      dx = pos.x - player->actor_class.world.position.x;
+      dz = pos.z - player->actor_class.world.position.z;
+      if (dx * dx + dz * dz < aSOI_PC_NEAR_PLAYER_DIST * aSOI_PC_NEAR_PLAYER_DIST) {
+        aSOI_set_live_ut(set_data, ut_x, ut_z, FALSE);
+      }
+    }
+  }
+}
+#endif
+
 static void aSOI_ins_decide_insect(aSOI_set_data_c* set_data, aSetMgr_player_pos_c* player_pos, aSOI_insect_spawn_info_f_c* spawn_info, int info_num) {
   mActor_name_t* fg_item;
   u16* deposit;
@@ -2058,6 +2097,9 @@ static void aSOI_ins_decide_insect(aSOI_set_data_c* set_data, aSetMgr_player_pos
     // Check that the spawn area is an actual valid spawn area
     if (spawn_area < aSOI_SPAWN_AREA_FLYING_NEAR_FLOWERS_OR_AROUND) {
       aSOI_make_live_ut(set_data, spawn_area, fg_item, collision_data);
+#ifdef TARGET_PC
+      aSOI_pc_drop_near_player(set_data, player_pos);
+#endif
       aSOI_ins_set_insect_data(set_data, info->type, player_pos);
     }
   }
