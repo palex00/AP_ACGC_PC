@@ -23,6 +23,11 @@ extern "C" {
 #define PC_AP_ITEM_MUSEUM_BASE       0x10100 // "Museum: X"
 #define PC_AP_LOC_DONATE_BASE        0x30000 // "Donate X"
 #define PC_AP_LOC_FIND_BASE          0x30100 // "Catch X" / "Dig Up X"
+// WARN: keep in sync with apworld museum.py FOSSIL_SERIES! Progressive fossil
+// spawns: "<series> Fossils" = base + series (Tricera, T-rex, Apato, Stego,
+// Ptera, Plesio, Mammoth)
+#define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10030
+#define PC_AP_FOSSIL_SERIES_NUM       7
 
 typedef struct {
   // Config (slot_data); all 0 when museumsanity is off or offline
@@ -30,7 +35,7 @@ typedef struct {
   int goal_count;                // Museum goal: donation items to receive
   // Spawns: set even when museumsanity is off and offline
   int critter_spawns;                      // AP_CRITTER_SPAWNS_*
-  int fossil_spawns;                       // AP_FOSSIL_SPAWNS_*
+  int fossil_spawns;                       // AP_FOSSIL_SPAWNS_* (progressive without fossil checks = vanilla)
   int fossil_seasons[mMmd_FOSSIL_NUM];     // season per fossil (0 spring .. 3 winter)
 } pc_ap_museumsanity;
 
@@ -77,8 +82,17 @@ int pc_ap_museumsanity_instant_fossils(const pc_ap_museumsanity* m);
 // is unsent (fossils active), else while it isn't on display in info
 void pc_ap_museumsanity_fossil_wanted(const pc_ap_museumsanity* m, const mMmd_info_c* info,
                                       u8 wanted[mMmd_FOSSIL_NUM]);
+// Progressive fossil spawns: series (0-6) of a fossil (museum index), -1 for
+// the always-open ones (Amber, Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite)
+int pc_ap_museumsanity_fossil_series(int idx);
+// Nonzero if a fossil can come out: always, unless progressive and its
+// series item isn't received
+int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx);
+// Progressive fossils: find and donate checks of the open fossils (sent or not),
+// -1 when not progressive
+int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m);
 // Fossil (museum index) a dug-up fossil turns out to be, by fossil_spawns.
-// month 0-11, r random in [0, 1)
+// Progressive = dynamic over the open fossils. month 0-11, r random in [0, 1)
 int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[mMmd_FOSSIL_NUM], int month,
                                    f32 r);
 

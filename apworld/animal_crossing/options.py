@@ -600,7 +600,7 @@ class NoFallingStalks(Toggle):
 class CoconutsWashUp(DefaultOnToggle):
     """
     Coconuts sometimes wash up on the town beach in place of a shell (about one
-    in every two full beach walks). Plant one on the beach row to grow a palm tree.
+    in every two to three full beach walks). Plant one on the beach row to grow a palm tree.
     """
     display_name = "Coconuts Wash Up"
 
@@ -819,7 +819,7 @@ class CritterSpawns(Choice):
     option_vanilla = 0
     option_normalized = 1
     option_dynamic = 2
-    default = 1
+    default = 2
 
 
 class FossilSpawns(Choice):
@@ -831,12 +831,16 @@ class FossilSpawns(Choice):
     Season Locked: each fossil only comes out in one season (Spring: March-May, Summer: June-August,
     Autumn: September-November, Winter: December-February). With Timesanity, fossil checks need a month of
     their season.
+    Progressive: like Dynamic, but each dinosaur series (Tricera, T-rex, Apato, Stego, Ptera, Plesio, Mammoth)
+    only comes out once you have its item ("T-rex Fossils", ...). Amber, Dinosaur Track, Ammonite, Dinosaur Egg
+    and Trilobite are always open. Needs Fossil Checks (with Museumsanity); without them this is Vanilla.
     """
     display_name = "Fossil Spawns"
     option_vanilla = 0
     option_dynamic = 1
     option_season_locked = 2
-    default = 1
+    option_progressive = 3
+    default = 3
 
 
 class PaintingChecks(Choice):

@@ -14,7 +14,8 @@ from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOO
                     PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_HOUSE, PROGRESSIVE_NOOK_STORE, SHOVEL, TIME_SLOTS, TOOLS)
 from .locations import (LOANS, LOCATION_NAME_TO_ID, beach_location_name, favor_location_name, loan_location_name,
                         split_loan_checks)
-from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
+from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSIL_SERIES_ITEMS, FOSSIL_SERIES_OF,
+                     FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
                      MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS,
                      museum_donate_name, museum_find_name, museum_item_name)
 from . import options
@@ -221,6 +222,11 @@ class AnimalCrossingWorld(World):
                     self.museum_locations.append(museum_find_name(c, name))
                 if self.museum_modes[c] & CHECK_DONATE:
                     self.museum_locations.append(museum_donate_name(name))
+        # Progressive fossils: one item per series, only with fossil checks (else the client uses vanilla spawns)
+        self.fossil_series_items = []
+        if (self.options.fossil_spawns == options.FossilSpawns.option_progressive
+                and self.museum_modes[MUSEUM_FOSSIL]):
+            self.fossil_series_items = list(FOSSIL_SERIES_ITEMS)
         # Starting tool: also without Tools in Pool (a freebie, mailed at the start)
         self.starting_tool = None
         choice = self.options.starting_tool.value
@@ -329,6 +335,7 @@ class AnimalCrossingWorld(World):
         if self.options.timesanity:
             items += len(MONTHS) + len(TIME_SLOTS) - 2
         items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items + self.catalog_pool_items
+        items += len(self.fossil_series_items)
         if locations < items:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Total checks at {locations}, it must be at "
                               f"least {items} with these options. Raise optional checks such as Favorsanity.")
@@ -358,6 +365,7 @@ class AnimalCrossingWorld(World):
                     pool.append(self.create_item(name))
         pool += [self.create_item(name) for name in self.museum_item_names]
         pool += [self.create_item(name) for name in self.pool_tools]
+        pool += [self.create_item(name) for name in self.fossil_series_items]
         pool += [self.create_item(PROGRESSIVE_NOOK_STORE) for _ in range(self.store_items)]
         pool += [self.create_item(PROGRESSIVE_CATALOG_POOL) for _ in range(self.catalog_pool_items)]
         if self.starting_tool:
@@ -369,7 +377,8 @@ class AnimalCrossingWorld(World):
         self.multiworld.itempool += pool
 
     def create_item(self, name: str) -> AnimalCrossingItem:
-        if name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL) or name in MONTHS or name in TIME_SLOTS:
+        if (name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL) or name in MONTHS or name in TIME_SLOTS
+                or name in FOSSIL_SERIES_ITEMS):
             classification = ItemClassification.progression
         elif name in self.museum_progression:
             classification = ItemClassification.progression
@@ -443,6 +452,12 @@ class AnimalCrossingWorld(World):
             for name, season in zip(FOSSILS, FOSSIL_SEASONS):
                 months = [MONTHS[m] for m in SEASON_MONTHS[season]]
                 self.set_museum_rule(MUSEUM_FOSSIL, name, lambda state, months=months: state.has_any(months, self.player))
+
+        # Progressive fossils: a series fossil needs its series item (the shovel rule below comes on top)
+        if self.fossil_series_items:
+            for name, item in zip(FOSSILS, FOSSIL_SERIES_OF):
+                if item is not None:
+                    self.add_museum_rule(MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, self.player))
 
         # Tools in Pool: catching, digging up and donating need the tool (on top of the rules above)
         if self.options.tools_in_pool:

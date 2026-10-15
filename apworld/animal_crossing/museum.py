@@ -62,3 +62,22 @@ _SEASON_OF_FOSSIL = {
     "Amber": 3, "Dinosaur Track": 3,
 }
 FOSSIL_SEASONS = [_SEASON_OF_FOSSIL[name] for name in FOSSILS]  # museum fossil index -> season
+
+# Fossil Spawns "Progressive": one item per series opens its fossils; the rest (Amber, Dinosaur Track, Ammonite,
+# Dinosaur Egg, Trilobite) are always open.
+# WARN: the client mirrors the series order and ids (pc_ap_museumsanity_fossil_series, PC_AP_ITEM_FOSSIL_SERIES_BASE)!
+FOSSIL_SERIES = ["Tricera", "T-rex", "Apato", "Stego", "Ptera", "Plesio", "Mammoth"]
+FOSSIL_SERIES_ID_BASE = 0x10030  # series s (0-6) = base + s (in the AP item range of items.py)
+
+
+def fossil_series_item_name(series: str) -> str:
+    return f"{series} Fossils"
+
+
+FOSSIL_SERIES_ITEMS = [fossil_series_item_name(series) for series in FOSSIL_SERIES]
+FOSSIL_SERIES_ITEM_NAME_TO_ID = {name: FOSSIL_SERIES_ID_BASE + s for s, name in enumerate(FOSSIL_SERIES_ITEMS)}
+# museum fossil index -> its series item name ("T-rex Skull" -> "T-rex Fossils"), None for the always-open ones
+FOSSIL_SERIES_OF = []
+for _name in FOSSILS:
+    _series = _name.split(" ")[0]
+    FOSSIL_SERIES_OF.append(fossil_series_item_name(_series) if _series in FOSSIL_SERIES else None)

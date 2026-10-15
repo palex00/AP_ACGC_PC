@@ -19,14 +19,17 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   for(int i = 0; i < mMmd_FOSSIL_NUM; i++) {
     m->fossil_seasons[i] = sd->fossil_seasons[i];
   }
-  if(!sd->museumsanity) {
-    return;
+  if(sd->museumsanity) {
+    m->checks[mMmd_CATEGORY_FOSSIL] = sd->fossil_checks;
+    m->checks[mMmd_CATEGORY_ART] = sd->painting_checks;
+    m->checks[mMmd_CATEGORY_INSECT] = sd->bug_checks;
+    m->checks[mMmd_CATEGORY_FISH] = sd->fish_checks;
+    m->goal_count = sd->museum_goal_count;
   }
-  m->checks[mMmd_CATEGORY_FOSSIL] = sd->fossil_checks;
-  m->checks[mMmd_CATEGORY_ART] = sd->painting_checks;
-  m->checks[mMmd_CATEGORY_INSECT] = sd->bug_checks;
-  m->checks[mMmd_CATEGORY_FISH] = sd->fish_checks;
-  m->goal_count = sd->museum_goal_count;
+  // Progressive fossils: the series items only exist with fossil checks (also not offline)
+  if(m->fossil_spawns == AP_FOSSIL_SPAWNS_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FOSSIL)) {
+    m->fossil_spawns = AP_FOSSIL_SPAWNS_VANILLA;
+  }
 }
 
 // Same ranges and numbering as mMmd_GetDisplayInfo
@@ -236,6 +239,45 @@ void pc_ap_museumsanity_fossil_wanted(const pc_ap_museumsanity* m, const mMmd_in
   }
 }
 
+int pc_ap_museumsanity_fossil_series(int idx) {
+  // Museum order: three each for Tricera .. Plesio (0-17), then Mammoth skull + torso
+  if(idx >= 0 && idx < 18) {
+    return idx / 3;
+  }
+  if(idx == 18 || idx == 19) {
+    return 6;
+  }
+  return -1;
+}
+
+int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx) {
+  if(m->fossil_spawns != AP_FOSSIL_SPAWNS_PROGRESSIVE) {
+    return 1;
+  }
+  int series = pc_ap_museumsanity_fossil_series(idx);
+  return series < 0 || ap_item_count(PC_AP_ITEM_FOSSIL_SERIES_BASE + series) > 0;
+}
+
+int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m) {
+  if(m->fossil_spawns != AP_FOSSIL_SPAWNS_PROGRESSIVE) {
+    return -1;
+  }
+  int per_fossil = 0;
+  if(m->checks[mMmd_CATEGORY_FOSSIL] & AP_MUSEUM_FIND) {
+    per_fossil++;
+  }
+  if(m->checks[mMmd_CATEGORY_FOSSIL] & AP_MUSEUM_DONATE) {
+    per_fossil++;
+  }
+  int count = 0;
+  for(int idx = 0; idx < mMmd_FOSSIL_NUM; idx++) {
+    if(pc_ap_museumsanity_fossil_open(m, idx)) {
+      count += per_fossil;
+    }
+  }
+  return count;
+}
+
 int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[mMmd_FOSSIL_NUM], int month,
                                    f32 r) {
   int weight[mMmd_FOSSIL_NUM];
@@ -246,10 +288,10 @@ int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[
     if(m->fossil_spawns == AP_FOSSIL_SPAWNS_SEASON_LOCKED) {
       weight[idx] = m->fossil_seasons[idx] == season;
     } else {
-      // Dynamic: every fossil equally likely, wanted ones boosted. Vanilla spawns never
-      // get here (the game's own pick).
-      weight[idx] = 1;
-      if(m->fossil_spawns == AP_FOSSIL_SPAWNS_DYNAMIC && wanted[idx]) {
+      // Dynamic: every fossil equally likely, wanted ones boosted. Progressive: the
+      // same over the open fossils. Vanilla spawns never get here (the game's own pick).
+      weight[idx] = pc_ap_museumsanity_fossil_open(m, idx) ? 1 : 0;
+      if(m->fossil_spawns != AP_FOSSIL_SPAWNS_VANILLA && wanted[idx]) {
         weight[idx] *= PC_AP_SPAWN_BOOST;
       }
     }

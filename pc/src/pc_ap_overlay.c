@@ -222,7 +222,11 @@ static void apo_append_museum(char* out, size_t size) {
   for(int i = 0; i < (int)(sizeof(cats) / sizeof(cats[0])); i++) {
     int checks;
     int checked = pc_ap_museum_checked(cats[i].cat, &checks);
-    if(checks > 0) {
+    // Progressive fossils: sent / checks of the open fossils / all checks
+    int available = cats[i].cat == mMmd_CATEGORY_FOSSIL ? pc_ap_museum_fossils_available() : -1;
+    if(checks > 0 && available >= 0) {
+      apo_append(out, size, "\n%s: %d / %d / %d", cats[i].name, checked, available, checks);
+    } else if(checks > 0) {
       apo_append(out, size, "\n%s: %d / %d", cats[i].name, checked, checks);
     }
   }

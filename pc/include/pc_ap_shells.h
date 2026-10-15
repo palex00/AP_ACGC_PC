@@ -11,8 +11,8 @@ extern "C" {
 #endif
 
 // Chance (percent) that a town shell washes up as a coconut with Coconuts Wash Up on.
-// ~20 shells per full beach walk (research/coconuts.md): about one coconut every two walks.
-#define PC_AP_SHELLS_COCONUT_PERCENT 3
+// ~20 shells per full beach walk (research/coconuts.md): about one coconut every two to three walks.
+#define PC_AP_SHELLS_COCONUT_PERCENT 2
 
 // The item to wash up instead of the game's shell: a coconut in town when coconuts is on and
 // the roll (0-99) hits, else shell

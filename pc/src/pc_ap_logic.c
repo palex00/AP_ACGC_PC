@@ -273,6 +273,10 @@ int pc_ap_museum_checked(int cat, int* total) {
   return pc_ap_museumsanity_checked(&g_ap.museum, cat, total);
 }
 
+int pc_ap_museum_fossils_available(void) {
+  return pc_ap_museumsanity_fossil_available(&g_ap.museum);
+}
+
 int pc_ap_museum_category_size(int cat) {
   return pc_ap_museumsanity_active(&g_ap.museum, cat) ? pc_ap_museumsanity_size(cat) : 0;
 }

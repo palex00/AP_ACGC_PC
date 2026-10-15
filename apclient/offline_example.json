@@ -9,7 +9,7 @@
     "train_station 0-14, -1 = game's pick. town_day 1-31 (not 4), 0 = game's pick. Toggles: 0 off, 1 on.",
     "loans (Bells): starting, medium, basement, large, upper. The values below are vanilla.",
     "critter_spawns (bugs, fish) 0 vanilla, 1 normalized, 2 dynamic (missing from journal or museum more likely).",
-    "fossil_spawns 0 vanilla, 1 dynamic (missing from museum more likely), 2 season locked (Spring Mar-May, ...).",
+    "fossil_spawns 0 vanilla, 1 dynamic (missing from museum more likely), 2 season locked (Spring Mar-May, ...), 3 progressive (needs AP items: vanilla offline).",
     "New town settings only apply when the town is made."
   ],
   "seed": "offline",
@@ -39,7 +39,7 @@
   "skip_hra_talk": 1,
   "coconuts_wash_up": 1,
   "normalized_time_travel": 1,
-  "critter_spawns": 1,
+  "critter_spawns": 2,
   "fossil_spawns": 1,
   "loans": [17400, 148000, 49800, 398000, 798000]
 }

@@ -50,6 +50,7 @@ extern "C" {
 #define AP_FOSSIL_SPAWNS_VANILLA       0
 #define AP_FOSSIL_SPAWNS_DYNAMIC       1 // wanted ones (unsent check / missing) more likely
 #define AP_FOSSIL_SPAWNS_SEASON_LOCKED 2 // only fossils of the current season (fossil_seasons)
+#define AP_FOSSIL_SPAWNS_PROGRESSIVE   3 // dynamic, series fossils only once their series item is received
 
 typedef struct {
   // Base data (not necessarily set)
