@@ -31,6 +31,11 @@ void pc_card_dir_set_root_ap(const char * seed, int team, int player) {
 }
 
 
+// A file in the save folder itself (next to card_a/)
+void pc_save_root_file_out(char * out, size_t size, const char * fname) {
+  snprintf(out, size, "%s/%s", g_pc_saveroot, fname);
+}
+
 /* Per-channel directory: chan 0 = card_a, chan 1 = card_b */
 void pc_card_dir_out(s32 chan, char * out, size_t size) {
   switch (chan) {

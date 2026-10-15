@@ -888,6 +888,7 @@ void mCD_LoadLand(void) {
   if(ap_roomplayer_valid(&cs->roomplayer)) {
     pc_card_dir_set_root_ap(cs->roomplayer.seed, cs->roomplayer.team,
         cs->roomplayer.player);
+    pc_ap_settings_open();
   }
   int backup_no;
   if (pc_save_check_and_load(&backup_no)) {

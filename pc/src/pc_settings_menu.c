@@ -3,6 +3,9 @@
 #include "pc_keybindings.h"
 #include "pc_menu_util.h"
 #include "pc_text_draw.h"
+#include "pc_menu_list.h"
+#include "pc_ap_logic.h"
+#include "pc_ap_settings.h"
 
 #include "graph.h"
 #include "m_font.h"
@@ -30,7 +33,10 @@ enum {
     ITEM_STICK_DEADZONE,
     ITEM_CSTICK_DEADZONE,
     ITEM_BINDINGS,
+    ITEM_AP_FIRST, /* + PC_AP_SET_* */
 };
+
+#define ITEM_IS_AP(id) ((id) >= ITEM_AP_FIRST && (id) < ITEM_AP_FIRST + PC_AP_SET_NUM)
 
 /* Per-item static metadata. restart=1 appends " *" and folds into the
  * "requires restart" hint at the bottom of the page. */
@@ -67,6 +73,45 @@ static const Item tab_controls_items[] = {
     { "Keybindings",      ITEM_BINDINGS,        0 },
 };
 
+/* Settings > AP: the per-save QoL settings (pc_ap_settings.h) */
+#define AP_ITEM(lbl, set) { lbl, ITEM_AP_FIRST + (set), 0 }
+static const Item tab_ap_items[] = {
+    AP_ITEM("No cockroaches",    PC_AP_SET_NO_COCKROACHES),
+    AP_ITEM("No weeds",          PC_AP_SET_NO_WEEDS),
+    AP_ITEM("More favors",       PC_AP_SET_MORE_FAVORS),
+    AP_ITEM("Villagers stay",    PC_AP_SET_VILLAGERS_DONT_LEAVE),
+    AP_ITEM("Villagers awake",   PC_AP_SET_VILLAGERS_NEVER_SLEEP),
+    AP_ITEM("No falling stalks", PC_AP_SET_NO_FALLING_STALKS),
+    AP_ITEM("No fishing trash",  PC_AP_SET_NO_FISHING_TRASH),
+    AP_ITEM("Easier catching",   PC_AP_SET_EASIER_CRITTER_CATCH),
+    AP_ITEM("Skip HRA talk",     PC_AP_SET_SKIP_HRA_TALK),
+    AP_ITEM("Coconuts wash up",  PC_AP_SET_COCONUTS_WASH_UP),
+    AP_ITEM("Time travel",       PC_AP_SET_NORMALIZED_TIME_TRAVEL),
+    AP_ITEM("Critter odds",      PC_AP_SET_CRITTER_ODDS),
+    AP_ITEM("Fossil odds",       PC_AP_SET_FOSSIL_ODDS),
+    AP_ITEM("New item chance",   PC_AP_SET_NEW_ITEM_CHANCE),
+    AP_ITEM("AP shell chance",   PC_AP_SET_SHELLSANITY_ITEM_CHANCE),
+};
+
+/* One line under the AP tab for the selected setting (game font: no '/', '+', ';') */
+static const char* const s_ap_help[PC_AP_SET_NUM] = {
+    [PC_AP_SET_NO_COCKROACHES]         = "Removes cockroaches when you start playing",
+    [PC_AP_SET_NO_WEEDS]               = "Weeds never grow",
+    [PC_AP_SET_MORE_FAVORS]            = "Villagers almost always ask for a favor",
+    [PC_AP_SET_VILLAGERS_DONT_LEAVE]   = "Villagers never move out",
+    [PC_AP_SET_VILLAGERS_NEVER_SLEEP]  = "Villagers never go to sleep",
+    [PC_AP_SET_NO_FALLING_STALKS]      = "Turnip prices never just fall all week",
+    [PC_AP_SET_NO_FISHING_TRASH]       = "No cans, boots or tires when fishing",
+    [PC_AP_SET_EASIER_CRITTER_CATCH]   = "Fish bite longer, bugs flee slower",
+    [PC_AP_SET_SKIP_HRA_TALK]          = "Skips Nook's Happy Room Academy talk",
+    [PC_AP_SET_COCONUTS_WASH_UP]       = "Coconuts sometimes wash up on the beach",
+    [PC_AP_SET_NORMALIZED_TIME_TRAVEL] = "Normalized: a date change counts as 1 day",
+    [PC_AP_SET_CRITTER_ODDS]           = "Dynamic: bugs and fish you need are likelier",
+    [PC_AP_SET_FOSSIL_ODDS]            = "Dynamic: fossils you need are likelier",
+    [PC_AP_SET_NEW_ITEM_CHANCE]        = "Catalog: chance a random item is a new one",
+    [PC_AP_SET_SHELLSANITY_ITEM_CHANCE] = "Chance a washed-up shell is an AP item",
+};
+
 typedef struct {
     const char* name;
     const Item* items;
@@ -79,8 +124,17 @@ static const Tab s_tabs[] = {
     { "Audio",    TAB_ITEMS(tab_audio_items) },
     { "Controls", TAB_ITEMS(tab_controls_items) },
     { "Gameplay", TAB_ITEMS(tab_gameplay_items) },
+    { "AP",       TAB_ITEMS(tab_ap_items) }, /* last: hidden until a save is loaded */
 };
 #define TAB_COUNT ((int)(sizeof(s_tabs) / sizeof(s_tabs[0])))
+
+/* Tabs shown now: the AP tab only once a save's AP settings are loaded */
+static int tab_count(void) {
+    return pc_ap_settings_available() ? TAB_COUNT : TAB_COUNT - 1;
+}
+
+/* Rows shown at once (the longest non-AP tab); longer tabs scroll */
+#define SETTINGS_VISIBLE 7
 
 /* --- Sub-pages --- */
 typedef enum {
@@ -98,6 +152,12 @@ static int     s_sel    = -1; /* start on the tab row */
 /* Pending edits - only committed to g_pc_settings on Apply. */
 static PCSettings s_pending;
 static int        s_pending_dirty = 0;
+/* Same for the AP tab (pc_ap_settings_apply) */
+static pc_ap_settings s_ap_pending;
+static pc_ap_settings s_ap_current;
+
+/* The current tab's rows (scrolls when it has more than SETTINGS_VISIBLE) */
+static pc_menu_list s_list;
 
 /* Resolution-change confirmation state. */
 #define RES_CONFIRM_MS 15000u
@@ -241,8 +301,12 @@ static int        s_pending_restart = 0;
 
 /* --- Dirty + helpers --- */
 
-static void recompute_dirty(void) {
-    s_pending_dirty =
+static int ap_dirty(void) {
+    return memcmp(&s_ap_pending, &s_ap_current, sizeof(s_ap_pending)) != 0;
+}
+
+static int pc_dirty(void) {
+    return
         (s_pending.fullscreen       != g_pc_settings.fullscreen) ||
         (s_pending.vsync            != g_pc_settings.vsync) ||
         (s_pending.max_fps          != g_pc_settings.max_fps) ||
@@ -260,8 +324,14 @@ static void recompute_dirty(void) {
         (s_pending.cstick_deadzone  != g_pc_settings.cstick_deadzone);
 }
 
+static void recompute_dirty(void) {
+    s_pending_dirty = pc_dirty() || ap_dirty();
+}
+
 static void snapshot(void) {
     s_pending = g_pc_settings;
+    pc_ap_settings_get(&s_ap_current);
+    s_ap_pending = s_ap_current;
     s_pending_dirty = 0;
 }
 
@@ -269,6 +339,12 @@ static void snapshot(void) {
  * new setting row is added to any tab. */
 
 static void item_cycle(int id, int dir) {
+    if (ITEM_IS_AP(id)) {
+        int set = id - ITEM_AP_FIRST;
+        s_ap_pending.value[set] = pc_ap_settings_step(set, s_ap_pending.value[set], dir);
+        recompute_dirty();
+        return;
+    }
     switch (id) {
         case ITEM_DISPLAY: {
             int v = s_pending.fullscreen + (dir > 0 ? 1 : 2);
@@ -341,7 +417,32 @@ static void item_cycle(int id, int dir) {
     recompute_dirty();
 }
 
+static void ap_item_format(int set, char* buf, size_t n) {
+    static const char* const odds[PC_AP_SET_ODDS_NUM] = { "Vanilla", "Normalized", "Dynamic" };
+    int v = s_ap_pending.value[set];
+
+    if (set == PC_AP_SET_NORMALIZED_TIME_TRAVEL) {
+        snprintf(buf, n, "%s", v ? "< Normalized >" : "< Vanilla >");
+        return;
+    }
+    switch (pc_ap_settings_kind(set)) {
+        case PC_AP_SET_KIND_TOGGLE:
+            snprintf(buf, n, "%s", v ? "< On >" : "< Off >");
+            break;
+        case PC_AP_SET_KIND_ODDS:
+            snprintf(buf, n, "< %s >", odds[v]);
+            break;
+        default:
+            snprintf(buf, n, "< %d%% >", v);
+            break;
+    }
+}
+
 static void item_format(int id, char* buf, size_t n) {
+    if (ITEM_IS_AP(id)) {
+        ap_item_format(id - ITEM_AP_FIRST, buf, n);
+        return;
+    }
     switch (id) {
         case ITEM_DISPLAY:
             snprintf(buf, n, "%s",
@@ -405,6 +506,10 @@ static void item_format(int id, char* buf, size_t n) {
 }
 
 static int item_changed(int id) {
+    if (ITEM_IS_AP(id)) {
+        int set = id - ITEM_AP_FIRST;
+        return s_ap_pending.value[set] != s_ap_current.value[set];
+    }
     switch (id) {
         case ITEM_DISPLAY:    return s_pending.fullscreen       != g_pc_settings.fullscreen;
         case ITEM_VSYNC:      return s_pending.vsync            != g_pc_settings.vsync;
@@ -454,6 +559,16 @@ static void recompute_restart_needed(void) {
 /* --- Nav helpers --- */
 
 static int cur_item_count(void) { return s_tabs[s_tab].count; }
+
+/* New tab: back to its top */
+static void list_reset(void) {
+    pc_menu_list_set(&s_list, cur_item_count(), 1, SETTINGS_VISIBLE);
+}
+
+/* Keep the cursor's row on screen */
+static void list_follow(void) {
+    if (s_sel >= 0 && s_sel < cur_item_count()) pc_menu_list_show(&s_list, s_sel);
+}
 static int idx_apply(void)      { return cur_item_count(); }
 static int idx_back(void)       { return cur_item_count() + 1; }
 
@@ -485,6 +600,16 @@ static void res_confirm_finish(void) {
 
 static void apply_pending(void) {
     if (!s_pending_dirty) return;
+
+    if (ap_dirty()) {
+        if (!pc_ap_settings_apply(&s_ap_pending)) printf("[SETTINGS] couldn't write the AP settings file\n");
+        s_ap_current = s_ap_pending;
+    }
+    if (!pc_dirty()) {
+        s_pending_dirty = 0;
+        printf("[SETTINGS] applied\n");
+        return;
+    }
 
     int res_changed = (s_pending.window_width  != g_pc_settings.window_width) ||
                       (s_pending.window_height != g_pc_settings.window_height);
@@ -524,6 +649,7 @@ void pc_settings_menu_enter(void) {
     snapshot();
     s_tab = 0;
     s_sel = -1;           /* start cursor on the tab row */
+    list_reset();
     s_sub = SUB_SETTINGS;
     s_res_deadline = 0;
     s_capture = 0;
@@ -549,6 +675,7 @@ int pc_settings_menu_nav_up(void) {
     /* Clamp at the top - no wrap. */
     if (s_sel == 0)      s_sel = -1;            /* first item -> tab row */
     else if (s_sel > 0)  s_sel--;
+    list_follow();
     return 1;
 }
 
@@ -564,6 +691,7 @@ int pc_settings_menu_nav_down(void) {
     /* Clamp at the bottom - no wrap. */
     if (s_sel == -1)             s_sel = 0;     /* tab row -> first item */
     else if (s_sel < idx_back()) s_sel++;
+    list_follow();
     return 1;
 }
 
@@ -590,7 +718,8 @@ static int nav_horizontal(int dir) {
     if (s_sel == -1) {
         /* Tab row: clamp at the ends, no wrap. */
         if (dir < 0) { if (s_tab > 0) s_tab--; }
-        else         { if (s_tab < TAB_COUNT - 1) s_tab++; }
+        else         { if (s_tab < tab_count() - 1) s_tab++; }
+        list_reset();
     } else if (s_sel < cur_item_count()) {
         item_cycle(s_tabs[s_tab].items[s_sel].id, dir);
     }
@@ -630,6 +759,7 @@ int pc_settings_menu_confirm(void) {
     if (s_sel == -1) {
         /* Confirm on the tab row - just hop into the first item. */
         s_sel = 0;
+        list_follow();
     } else if (s_sel < cur_item_count()) {
         int id = s_tabs[s_tab].items[s_sel].id;
         if (id == ITEM_BINDINGS) bind_enter_page();
@@ -771,17 +901,18 @@ static void draw_tab_row(struct game_s* game, f32 y) {
     int on_tab_row = (s_sel == -1);
 
     /* Pre-measure widths and total horizontal extent so we can centre. */
+    int count = tab_count();
     int widths[TAB_COUNT];
     int total = 0;
     const int gap_px = 18;
-    for (int t = 0; t < TAB_COUNT; t++) {
+    for (int t = 0; t < count; t++) {
         widths[t] = pc_text_width(s_tabs[t].name);
         total += widths[t];
     }
-    total += gap_px * (TAB_COUNT - 1);
+    total += gap_px * (count - 1);
 
     f32 x = (SCREEN_WIDTH_F - (f32)total) * 0.5f;
-    for (int t = 0; t < TAB_COUNT; t++) {
+    for (int t = 0; t < count; t++) {
         const char* name = s_tabs[t].name;
         int active = (t == s_tab);
         int r, g, b, a;
@@ -802,15 +933,18 @@ static void draw_settings_page(struct game_s* game) {
     int r, g, b, a;
     f32 lx = 70.0f;
     f32 vx = 200.0f;
-    f32 y_tab = 50.0f;
-    f32 y0    = 78.0f;
+    f32 y_tab = 38.0f;
+    f32 y0    = 66.0f;
     f32 line_h = 15.0f;
 
-    pc_menu_draw_centered(game, "- Settings -", 30.0f, 255, 255, 255, 255, 1.0f);
+    /* Bottom line (description / restart banner) ends up at 217: 16 px glyphs fit in 240 */
+    pc_menu_draw_centered(game, "- Settings -", 18.0f, 255, 255, 255, 255, 1.0f);
     draw_tab_row(game, y_tab);
 
     const Tab* tab = &s_tabs[s_tab];
-    for (int i = 0; i < tab->count; i++) {
+    int first = pc_menu_list_first(&s_list);
+    int end = pc_menu_list_end(&s_list);
+    for (int i = first; i < end; i++) {
         const Item* it = &tab->items[i];
         int selected = (s_sel == i);
 
@@ -818,7 +952,7 @@ static void draw_settings_page(struct game_s* game) {
         item_format(it->id, value_buf, sizeof(value_buf));
 
         int changed = item_changed(it->id);
-        f32 y = y0 + i * line_h;
+        f32 y = y0 + (i - first) * line_h;
 
         f32 s = selected ? PC_MENU_SCALE_SELECTED : 1.0f;
         pc_menu_row_colors(selected, &r, &g, &b, &a);
@@ -827,12 +961,19 @@ static void draw_settings_page(struct game_s* game) {
         pc_menu_draw_left(game, value_buf, vx, y, r, g, b, a, s);
     }
 
+    /* More rows above / below (no arrow glyphs in the game font) */
+    if (first > 0)
+        pc_menu_draw_left(game, "...", lx - 26.0f, y0, 180, 180, 180, 200, 1.0f);
+    if (end < tab->count)
+        pc_menu_draw_left(game, "...", lx - 26.0f, y0 + (SETTINGS_VISIBLE - 1) * line_h, 180, 180, 180, 200, 1.0f);
+
     /* Anchor Apply/Back to the tallest tab's footprint so they don't
      * shift up when the user moves to a tab with fewer items. */
     int max_items = 0;
     for (int t = 0; t < TAB_COUNT; t++) {
         if (s_tabs[t].count > max_items) max_items = s_tabs[t].count;
     }
+    if (max_items > SETTINGS_VISIBLE) max_items = SETTINGS_VISIBLE;
 
     /* Apply: green when there's something to apply. */
     f32 apy = y0 + max_items * line_h + 10.0f;
@@ -855,6 +996,14 @@ static void draw_settings_page(struct game_s* game) {
     pc_menu_row_colors(sel_back, &r, &g, &b, &a);
     pc_menu_draw_centered(game, "Back", bky, r, g, b, a,
                           sel_back ? PC_MENU_SCALE_SELECTED : 1.0f);
+
+    /* AP tab: what the selected setting does, else where they're kept */
+    if (tab->items == tab_ap_items) {
+        const char* help = "Saved for this town only";
+        if (s_sel >= 0 && s_sel < tab->count) help = s_ap_help[tab->items[s_sel].id - ITEM_AP_FIRST];
+        pc_menu_draw_centered(game, help, bky + line_h + 6.0f, 150, 150, 150, 220, 1.0f);
+        return;
+    }
 
     /* Restart banner stays up until the process actually restarts (survives
      * reopening the menu). Sits below Back so it never competes with the cursor. */

@@ -34,7 +34,7 @@ typedef struct {
   int start_year;   // frozen clock start: year, month (0-11), time slot (0-3)
   int start_month;
   int start_slot;
-  int normalized;   // normalized_time_travel: a date change counts as one day passing
+  int normalized;   // normalized_time_travel: a date change counts as one day passing (Settings > AP)
   // Transient (not saved)
   int spoil_pending;
   int spoil;            // turnip decision from the last normalize, for the next grow tick

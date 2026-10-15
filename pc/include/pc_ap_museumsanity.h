@@ -43,10 +43,10 @@ typedef struct {
   int checks[mMmd_CATEGORY_NUM]; // AP_MUSEUM_* bits per category, 0 = vanilla
   int goal_count;                // Museum goal: donation items to receive
   // Spawns: set even when museumsanity is off and offline
-  int critter_odds;                      // AP_CRITTER_ODDS_*
+  int critter_odds;                      // AP_CRITTER_ODDS_* (Settings > AP)
   int fish_availability;                   // AP_FISH_AVAIL_* (progressive without fish checks = all)
   int fossil_availability;                 // AP_FOSSIL_AVAIL_* (progressive without fossil checks = all)
-  int fossil_odds;                         // AP_FOSSIL_ODDS_*
+  int fossil_odds;                         // AP_FOSSIL_ODDS_* (Settings > AP)
   int fossil_seasons[mMmd_FOSSIL_NUM];     // season per fossil (0 spring .. 3 winter)
 } pc_ap_museumsanity;
 

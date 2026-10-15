@@ -69,7 +69,8 @@ def villager_indices(chosen: set[str]) -> list[int]:
 
 
 class AnimalCrossingWeb(WebWorld):
-    # Options not listed here stay under "Game Options"
+    # Options not listed here stay under "Game Options" (Shops Always Open and Turnips Never Spoil change logic,
+    # so they're there, not under Quality of Life)
     option_groups = [
         OptionGroup("Intro", [
             options.SkipIntro,
@@ -110,7 +111,6 @@ class AnimalCrossingWeb(WebWorld):
             options.Catalogsanity,
             options.CatalogPools,
             options.CatalogPoolSize,
-            options.NewItemChance,
             options.CatalogSources,
             options.CatalogGoalPercent,
         ]),
@@ -120,10 +120,8 @@ class AnimalCrossingWeb(WebWorld):
             options.FishChecks,
             options.FossilChecks,
             options.PaintingChecks,
-            options.CritterOdds,
             options.FishAvailability,
             options.FossilAvailability,
-            options.FossilOdds,
             options.MuseumGoalPercent,
         ]),
         OptionGroup("Nook's Cranny", [
@@ -135,20 +133,23 @@ class AnimalCrossingWeb(WebWorld):
             options.NookwayCatalog,
             options.NookingtonsCatalog,
         ]),
+        # Only starting values: the game keeps them per save and they can be changed there (Settings > AP)
         OptionGroup("Quality of Life", [
             options.NoCockroaches,
-            options.ShopsAlwaysOpen,
             options.NoWeeds,
             options.MoreFavors,
             options.VillagersDontLeave,
             options.VillagersNeverSleep,
-            options.TurnipsNeverSpoil,
             options.NoFallingStalks,
             options.NoFishingTrash,
             options.EasierCritterCatch,
             options.SkipHRATalk,
             options.CoconutsWashUp,
             options.NormalizedTimeTravel,
+            options.CritterOdds,
+            options.FossilOdds,
+            options.NewItemChance,
+            options.ShellsanityItemChance,
         ]),
     ]
 

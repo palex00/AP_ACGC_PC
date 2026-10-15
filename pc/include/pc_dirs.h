@@ -15,6 +15,8 @@ int pc_card_dir_set_root(const char * dir);
 void pc_card_dir_set_root_ap(const char * seed, int team, int player);
 void pc_card_dir_out(s32 chan, char * out, size_t size);
 void pc_card_file_out(s32 chan, char * out, size_t size, const char * fname);
+// A file in the save folder itself (next to card_a/)
+void pc_save_root_file_out(char * out, size_t size, const char * fname);
 void pc_card_dir_create(void);
 void pc_mkdir_p(const char * path);
 

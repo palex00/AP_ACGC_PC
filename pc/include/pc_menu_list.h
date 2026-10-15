@@ -26,6 +26,8 @@ void pc_menu_list_set(pc_menu_list* l, int count, int columns, int rows);
 void pc_menu_list_up(pc_menu_list* l);
 void pc_menu_list_down(pc_menu_list* l);
 int pc_menu_list_max_scroll(const pc_menu_list* l);
+// Scroll just enough that item i is visible (for lists with a cursor)
+void pc_menu_list_show(pc_menu_list* l, int i);
 
 // Visible items: first .. end - 1, item i drawn at y
 int pc_menu_list_first(const pc_menu_list* l);

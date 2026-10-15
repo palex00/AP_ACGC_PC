@@ -33,7 +33,7 @@ typedef struct {
   int count;
   mActor_name_t items[AP_CATALOG_MAX]; // game item ids, pools flattened
   u8 pool[AP_CATALOG_MAX];             // pool (0-based) of each item
-  int new_item_chance;                 // percent
+  int new_item_chance;                 // percent (Settings > AP)
   int sources;                         // AP_CATALOG_SOURCE_* bits on
   int goal_count;                      // Catalog goal: items to have (only used when it's a goal)
 } pc_ap_catalogsanity;

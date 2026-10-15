@@ -10,11 +10,13 @@
 #include "pc_ap_store.h"
 #include "pc_ap_catalogsanity.h"
 #include "pc_ap_shellsanity.h"
+#include "pc_ap_settings.h"
 #include "pc_ap_shells.h"
 #include "pc_ap_overlay.h"
 #include "pc_ap_strings.h"
 #include "pc_ap_weather.h"
 #include "pc_crash.h"
+#include "pc_dirs.h"
 #include "ap_archipelago.h"
 #include "ap_slotdata.h"
 #include "m_common_data.h"
@@ -111,6 +113,8 @@ typedef struct {
   pc_ap_store store;
   pc_ap_catalogsanity catalog;
   pc_ap_shellsanity shells;
+  pc_ap_settings settings; // Settings > AP; the modules get theirs through pc_ap_settings_push
+  int settings_open;  // ap_settings.ini read for this save (the AP tab shows)
   int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
   int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
   pc_ap_reload reload;
@@ -120,6 +124,8 @@ typedef struct {
 } pc_ap;
 
 static pc_ap g_ap;
+
+static void pc_ap_settings_push(void);
 
 void pc_ap_init(void) {
   ap_slotdata* sd = ap_getslotdata();
@@ -133,12 +139,77 @@ void pc_ap_init(void) {
   pc_ap_store_init(&g_ap.store, sd);
   pc_ap_catalogsanity_init(&g_ap.catalog, sd);
   pc_ap_shellsanity_init(&g_ap.shells, sd);
+  pc_ap_settings_init(&g_ap.settings, sd); // until pc_ap_settings_open reads the save's file
+  g_ap.settings_open = 0;
+  pc_ap_settings_push();
   // Cleared here as when they were timesanity fields
   memset(&g_ap.reload, 0, sizeof(g_ap.reload));
   g_ap.time_change_allowed = 0;
   memset(&g_ap.request, 0, sizeof(g_ap.request));
   g_ap.goal_letter_sent = 0; // persisted: pc_ap_load sets it
   g_ap.initialized = 1;
+}
+
+// Settings the modules keep in their own config (from slot_data in their init)
+static void pc_ap_settings_push(void) {
+  const int* v = g_ap.settings.value;
+  g_ap.time.normalized = v[PC_AP_SET_NORMALIZED_TIME_TRAVEL];
+  g_ap.museum.critter_odds = v[PC_AP_SET_CRITTER_ODDS];
+  g_ap.museum.fossil_odds = v[PC_AP_SET_FOSSIL_ODDS];
+  g_ap.catalog.new_item_chance = v[PC_AP_SET_NEW_ITEM_CHANCE];
+  g_ap.shells.chance = v[PC_AP_SET_SHELLSANITY_ITEM_CHANCE];
+}
+
+static void pc_ap_settings_path(char* out, size_t size) {
+  pc_save_root_file_out(out, size, PC_AP_SETTINGS_FILENAME);
+}
+
+// Rewritten whole: also adds keys a newer client has that the file doesn't
+static int pc_ap_settings_write(void) {
+  char path[PC_PATHSIZE];
+  ini_t* ini = ini_create(NULL);
+  int ok;
+  pc_ap_settings_save(&g_ap.settings, ini);
+  pc_ap_settings_path(path, sizeof(path));
+  ok = pc_ap_state_write(path, ini);
+  ini_destroy(ini);
+  return ok;
+}
+
+void pc_ap_settings_open(void) {
+  char path[PC_PATHSIZE];
+  ini_t* ini;
+  if(!g_ap.initialized) {
+    return;
+  }
+  pc_ap_settings_init(&g_ap.settings, ap_getslotdata());
+  pc_ap_settings_path(path, sizeof(path));
+  ini = pc_ap_state_read(path); // NULL (first load): keeps the slot_data values
+  pc_ap_settings_load(&g_ap.settings, ini);
+  if(ini != NULL) {
+    ini_destroy(ini);
+  }
+  pc_ap_settings_write();
+  pc_ap_settings_push();
+  g_ap.settings_open = 1;
+}
+
+int pc_ap_settings_available(void) {
+  return g_ap.settings_open;
+}
+
+int pc_ap_setting(int id) {
+  return g_ap.settings.value[id];
+}
+
+void pc_ap_settings_get(pc_ap_settings* out) {
+  *out = g_ap.settings;
+}
+
+int pc_ap_settings_apply(const pc_ap_settings* s) {
+  g_ap.settings = *s;
+  pc_ap_settings_push();
+  return pc_ap_settings_write();
 }
 
 static void pc_ap_time_reload_update(void);
@@ -512,7 +583,6 @@ static int pc_ap_beach_count(mActor_name_t item) {
 }
 
 mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island) {
-  ap_slotdata* sd = ap_getslotdata();
   if(!is_island && g_ap.shells.per_month > 0 && pc_ap_accepting()) {
     int month = Common_Get(time.rtc_time.month) - 1;
     int on_beach = pc_ap_beach_count(PC_AP_BEACH_ITEM_START + month);
@@ -521,7 +591,7 @@ mActor_name_t pc_ap_shell_item(mActor_name_t shell, int is_island) {
       return item;
     }
   }
-  return pc_ap_shells_pick(shell, is_island, sd->valid && sd->coconuts_wash_up, RANDOM(100));
+  return pc_ap_shells_pick(shell, is_island, g_ap.settings.value[PC_AP_SET_COCONUTS_WASH_UP], RANDOM(100));
 }
 
 int pc_ap_beach_pickup(mActor_name_t item) {

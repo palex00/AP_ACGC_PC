@@ -401,6 +401,7 @@ class ShellsanityItemChance(Range):
     Shellsanity: chance (percent) that a shell washing up is an Archipelago item
     instead, while the current month has checks left. A full beach walk is about
     20 shells.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Shellsanity Item Chance"
     range_start = 1
@@ -535,7 +536,10 @@ class StartingVillagers(OptionSet):
 
 
 class NoCockroaches(DefaultOnToggle):
-    """Cockroaches never appear in your house, even if you're away for a while."""
+    """
+    Cockroaches never appear in your house, even if you're away for a while.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
     display_name = "No Cockroaches"
 
 
@@ -545,12 +549,18 @@ class ShopsAlwaysOpen(DefaultOnToggle):
 
 
 class NoWeeds(Toggle):
-    """Weeds never grow in your town."""
+    """
+    Weeds never grow in your town.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
     display_name = "No Weeds"
 
 
 class MoreFavors(DefaultOnToggle):
-    """Villagers will almost always give you a job when you talk to them."""
+    """
+    Villagers will almost always give you a job when you talk to them.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
     display_name = "More Favors"
 
 
@@ -558,6 +568,7 @@ class VillagersDontLeave(Toggle):
     """
     Villagers never move out, and nobody talks about moving. Once your town has
     15 villagers, nobody new moves in either.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Villagers Don't Leave"
 
@@ -567,6 +578,7 @@ class VillagersNeverSleep(Toggle):
     Villagers never go to sleep: when they would, they stay awake at home,
     so you can always visit them (handy for favors when you only have
     early-morning or night hours).
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Villagers Never Sleep"
 
@@ -581,7 +593,10 @@ class TurnipsNeverSpoil(Toggle):
 
 
 class NoFishingTrash(DefaultOnToggle):
-    """Fishing never hooks an empty can, boot or old tire."""
+    """
+    Fishing never hooks an empty can, boot or old tire.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
     display_name = "No Fishing Trash"
 
 
@@ -589,6 +604,7 @@ class SkipHRATalk(DefaultOnToggle):
     """
     Tom Nook never stops you in his shop to talk about the Happy Room Academy.
     The Academy starts judging your house the day after you move in.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Skip HRA Talk"
 
@@ -598,6 +614,7 @@ class EasierCritterCatch(Toggle):
     Fish give you one more second to press A once the bobber goes under, and
     bugs take twice as long to notice you moving near them. Shaking a tree or
     swinging the net next to a bug still scares it.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Easier Critter Catch"
 
@@ -605,6 +622,7 @@ class EasierCritterCatch(Toggle):
 class NoFallingStalks(Toggle):
     """
     The stalk market never rolls the falling pattern (prices only go down all week).
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "No Falling Stalks"
 
@@ -613,6 +631,7 @@ class CoconutsWashUp(DefaultOnToggle):
     """
     Coconuts sometimes wash up on the town beach in place of a shell (about one
     in every two to three full beach walks). Plant one on the beach row to grow a palm tree.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Coconuts Wash Up"
 
@@ -625,6 +644,7 @@ class NormalizedTimeTravel(DefaultOnToggle):
     Off: the game sees the real jump, so a big jump forward is like being away
     that long (weeds, villagers moving out or greeting you like you were gone)
     and going back in time has the usual penalties.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Normalized Time Travel"
 
@@ -709,6 +729,7 @@ class NewItemChance(Range):
     """
     How often a random item you get from Catalogsanity sources is new
     (Nook's shop, favors, balloon presents, ...)
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "New Item Chance"
     range_start = 5
@@ -826,6 +847,7 @@ class CritterOdds(Choice):
     Normalized: every bug and fish that can spawn is equally likely.
     Dynamic: like Normalized, but bugs and fish whose check isn't sent yet (or, with no checks, that are missing
     from the journal or the museum) are 4 times as likely.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Critter Odds"
     option_vanilla = 0
@@ -874,6 +896,7 @@ class FossilOdds(Choice):
     Normalized: every available fossil equally likely.
     Dynamic: like Normalized, but fossils whose check isn't sent yet (or, with no checks, that are missing from
     the museum) are 4 times as likely.
+    Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Fossil Odds"
     option_vanilla = 0

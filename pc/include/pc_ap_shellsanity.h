@@ -31,7 +31,7 @@ extern "C" {
 typedef struct {
   // Config (slot_data)
   int per_month; // checks per month, 0 = off
-  int chance;    // percent of washed-up shells that become beach items
+  int chance;    // percent of washed-up shells that become beach items (Settings > AP)
 } pc_ap_shellsanity;
 
 // Config from slot_data

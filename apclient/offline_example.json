@@ -12,7 +12,8 @@
     "fish_availability 0 all, 1 progressive (needs AP items: all offline).",
     "fossil_availability 0 all, 1 season locked (Spring Mar-May, ...), 2 progressive (needs AP items: all offline).",
     "fossil_odds 0 vanilla, 1 normalized, 2 dynamic (missing from museum more likely).",
-    "New town settings only apply when the town is made."
+    "New town settings only apply when the town is made. Quality of life settings (no_cockroaches ... normalized_time_travel,",
+    "critter_odds, fossil_odds) only set the first values of the save's ap_settings.ini: change them in game in Settings > AP."
   ],
   "seed": "offline",
   "team": 0,

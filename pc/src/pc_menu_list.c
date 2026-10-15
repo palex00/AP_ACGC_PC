@@ -30,6 +30,16 @@ void pc_menu_list_down(pc_menu_list* l) {
   }
 }
 
+void pc_menu_list_show(pc_menu_list* l, int i) {
+  int row = i / l->columns;
+  if(row < l->scroll) {
+    l->scroll = row;
+  }
+  if(row >= l->scroll + l->rows) {
+    l->scroll = row - l->rows + 1;
+  }
+}
+
 int pc_menu_list_first(const pc_menu_list* l) {
   return l->scroll * l->columns;
 }

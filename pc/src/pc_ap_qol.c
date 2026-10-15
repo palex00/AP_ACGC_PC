@@ -1,5 +1,7 @@
 #include "pc_ap_qol.h"
 #include "ap_slotdata.h"
+#include "pc_ap_logic.h"
+#include "pc_ap_settings.h"
 
 #include "m_common_data.h"
 #include "m_home.h"
@@ -13,23 +15,19 @@ int pc_ap_qol_skip_intro(void) {
 }
 
 int pc_ap_qol_no_weeds(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->no_weeds;
+  return pc_ap_setting(PC_AP_SET_NO_WEEDS);
 }
 
 int pc_ap_qol_more_favors(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->more_favors;
+  return pc_ap_setting(PC_AP_SET_MORE_FAVORS);
 }
 
 int pc_ap_qol_villagers_dont_leave(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->villagers_dont_leave;
+  return pc_ap_setting(PC_AP_SET_VILLAGERS_DONT_LEAVE);
 }
 
 int pc_ap_qol_villagers_never_sleep(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->villagers_never_sleep;
+  return pc_ap_setting(PC_AP_SET_VILLAGERS_NEVER_SLEEP);
 }
 
 int pc_ap_qol_turnips_never_spoil(void) {
@@ -38,18 +36,15 @@ int pc_ap_qol_turnips_never_spoil(void) {
 }
 
 int pc_ap_qol_no_falling_stalks(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->no_falling_stalks;
+  return pc_ap_setting(PC_AP_SET_NO_FALLING_STALKS);
 }
 
 int pc_ap_qol_no_fishing_trash(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->no_fishing_trash;
+  return pc_ap_setting(PC_AP_SET_NO_FISHING_TRASH);
 }
 
 int pc_ap_qol_skip_hra_talk(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->skip_hra_talk;
+  return pc_ap_setting(PC_AP_SET_SKIP_HRA_TALK);
 }
 
 // Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast
@@ -57,8 +52,7 @@ int pc_ap_qol_skip_hra_talk(void) {
 #define PC_AP_QOL_BUG_STRESS_SCALE 0.5f
 
 static int pc_ap_qol_easier_critter_catch(void) {
-  ap_slotdata* sd = ap_getslotdata();
-  return sd->valid && sd->easier_critter_catch;
+  return pc_ap_setting(PC_AP_SET_EASIER_CRITTER_CATCH);
 }
 
 int pc_ap_qol_bite_window_bonus(void) {
@@ -75,10 +69,9 @@ int pc_ap_qol_shops_always_open(void) {
 }
 
 void pc_ap_qol_cockroaches(void) {
-  ap_slotdata* sd = ap_getslotdata();
   int i;
 
-  if (!sd->valid || !sd->no_cockroaches) {
+  if (!pc_ap_setting(PC_AP_SET_NO_COCKROACHES)) {
     return;
   }
 

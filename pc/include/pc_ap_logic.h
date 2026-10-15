@@ -31,6 +31,19 @@ void pc_ap_load(const char* filename);
 // Returns 0 on failure
 int pc_ap_save(const char* filename);
 
+// Settings > AP (pc_ap_settings.h). On loading a save (right after its folder is set):
+// reads the save's ap_settings.ini, or makes it from slot_data the first time.
+void pc_ap_settings_open(void);
+// Nonzero once that's done (the settings menu shows the AP tab)
+int pc_ap_settings_available(void);
+// Current value of PC_AP_SET_* (slot_data's until pc_ap_settings_open; 0 before pc_ap_init)
+int pc_ap_setting(int id);
+struct pc_ap_settings_s;
+// Copy of all of them, for the menu to edit
+void pc_ap_settings_get(struct pc_ap_settings_s* out);
+// The menu's Apply: takes effect now and saves the file. Returns 0 if the file couldn't be written
+int pc_ap_settings_apply(const struct pc_ap_settings_s* s);
+
 // Amount of loan k in AP order (Starting, Medium, Basement, Large, Upper),
 // not an mHm_HOMESIZE_*. Returns 0 for anything invalid
 int pc_ap_loan_amount(int loan);
