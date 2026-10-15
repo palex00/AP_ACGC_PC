@@ -953,9 +953,7 @@ void pc_ap_caught(mActor_name_t item) {
 }
 
 int pc_ap_pick_fossil(mActor_name_t* fossil) {
-  if(g_ap.museum.fossil_spawns == AP_FOSSIL_SPAWNS_VANILLA) {
-    return 0;
-  }
+  // Always our pick: vanilla odds + all fossils is the game's own odds
   u8 wanted[mMmd_FOSSIL_NUM];
   pc_ap_museumsanity_fossil_wanted(&g_ap.museum, &Save_Get(museum_display), wanted);
   int month = Common_Get(time.rtc_time).month - 1; // lbRTC months are 1-12
@@ -968,7 +966,7 @@ mActor_name_t pc_ap_dug_item(mActor_name_t item) {
   if(item != ITM_FOSSIL || !pc_ap_museumsanity_instant_fossils(&g_ap.museum) || !pc_ap_accepting()) {
     return item;
   }
-  // The museum's appraisal (mail): game odds, or the fossil_spawns pick through pc_ap_pick_fossil
+  // The museum's appraisal (mail): the fossil_availability / fossil_odds pick through pc_ap_pick_fossil
   mActor_name_t fossil;
   mMsm_GetFossil(&fossil);
   int cat, idx;

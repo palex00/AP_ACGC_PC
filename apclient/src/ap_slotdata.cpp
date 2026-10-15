@@ -148,7 +148,8 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->painting_checks = slot_data.value("painting_checks", 0) % 4;
   sd->museum_goal_count = slot_data.value("museum_goal_count", 0);
   sd->critter_spawns = slot_data.value("critter_spawns", 2) % 3;
-  sd->fossil_spawns = slot_data.value("fossil_spawns", 3) % 4;
+  sd->fossil_availability = slot_data.value("fossil_availability", 2) % 3;
+  sd->fossil_odds = slot_data.value("fossil_odds", 2) % 3;
   // WARN: copy of the apworld's FOSSIL_SEASONS (museum.py), the default for offline play
   static const int default_fossil_seasons[AP_FOSSIL_NUM] = {
     2, 2, 2, 2, 2, 2, // Tricera, T-rex: autumn
@@ -172,7 +173,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
   sd->catalog_sources = read_catalog_sources(slot_data);
   sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
-  sd->beach_per_month = slot_data.value("shellsanity", 0);
+  sd->beach_per_month = slot_data.value("shellsanity", 3);
   if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
   sd->beach_item_chance = slot_data.value("beach_item_chance", 15);
   if (sd->beach_item_chance < 0 || sd->beach_item_chance > 100) { sd->beach_item_chance = 15; }

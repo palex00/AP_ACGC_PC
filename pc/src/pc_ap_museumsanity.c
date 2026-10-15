@@ -15,7 +15,8 @@ static const int pc_ap_museum_count[mMmd_CATEGORY_NUM] = {
 void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   memset(m, 0, sizeof(*m));
   m->critter_spawns = sd->critter_spawns;
-  m->fossil_spawns = sd->fossil_spawns;
+  m->fossil_availability = sd->fossil_availability;
+  m->fossil_odds = sd->fossil_odds;
   for(int i = 0; i < mMmd_FOSSIL_NUM; i++) {
     m->fossil_seasons[i] = sd->fossil_seasons[i];
   }
@@ -27,8 +28,8 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
     m->goal_count = sd->museum_goal_count;
   }
   // Progressive fossils: the series items only exist with fossil checks (also not offline)
-  if(m->fossil_spawns == AP_FOSSIL_SPAWNS_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FOSSIL)) {
-    m->fossil_spawns = AP_FOSSIL_SPAWNS_VANILLA;
+  if(m->fossil_availability == AP_FOSSIL_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FOSSIL)) {
+    m->fossil_availability = AP_FOSSIL_AVAIL_ALL;
   }
 }
 
@@ -251,7 +252,7 @@ int pc_ap_museumsanity_fossil_series(int idx) {
 }
 
 int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx) {
-  if(m->fossil_spawns != AP_FOSSIL_SPAWNS_PROGRESSIVE) {
+  if(m->fossil_availability != AP_FOSSIL_AVAIL_PROGRESSIVE) {
     return 1;
   }
   int series = pc_ap_museumsanity_fossil_series(idx);
@@ -259,7 +260,7 @@ int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx) {
 }
 
 int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m) {
-  if(m->fossil_spawns != AP_FOSSIL_SPAWNS_PROGRESSIVE) {
+  if(m->fossil_availability != AP_FOSSIL_AVAIL_PROGRESSIVE) {
     return -1;
   }
   int per_fossil = 0;
@@ -285,15 +286,21 @@ int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[
   // March-May = 0 (spring) ... December-February = 3 (winter)
   int season = (month + 10) % 12 / 3;
   for(int idx = 0; idx < mMmd_FOSSIL_NUM; idx++) {
-    if(m->fossil_spawns == AP_FOSSIL_SPAWNS_SEASON_LOCKED) {
-      weight[idx] = m->fossil_seasons[idx] == season;
-    } else {
-      // Dynamic: every fossil equally likely, wanted ones boosted. Progressive: the
-      // same over the open fossils. Vanilla spawns never get here (the game's own pick).
-      weight[idx] = pc_ap_museumsanity_fossil_open(m, idx) ? 1 : 0;
-      if(m->fossil_spawns != AP_FOSSIL_SPAWNS_VANILLA && wanted[idx]) {
-        weight[idx] *= PC_AP_SPAWN_BOOST;
-      }
+    // Odds. Vanilla (mMsm_GetFossil): a coin flip between the 5 single fossils and
+    // the 20 dinosaur parts, so a single is 4 times as likely as a part.
+    weight[idx] = 1;
+    if(m->fossil_odds == AP_FOSSIL_ODDS_VANILLA && pc_ap_museumsanity_fossil_series(idx) < 0) {
+      weight[idx] = 4;
+    }
+    if(m->fossil_odds == AP_FOSSIL_ODDS_DYNAMIC && wanted[idx]) {
+      weight[idx] *= PC_AP_SPAWN_BOOST;
+    }
+    // Availability
+    if(m->fossil_availability == AP_FOSSIL_AVAIL_SEASON_LOCKED && m->fossil_seasons[idx] != season) {
+      weight[idx] = 0;
+    }
+    if(!pc_ap_museumsanity_fossil_open(m, idx)) {
+      weight[idx] = 0;
     }
     total += weight[idx];
   }

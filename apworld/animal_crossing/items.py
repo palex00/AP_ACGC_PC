@@ -2388,6 +2388,6 @@ from .museum import FOSSIL_SERIES_ITEM_NAME_TO_ID, MUSEUM_ITEM_NAME_TO_ID  # noq
 
 AP_ITEM_NAME_TO_ID.update(MUSEUM_ITEM_NAME_TO_ID)
 ITEM_NAME_TO_ID.update(MUSEUM_ITEM_NAME_TO_ID)
-# Fossil Spawns "Progressive": one item per fossil series
+# Fossil Availability "Progressive": one item per fossil series
 AP_ITEM_NAME_TO_ID.update(FOSSIL_SERIES_ITEM_NAME_TO_ID)
 ITEM_NAME_TO_ID.update(FOSSIL_SERIES_ITEM_NAME_TO_ID)

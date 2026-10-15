@@ -381,7 +381,7 @@ class Shellsanity(Range):
     display_name = "Shellsanity"
     range_start = 0
     range_end = 20
-    default = 0
+    default = 3
 
 
 class BeachItemChance(Range):
@@ -822,25 +822,37 @@ class CritterSpawns(Choice):
     default = 2
 
 
-class FossilSpawns(Choice):
+class FossilAvailability(Choice):
     """
-    Which fossil a dug-up fossil turns out to be. Works without Museumsanity too.
-    Vanilla: the game's odds.
-    Dynamic: every fossil starts equally likely; fossils whose check isn't sent yet (or, with no checks, that are
-    missing from the museum) are more likely.
+    Which fossils can come out of the ground. Works without Museumsanity too.
+    All: every fossil.
     Season Locked: each fossil only comes out in one season (Spring: March-May, Summer: June-August,
     Autumn: September-November, Winter: December-February). With Timesanity, fossil checks need a month of
     their season.
-    Progressive: like Dynamic, but each dinosaur series (Tricera, T-rex, Apato, Stego, Ptera, Plesio, Mammoth)
-    only comes out once you have its item ("T-rex Fossils", ...). Amber, Dinosaur Track, Ammonite, Dinosaur Egg
-    and Trilobite are always open. Needs Fossil Checks (with Museumsanity); without them this is Vanilla.
+    Progressive: each dinosaur series (Tricera, T-rex, Apato, Stego, Ptera, Plesio, Mammoth) only comes out once
+    you have its item ("T-rex Fossils", ...). Amber, Dinosaur Track, Ammonite, Dinosaur Egg and Trilobite are
+    always open. Needs Fossil Checks (with Museumsanity); without them this is All.
     """
-    display_name = "Fossil Spawns"
+    display_name = "Fossil Availability"
+    option_all = 0
+    option_season_locked = 1
+    option_progressive = 2
+    default = 2
+
+
+class FossilOdds(Choice):
+    """
+    How likely each available fossil is. Works without Museumsanity too.
+    Vanilla: the game's odds (half the time one of the five single fossils, else a dinosaur part).
+    Normalized: every available fossil equally likely.
+    Dynamic: like Normalized, but fossils whose check isn't sent yet (or, with no checks, that are missing from
+    the museum) are 4 times as likely.
+    """
+    display_name = "Fossil Odds"
     option_vanilla = 0
-    option_dynamic = 1
-    option_season_locked = 2
-    option_progressive = 3
-    default = 3
+    option_normalized = 1
+    option_dynamic = 2
+    default = 2
 
 
 class PaintingChecks(Choice):
@@ -911,7 +923,8 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     fossil_checks: FossilChecks
     painting_checks: PaintingChecks
     critter_spawns: CritterSpawns
-    fossil_spawns: FossilSpawns
+    fossil_availability: FossilAvailability
+    fossil_odds: FossilOdds
     museum_goal_percent: MuseumGoalPercent
     nook_store_upgrades: NookStoreUpgrades
     nook_n_go_sales: NookNGoSales

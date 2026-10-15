@@ -70,7 +70,7 @@ int pc_ap_favors_total(void);
 int pc_ap_museum_received(int counts[4]);
 // Museum find/donate checks sent in a category; *total = its number of checks (0 if not run by AP)
 int pc_ap_museum_checked(int cat, int* total);
-// Progressive fossil spawns: find/donate checks of the open fossils, -1 when not progressive
+// Progressive fossils: find/donate checks of the open fossils, -1 when not progressive
 int pc_ap_museum_fossils_available(void);
 // Things in a category if it's run by AP (has checks), else 0
 int pc_ap_museum_category_size(int cat);
@@ -117,8 +117,8 @@ int pc_ap_museum_donator(mActor_name_t item);
 // A bug or fish was caught (net/rod, right where the game marks the journal):
 // sends its catch check if unsent, on every catch (not only the first)
 void pc_ap_caught(mActor_name_t item);
-// mMsm_GetFossil (museum mail appraisal): 1 = handled, *fossil = the fossil_spawns pick.
-// 0 for vanilla spawns.
+// mMsm_GetFossil (museum mail appraisal): *fossil = the fossil_availability / fossil_odds pick.
+// Always 1 (handled); vanilla odds reproduce the game's own pick.
 int pc_ap_pick_fossil(mActor_name_t* fossil);
 // Item the shovel digs up (Get_scoop setup): with fossil find checks an unappraised
 // fossil comes out appraised (mMsm_GetFossil, as by mail) and sends its "Dig Up" check.

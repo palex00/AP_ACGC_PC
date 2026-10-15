@@ -120,7 +120,8 @@ class AnimalCrossingWeb(WebWorld):
             options.FossilChecks,
             options.PaintingChecks,
             options.CritterSpawns,
-            options.FossilSpawns,
+            options.FossilAvailability,
+            options.FossilOdds,
             options.MuseumGoalPercent,
         ]),
         OptionGroup("Nook's Cranny", [
@@ -222,9 +223,9 @@ class AnimalCrossingWorld(World):
                     self.museum_locations.append(museum_find_name(c, name))
                 if self.museum_modes[c] & CHECK_DONATE:
                     self.museum_locations.append(museum_donate_name(name))
-        # Progressive fossils: one item per series, only with fossil checks (else the client uses vanilla spawns)
+        # Progressive fossils: one item per series, only with fossil checks (else the client opens all fossils)
         self.fossil_series_items = []
-        if (self.options.fossil_spawns == options.FossilSpawns.option_progressive
+        if (self.options.fossil_availability == options.FossilAvailability.option_progressive
                 and self.museum_modes[MUSEUM_FOSSIL]):
             self.fossil_series_items = list(FOSSIL_SERIES_ITEMS)
         # Starting tool: also without Tools in Pool (a freebie, mailed at the start)
@@ -448,7 +449,8 @@ class AnimalCrossingWorld(World):
                 self.add_museum_rule(MUSEUM_BUG, "Snail", lambda state: state.has_any(
                     ("Day Hours", "Evening Hours", "Night Hours"), self.player))
         # Season locked fossils (dig up and donate): a month of its season
-        if self.options.timesanity and self.options.fossil_spawns == options.FossilSpawns.option_season_locked:
+        if (self.options.timesanity
+                and self.options.fossil_availability == options.FossilAvailability.option_season_locked):
             for name, season in zip(FOSSILS, FOSSIL_SEASONS):
                 months = [MONTHS[m] for m in SEASON_MONTHS[season]]
                 self.set_museum_rule(MUSEUM_FOSSIL, name, lambda state, months=months: state.has_any(months, self.player))
@@ -589,7 +591,8 @@ class AnimalCrossingWorld(World):
             # Museum donation items that are progression (Museum goal); for Universal Tracker
             "museum_progression": sorted(ITEM_NAME_TO_ID[name] for name in self.museum_progression),
             "critter_spawns": self.options.critter_spawns.value,
-            "fossil_spawns": self.options.fossil_spawns.value,
+            "fossil_availability": self.options.fossil_availability.value,
+            "fossil_odds": self.options.fossil_odds.value,
             "fossil_seasons": FOSSIL_SEASONS,
             # Timesanity clock year: the year the seed was made, fixed for the whole save
             "start_year": min(max(datetime.date.today().year, MIN_YEAR), MAX_YEAR),

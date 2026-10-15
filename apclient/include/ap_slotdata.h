@@ -46,11 +46,14 @@ extern "C" {
 #define AP_CRITTER_SPAWNS_VANILLA    0
 #define AP_CRITTER_SPAWNS_NORMALIZED 1 // every species equally likely
 #define AP_CRITTER_SPAWNS_DYNAMIC    2 // wanted ones (unsent check / missing) more likely
-// fossil_spawns (which fossil a dug-up one is)
-#define AP_FOSSIL_SPAWNS_VANILLA       0
-#define AP_FOSSIL_SPAWNS_DYNAMIC       1 // wanted ones (unsent check / missing) more likely
-#define AP_FOSSIL_SPAWNS_SEASON_LOCKED 2 // only fossils of the current season (fossil_seasons)
-#define AP_FOSSIL_SPAWNS_PROGRESSIVE   3 // dynamic, series fossils only once their series item is received
+// fossil_availability (which fossils a dug-up one can be)
+#define AP_FOSSIL_AVAIL_ALL           0
+#define AP_FOSSIL_AVAIL_SEASON_LOCKED 1 // only fossils of the current season (fossil_seasons)
+#define AP_FOSSIL_AVAIL_PROGRESSIVE   2 // series fossils only once their series item is received
+// fossil_odds (how likely each available fossil is)
+#define AP_FOSSIL_ODDS_VANILLA    0 // the game's: half singles, half dinosaur parts
+#define AP_FOSSIL_ODDS_NORMALIZED 1 // equal
+#define AP_FOSSIL_ODDS_DYNAMIC    2 // normalized, wanted ones (unsent check / missing) more likely
 
 typedef struct {
   // Base data (not necessarily set)
@@ -102,7 +105,8 @@ typedef struct {
   int museum_goal_count;             // Museum goal: donation items to receive (apworld computes it from its % option)
   // Spawns: also without museumsanity and offline
   int critter_spawns;                // AP_CRITTER_SPAWNS_*
-  int fossil_spawns;                 // AP_FOSSIL_SPAWNS_*
+  int fossil_availability;           // AP_FOSSIL_AVAIL_*
+  int fossil_odds;                   // AP_FOSSIL_ODDS_*
   int fossil_seasons[AP_FOSSIL_NUM]; // per museum fossil index: 0 spring (Mar-May), 1 summer, 2 autumn, 3 winter (Dec-Feb)
   // Timesanity
   int timesanity;                    // nonzero: frozen clock, months and time slots are items

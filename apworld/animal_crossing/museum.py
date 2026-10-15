@@ -46,7 +46,7 @@ for _c, _names in enumerate(MUSEUM_NAMES):
         if _c in FIND_VERBS:
             MUSEUM_LOCATION_NAME_TO_ID[museum_find_name(_c, _name)] = MUSEUM_FIND_BASE_ID + _slot
 
-# Fossil Spawns "Season Locked": the season each fossil comes out in, dinosaurs kept together.
+# Fossil Availability "Season Locked": the season each fossil comes out in, dinosaurs kept together.
 # WARN: the client has a copy for offline play (ap_slotdata.cpp default_fossil_seasons)!
 SEASONS = ["Spring", "Summer", "Autumn", "Winter"]
 SEASON_MONTHS = [(2, 3, 4), (5, 6, 7), (8, 9, 10), (11, 0, 1)]  # month 0-11
@@ -63,7 +63,7 @@ _SEASON_OF_FOSSIL = {
 }
 FOSSIL_SEASONS = [_SEASON_OF_FOSSIL[name] for name in FOSSILS]  # museum fossil index -> season
 
-# Fossil Spawns "Progressive": one item per series opens its fossils; the rest (Amber, Dinosaur Track, Ammonite,
+# Fossil Availability "Progressive": one item per series opens its fossils; the rest (Amber, Dinosaur Track, Ammonite,
 # Dinosaur Egg, Trilobite) are always open.
 # WARN: the client mirrors the series order and ids (pc_ap_museumsanity_fossil_series, PC_AP_ITEM_FOSSIL_SERIES_BASE)!
 FOSSIL_SERIES = ["Tricera", "T-rex", "Apato", "Stego", "Ptera", "Plesio", "Mammoth"]
