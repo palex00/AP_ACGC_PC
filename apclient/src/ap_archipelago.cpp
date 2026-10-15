@@ -336,6 +336,19 @@ int ap_start(void) {
   });
 
   g_ap->set_room_info_handler([name, pw] {
+    // Seed changed (server restarted with another seed, same slot name): refuse before ConnectSlot,
+    // else apclientpp flushes checks queued while disconnected into the new room before
+    // slot_connected runs. get_seed() is already RoomInfo's (apclientpp sets it before this callback).
+    // Team/player can only be compared once connected (slot_connected handler).
+    ap_roomplayer * rp = &g_ap_connectstate.roomplayer;
+    if(ap_roomplayer_valid(rp) && g_ap->get_seed() != rp->seed) {
+      g_ap_room_changed = true;
+      g_ap_connectstate.state = AP_CSTATE_SLOTREFUSED;
+      snprintf(g_ap_connectstate.last_refuse_reason,
+          sizeof(g_ap_connectstate.last_refuse_reason), AP_ROOM_CHANGED_REASON);
+      APLOG_ERROR("ROOM CHANGED: was seed %s, now %s", rp->seed, g_ap->get_seed().c_str());
+      return;
+    }
     g_ap_connectstate.state = AP_CSTATE_JOINING;
     APLOG_INFO("CONNECTED - WAITING ON SLOT: %s", g_ap_config.slotname);
     g_ap->ConnectSlot(name, pw, 0b111 /* items_handling */);
