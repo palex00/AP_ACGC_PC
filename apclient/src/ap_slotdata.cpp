@@ -149,7 +149,8 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->painting_checks = slot_data.value("painting_checks", 0) % 4;
   sd->museum_goal_count = slot_data.value("museum_goal_count", 0);
   sd->critter_spawns = slot_data.value("critter_spawns", 2) % 3;
-  sd->fossil_availability = slot_data.value("fossil_availability", 2) % 3;
+  // Missing = all (0.3 seeds have no series items, progressive would never spawn dinosaurs)
+  sd->fossil_availability = slot_data.value("fossil_availability", 0) % 3;
   sd->fossil_odds = slot_data.value("fossil_odds", 2) % 3;
   // WARN: copy of the apworld's FOSSIL_SEASONS (museum.py), the default for offline play
   static const int default_fossil_seasons[AP_FOSSIL_NUM] = {
