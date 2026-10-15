@@ -297,36 +297,36 @@ class LoanAmount(NamedRange):
 class StartingLoan(LoanAmount):
     """The loan for your starting house. Vanilla: 17,400."""
     display_name = "Starting Loan"
-    default = 10000
-    special_range_names = {"default": 10000, "vanilla": 17400}
+    default = 15000
+    special_range_names = {"default": 15000, "vanilla": 17400}
 
 
 class MediumLoan(LoanAmount):
     """The loan for the first house upgrade (bigger main floor). Vanilla: 148,000."""
     display_name = "Medium House Loan"
-    default = 30000
-    special_range_names = {"default": 30000, "vanilla": 148000}
+    default = 45000
+    special_range_names = {"default": 45000, "vanilla": 148000}
 
 
 class BasementLoan(LoanAmount):
     """The loan for the basement (the second upgrade). Vanilla: 49,800."""
     display_name = "Basement Loan"
-    default = 20000
-    special_range_names = {"default": 20000, "vanilla": 49800}
+    default = 30000
+    special_range_names = {"default": 30000, "vanilla": 49800}
 
 
 class LargeLoan(LoanAmount):
     """The loan for the third house upgrade (biggest main floor). Vanilla: 398,000."""
     display_name = "Large House Loan"
-    default = 40000
-    special_range_names = {"default": 40000, "vanilla": 398000}
+    default = 60000
+    special_range_names = {"default": 60000, "vanilla": 398000}
 
 
 class UpperLoan(LoanAmount):
     """The loan for the upper floor (the last upgrade). Vanilla: 798,000."""
     display_name = "Upper Floor Loan"
-    default = 50000
-    special_range_names = {"default": 50000, "vanilla": 798000}
+    default = 80000
+    special_range_names = {"default": 80000, "vanilla": 798000}
 
 
 class Loansanity(DefaultOnToggle):
@@ -357,7 +357,7 @@ class FillerBellsPercent(Range):
     display_name = "Filler Bells Percent"
     range_start = 0
     range_end = 200
-    default = 80
+    default = 70
 
 
 class FavorPools(Range):
