@@ -129,7 +129,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->coconuts_wash_up = slot_data.value("coconuts_wash_up", 1) % 2;
   sd->normalized_time_travel = slot_data.value("normalized_time_travel", 1) % 2;
 
-  // Defaults match the apworld's option defaults
+  // Missing keys: offline-relevant ones default to the apworld defaults, AP-only ones to off
   static const int default_loans[AP_LOAN_NUM] = { 15000, 45000, 30000, 60000, 80000 };
   // the apworld always sends the real split; missing = no loan checks
   static const int default_loan_checks[AP_LOAN_NUM] = { 0, 0, 0, 0, 0 };
@@ -178,7 +178,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
   sd->catalog_sources = read_catalog_sources(slot_data);
   sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
-  sd->beach_per_month = slot_data.value("shellsanity", 3);
+  sd->beach_per_month = slot_data.value("shellsanity", 0);
   if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
   sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 15);
   if (sd->shellsanity_item_chance < 0 || sd->shellsanity_item_chance > 100) { sd->shellsanity_item_chance = 15; }
