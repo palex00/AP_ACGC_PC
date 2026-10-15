@@ -52,6 +52,8 @@ int pc_ap_museumsanity_active(const pc_ap_museumsanity* m, int cat);
 int pc_ap_museumsanity_received(const pc_ap_museumsanity* m);
 // Same, also split per category (counts[cat], 0 for inactive ones)
 int pc_ap_museumsanity_received_per_category(const pc_ap_museumsanity* m, int counts[mMmd_CATEGORY_NUM]);
+// Find and donate checks of a category sent so far; *total = its number of checks (0 if inactive)
+int pc_ap_museumsanity_checked(const pc_ap_museumsanity* m, int cat, int* total);
 // Things in a category (museum display size)
 int pc_ap_museumsanity_size(int cat);
 // Make the bits of every active category match the received items: received =

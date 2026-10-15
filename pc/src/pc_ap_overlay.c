@@ -200,7 +200,7 @@ static void apo_append(char* out, size_t size, const char* fmt, ...) {
   va_end(args);
 }
 
-// Museumsanity: donation items received, total then per AP category
+// Museumsanity: donation items received (what the goal counts), then checks sent per AP category
 static void apo_append_museum(char* out, size_t size) {
   static const struct { int cat; const char* name; } cats[] = {
     { mMmd_CATEGORY_FOSSIL, "Fossils" },
@@ -220,9 +220,10 @@ static void apo_append_museum(char* out, size_t size) {
   int goal = pc_ap_museum_goal();
   apo_append(out, size, "\nMuseum: %d / %d", received, goal > 0 ? goal : total);
   for(int i = 0; i < (int)(sizeof(cats) / sizeof(cats[0])); i++) {
-    int n = pc_ap_museum_category_size(cats[i].cat);
-    if(n > 0) {
-      apo_append(out, size, "\n%s: %d / %d", cats[i].name, counts[cats[i].cat], n);
+    int checks;
+    int checked = pc_ap_museum_checked(cats[i].cat, &checks);
+    if(checks > 0) {
+      apo_append(out, size, "\n%s: %d / %d", cats[i].name, checked, checks);
     }
   }
 }

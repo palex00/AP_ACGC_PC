@@ -68,6 +68,8 @@ int pc_ap_favors_done(void);
 int pc_ap_favors_total(void);
 // Museum donation items received (museumsanity), total; counts[mMmd_CATEGORY_*] per category
 int pc_ap_museum_received(int counts[4]);
+// Museum find/donate checks sent in a category; *total = its number of checks (0 if not run by AP)
+int pc_ap_museum_checked(int cat, int* total);
 // Things in a category if it's run by AP (has checks), else 0
 int pc_ap_museum_category_size(int cat);
 // Donation items the Museum goal needs, 0 if it isn't a goal

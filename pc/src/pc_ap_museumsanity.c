@@ -108,6 +108,33 @@ int pc_ap_museumsanity_received_per_category(const pc_ap_museumsanity* m, int co
   return total;
 }
 
+int pc_ap_museumsanity_checked(const pc_ap_museumsanity* m, int cat, int* total) {
+  *total = 0;
+  if(!pc_ap_museumsanity_active(m, cat)) {
+    return 0;
+  }
+  int n = pc_ap_museum_count[cat];
+  int64_t ids[2 * 0x40] = { 0 }; // find ids, then donate ids
+  u8 checked[2 * 0x40];
+  for(int idx = 0; idx < n; idx++) {
+    ids[idx] = PC_AP_LOC_FIND_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
+    ids[n + idx] = PC_AP_LOC_DONATE_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
+  }
+  ap_locations_checked(ids, 2 * n, checked);
+  int count = 0;
+  for(int idx = 0; idx < n; idx++) {
+    if(m->checks[cat] & AP_MUSEUM_FIND) {
+      *total += 1;
+      count += checked[idx];
+    }
+    if(m->checks[cat] & AP_MUSEUM_DONATE) {
+      *total += 1;
+      count += checked[n + idx];
+    }
+  }
+  return count;
+}
+
 int pc_ap_museumsanity_size(int cat) {
   return cat >= 0 && cat < mMmd_CATEGORY_NUM ? pc_ap_museum_count[cat] : 0;
 }
