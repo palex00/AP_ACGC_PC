@@ -9,6 +9,9 @@
 #include "m_skin_matrix.h"
 #include "sys_matrix.h"
 #include "m_rcp.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#endif
 
 static aINS_CTRL_ACTOR* aINS_ctrlActor = NULL;
 static aINS_overlay_c aINS_overlay;

@@ -35,6 +35,7 @@
   "turnips_never_spoil": 0,
   "no_falling_stalks": 0,
   "no_fishing_trash": 1,
+  "easier_critter_catch": 0,
   "coconuts_wash_up": 1,
   "normalized_time_travel": 1,
   "critter_spawns": 1,

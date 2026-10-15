@@ -52,6 +52,13 @@ int pc_ap_qol_no_falling_stalks(void);
 // and aGKK (coelacanth), which swap the fish for a can, boot or tire 1 in 20.
 int pc_ap_qol_no_fishing_trash(void);
 
+// Easier Critter Catch. Frames added to a fish's hook window (vanilla 20-90 at 60 Hz),
+// 0 when off; hooked in aGTT_bite_init and aGKK_bite_init.
+int pc_ap_qol_bite_window_bonus(void);
+// Multiplier on how fast a bug's patience meter fills from nearby movement (flees at 90),
+// 1 when off; hooked in aINS_calc_patience. Instant scares (net, tree shake) bypass it.
+float pc_ap_qol_bug_stress_scale(void);
+
 #ifdef __cplusplus
 }
 #endif

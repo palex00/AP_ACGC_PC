@@ -79,6 +79,7 @@ typedef struct {
   int turnips_never_spoil;
   int no_falling_stalks;      // stalk market never rolls the falling pattern
   int no_fishing_trash;       // fish never turn into a can, boot or tire
+  int easier_critter_catch;   // longer fish hook window, bugs notice you slower
   int coconuts_wash_up;       // town shells are sometimes coconuts
   int normalized_time_travel; // date changes count as one day passing
   // Goal / checks

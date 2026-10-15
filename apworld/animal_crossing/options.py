@@ -573,6 +573,15 @@ class NoFishingTrash(DefaultOnToggle):
     display_name = "No Fishing Trash"
 
 
+class EasierCritterCatch(Toggle):
+    """
+    Fish give you one more second to press A once the bobber goes under, and
+    bugs take twice as long to notice you moving near them. Shaking a tree or
+    swinging the net next to a bug still scares it.
+    """
+    display_name = "Easier Critter Catch"
+
+
 class NoFallingStalks(Toggle):
     """
     The stalk market never rolls the falling pattern (prices only go down all week).
@@ -908,5 +917,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     turnips_never_spoil: TurnipsNeverSpoil
     no_falling_stalks: NoFallingStalks
     no_fishing_trash: NoFishingTrash
+    easier_critter_catch: EasierCritterCatch
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel

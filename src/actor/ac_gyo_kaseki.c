@@ -767,6 +767,9 @@ static void aGKK_touch_init(aGYO_CTRL_ACTOR* gyo) {
 
 static void aGKK_bite_init(aGYO_CTRL_ACTOR* gyo) {    
     gyo->work0 = (int)(aGYO_bite_time[aGKK_get_uki_type()][gyoei_type[gyo->gyo_type].bite_time] * 2.0f);
+#ifdef TARGET_PC
+    gyo->work0 += pc_ap_qol_bite_window_bonus();
+#endif
     gyo->swork0 = 6;
     aGKK_speed_reset((ACTOR*)gyo);
 }

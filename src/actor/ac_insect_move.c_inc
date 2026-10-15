@@ -188,6 +188,9 @@ static void aINS_calc_patience(ACTOR* actorx, GAME* game) {
             insect->patience = 0.0f;
         }
     } else {
+#ifdef TARGET_PC
+        stress *= pc_ap_qol_bug_stress_scale();
+#endif
         insect->patience += stress * aINS_PATIENCE_STEP;
         if (insect->patience > 100.0f) {
             insect->patience = 100.0f;

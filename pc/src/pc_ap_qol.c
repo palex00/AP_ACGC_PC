@@ -47,6 +47,23 @@ int pc_ap_qol_no_fishing_trash(void) {
   return sd->valid && sd->no_fishing_trash;
 }
 
+// Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast
+#define PC_AP_QOL_BITE_WINDOW_BONUS 60
+#define PC_AP_QOL_BUG_STRESS_SCALE 0.5f
+
+static int pc_ap_qol_easier_critter_catch(void) {
+  ap_slotdata* sd = ap_getslotdata();
+  return sd->valid && sd->easier_critter_catch;
+}
+
+int pc_ap_qol_bite_window_bonus(void) {
+  return pc_ap_qol_easier_critter_catch() ? PC_AP_QOL_BITE_WINDOW_BONUS : 0;
+}
+
+float pc_ap_qol_bug_stress_scale(void) {
+  return pc_ap_qol_easier_critter_catch() ? PC_AP_QOL_BUG_STRESS_SCALE : 1.0f;
+}
+
 int pc_ap_qol_shops_always_open(void) {
   ap_slotdata* sd = ap_getslotdata();
   return sd->valid && sd->shops_always_open;
