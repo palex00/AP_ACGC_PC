@@ -604,9 +604,9 @@ class NoFishingTrash(DefaultOnToggle):
 
 class HiddenBugHints(DefaultOnToggle):
     """
-    Bugs that hide give themselves away: a little dirt puffs up where a mole
-    cricket is buried, and a tree with a bagworm or spider in it wiggles now and
-    then.
+    Bugs that hide give themselves away now and then: a little dirt pops up where a
+    mole cricket is buried or in front of a rock with a pill bug under it, and a tree
+    with a bagworm or spider in it wiggles.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Hidden Bug Hints"

@@ -69,8 +69,9 @@ int pc_ap_qol_bite_window_bonus(void);
 // 1 when off; hooked in aINS_calc_patience. Instant scares (net, tree shake) bypass it.
 float pc_ap_qol_bug_stress_scale(void);
 
-// Nonzero when hidden bugs give hints: a dirt puff over a buried mole cricket (aIKR_hide),
-// a small wiggle of the tree a bagworm or spider hides in (aIMN_hide).
+// Nonzero when hidden bugs give hints: a dirt clod over a buried mole cricket (aIKR_hide) or in
+// front of a pill bug's rock (aIDG_hide), a small wiggle of the tree a bagworm or spider hides in
+// (aIMN_hide).
 int pc_ap_qol_hidden_bug_hints(void);
 
 #ifdef __cplusplus

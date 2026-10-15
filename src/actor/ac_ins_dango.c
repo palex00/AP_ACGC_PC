@@ -5,6 +5,10 @@
 #include "m_common_data.h"
 #include "m_player_lib.h"
 #include "ac_set_ovl_insect.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#include "m_play.h"
+#endif
 
 enum {
     aIDG_ACTION_AVOID,
@@ -255,6 +259,26 @@ static void aIDG_stop(ACTOR* actor, GAME* game) {
     }
 }
 
+#ifdef TARGET_PC
+/* Hidden Bug Hints: the mole cricket's small dirt clod pops up at the front of the rock (toward
+ * the camera, a rock hides its own center) every few seconds, when the player is near. Spread
+ * over frames by its unit (no per-bug state). */
+static void aIDG_pc_hint(ACTOR* actor, GAME* game) {
+    aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actor;
+    xyz_t pos;
+
+    if (!pc_ap_qol_hidden_bug_hints() || actor->player_distance_xz > 400.0f) {
+        return;
+    }
+    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % 150 != 0) {
+        return;
+    }
+    pos = actor->world.position;
+    pos.z += 20.0f;
+    eEC_CLIP->effect_make_proc(eEC_EFFECT_DIG_MUD, pos, 2, 0, game, RSV_NO, 0, 0x4000 | 3);
+}
+#endif
+
 static void aIDG_hide(ACTOR* actor, GAME* game) {
     GAME_PLAY* play = (GAME_PLAY*) game;
     aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actor;
@@ -262,6 +286,11 @@ static void aIDG_hide(ACTOR* actor, GAME* game) {
     if (aIDG_check_strike_stone(insect) == TRUE) {
         aIDG_setupAction(insect, aIDG_ACTION_APPEAR, &play->game);
     }
+#ifdef TARGET_PC
+    else {
+        aIDG_pc_hint(actor, game);
+    }
+#endif
 }
 
 static void aIDG_appear(ACTOR* actor, GAME* game) {
