@@ -611,6 +611,16 @@ class SkipHRATalk(DefaultOnToggle):
     display_name = "Skip HRA Talk"
 
 
+class ShortShopTalk(Toggle):
+    """
+    Tom Nook keeps it short when you buy something in his shop: just the item, the
+    price and "would you like it?". He still gives you raffle tickets, he just
+    doesn't talk about them.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
+    display_name = "Short Shop Talk"
+
+
 class EasierCritterCatch(Toggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
@@ -994,6 +1004,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     no_fishing_trash: NoFishingTrash
     easier_critter_catch: EasierCritterCatch
     skip_hra_talk: SkipHRATalk
+    short_shop_talk: ShortShopTalk
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel
     critter_odds: CritterOdds

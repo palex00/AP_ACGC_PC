@@ -1,5 +1,6 @@
 #ifdef TARGET_PC
 #include "pc_ap_logic.h"
+#include "pc_ap_qol.h"
 #endif
 
 enum aNSC_action {
@@ -2491,6 +2492,12 @@ static void aNSC_sell_answer0(NPC_SHOP_COMMON_ACTOR* shop_common, GAME_PLAY* pla
                     }
                 }
             }
+#if defined(TARGET_PC) && !defined(aNSC_MAMEDANUKI)
+            // Short Shop Talk: ticket given (or mailed) silently, plain "<price> Bells it is!"
+            if (pc_ap_qol_short_shop_talk() && (next == 1 || next == 2)) {
+                next = 0;
+            }
+#endif
             aNSC_Set_continue_msg_num(msg_p, shop_common, aNSC_get_msg_no(msg_no[next]));
             mDemo_Set_OrderValue(mDemo_ORDER_NPC0, 0x9, 0x0);
             aNSC_setupAction(shop_common, play, next_act_idx[next]);
@@ -2566,6 +2573,12 @@ static void aNSC_show_item_check(NPC_SHOP_COMMON_ACTOR* shop_common, GAME_PLAY* 
                 break;
         }
 
+#if defined(TARGET_PC) && !defined(aNSC_MAMEDANUKI)
+        // Short Shop Talk: after trying on / seeing it (or not), the plain price offer
+        if (pc_ap_qol_short_shop_talk() && msg_no != aNSC_MSG_WAIT && msg_no != aNSC_MSG_BUY_CANCEL) {
+            msg_no = aNSC_MSG_BUY_ONE_OFFER;
+        }
+#endif
         if (msg_no != -1) {
             aNSC_Set_continue_msg_num(msg_p, shop_common, aNSC_get_msg_no(msg_no));
             mMsg_Set_ForceNext(msg_p);

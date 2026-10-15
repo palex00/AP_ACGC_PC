@@ -88,6 +88,7 @@ typedef struct {
   int no_fishing_trash;       // fish never turn into a can, boot or tire
   int easier_critter_catch;   // longer fish hook window, bugs notice you slower
   int skip_hra_talk;          // Nook never gives the Happy Room Academy talk
+  int short_shop_talk;        // Nook's buy talk shortened (no filler, no raffle ticket talk)
   int coconuts_wash_up;       // town shells are sometimes coconuts
   int normalized_time_travel; // date changes count as one day passing
   // Goal / checks

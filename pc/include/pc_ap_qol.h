@@ -57,6 +57,11 @@ int pc_ap_qol_no_fishing_trash(void);
 // mEv_RenewalDataEveryDay: the "wait a day" flag is cleared without setting the talk flag.
 int pc_ap_qol_skip_hra_talk(void);
 
+// Nonzero when Nook's buy talk is short (Nook's shop / department store, not the twins).
+// Hooked in ac_npc_shop_common.c (the raffle ticket talk and the clothes/carpet/wall
+// follow-ups become the plain price offer) and pc_ap_msg_patch (filler lines trimmed).
+int pc_ap_qol_short_shop_talk(void);
+
 // Easier Critter Catch. Frames added to a fish's hook window (vanilla 20-90 at 60 Hz),
 // 0 when off; hooked in aGTT_bite_init and aGKK_bite_init.
 int pc_ap_qol_bite_window_bonus(void);

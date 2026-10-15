@@ -40,6 +40,7 @@
   "no_fishing_trash": 1,
   "easier_critter_catch": 0,
   "skip_hra_talk": 1,
+  "short_shop_talk": 0,
   "coconuts_wash_up": 1,
   "normalized_time_travel": 1,
   "critter_odds": 2,

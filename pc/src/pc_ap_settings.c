@@ -18,6 +18,7 @@ static const pc_ap_setting_info l_settings[PC_AP_SET_NUM] = {
   [PC_AP_SET_NO_FISHING_TRASH] = { "no_fishing_trash", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_EASIER_CRITTER_CATCH] = { "easier_critter_catch", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_SKIP_HRA_TALK] = { "skip_hra_talk", PC_AP_SET_KIND_TOGGLE },
+  [PC_AP_SET_SHORT_SHOP_TALK] = { "short_shop_talk", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_COCONUTS_WASH_UP] = { "coconuts_wash_up", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_NORMALIZED_TIME_TRAVEL] = { "normalized_time_travel", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_CRITTER_ODDS] = { "critter_odds", PC_AP_SET_KIND_ODDS },
@@ -62,6 +63,7 @@ void pc_ap_settings_init(pc_ap_settings* s, const ap_slotdata* sd) {
   v[PC_AP_SET_NO_FISHING_TRASH] = sd->no_fishing_trash;
   v[PC_AP_SET_EASIER_CRITTER_CATCH] = sd->easier_critter_catch;
   v[PC_AP_SET_SKIP_HRA_TALK] = sd->skip_hra_talk;
+  v[PC_AP_SET_SHORT_SHOP_TALK] = sd->short_shop_talk;
   v[PC_AP_SET_COCONUTS_WASH_UP] = sd->coconuts_wash_up;
   v[PC_AP_SET_NORMALIZED_TIME_TRAVEL] = sd->normalized_time_travel;
   v[PC_AP_SET_CRITTER_ODDS] = sd->critter_odds;

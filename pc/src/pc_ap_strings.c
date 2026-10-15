@@ -1,5 +1,6 @@
 #include "pc_ap_strings.h"
 #include "pc_ap_logic.h"
+#include "pc_ap_qol.h"
 #include "pc_menu_util.h"
 #include "m_font.h" // CHAR_SPACE, CHAR_NEW_LINE, mem_clear
 #include "ap_log.h"
@@ -131,6 +132,38 @@ static int pc_ap_msg_rover_no_clock(u8* buf, int len) {
   return pc_replace_msg_text(buf, len, "So,", "Excuse me...");
 }
 
+// Remove from the start of from up to (not including) the start of to, the first to after from.
+// Both are raw message bytes; the message is left alone if either is missing.
+static int pc_msg_cut(u8* buf, int len, const char* from, const char* to) {
+  int start = pc_find_bytes(buf, len, 0, from, strlen(from));
+  if(start < 0) {
+    return len;
+  }
+  int end = pc_find_bytes(buf, len, start, to, strlen(to));
+  if(end < 0) {
+    return len;
+  }
+  return pc_msg_remove(buf, len, start, end - start);
+}
+
+// Short Shop Talk: Nook's filler lines go (Nook's shop / department store messages only;
+// ac_npc_shop_common.c swaps the follow-ups and the raffle ticket talk). Control codes are
+// kept, the DEMO_ORDER idx 9 ones in particular: the shop waits for them.
+static int pc_ap_msg_short_shop_talk(int index, u8* buf, int len) {
+  switch(index) {
+    case 4249: // "That's X. The price is Y Bells." [page] "It's a steal at that price! Would you like it?"
+      return pc_msg_cut(buf, len, "\x7F\x04" "\xCD" "\x7F\x02" "It's a steal", "\x7F\x09");
+    case 4237: // "That's X. It's the height of fashion, or so claims Fauna magazine. Would you like to try it on?"
+      return pc_msg_cut(buf, len, "It's ", "Would you like");
+    case 4259: // "That's X. It's very nice! Very! Would you like to see it?"
+      return pc_msg_cut(buf, len, "It's very nice!", "Would you like");
+    case 4250: // "No...? You're sure? Well, no matter! Feel free to keep browsing, hm?"
+      len = pc_msg_cut(buf, len, "No", "Well, no matter!");
+      return pc_msg_cut(buf, len, " Feel free", "\xCD" "\x7F"); // up to the final newline + end code
+  }
+  return len;
+}
+
 // Generic pc message patch, which will patch ANY message which matches
 // one of the patches.
 u32 pc_ap_msg_patch(int index, mMsg_Data_c* msg_data, u32 size) {
@@ -159,6 +192,10 @@ u32 pc_ap_msg_patch(int index, mMsg_Data_c* msg_data, u32 size) {
   }
   if(needle[0]) { // there is a replacement
     size = pc_replace_msg_text(msg_data->text_buf.data, size, needle, replace);
+  }
+
+  if(pc_ap_qol_short_shop_talk()) {
+    size = pc_ap_msg_short_shop_talk(index, msg_data->text_buf.data, size);
   }
 
   if(pc_ap_time_frozen()) {
