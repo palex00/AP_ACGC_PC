@@ -396,13 +396,13 @@ class Shellsanity(Range):
     default = 3
 
 
-class BeachItemChance(Range):
+class ShellsanityItemChance(Range):
     """
     Shellsanity: chance (percent) that a shell washing up is an Archipelago item
     instead, while the current month has checks left. A full beach walk is about
     20 shells.
     """
-    display_name = "Beach Item Chance"
+    display_name = "Shellsanity Item Chance"
     range_start = 1
     range_end = 100
     default = 15
@@ -909,7 +909,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     favor_pools: FavorPools
     favors_per_pool: FavorsPerPool
     shellsanity: Shellsanity
-    beach_item_chance: BeachItemChance
+    shellsanity_item_chance: ShellsanityItemChance
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
     skip_intro: SkipIntro

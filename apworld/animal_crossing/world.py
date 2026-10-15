@@ -587,7 +587,7 @@ class AnimalCrossingWorld(World):
             "skip_hra_talk": self.options.skip_hra_talk.value,
             "coconuts_wash_up": self.options.coconuts_wash_up.value,
             "shellsanity": self.options.shellsanity.value,
-            "beach_item_chance": self.options.beach_item_chance.value,
+            "shellsanity_item_chance": self.options.shellsanity_item_chance.value,
             "normalized_time_travel": self.options.normalized_time_travel.value,
             "goal": sorted(self.options.goal.value),
             "loans": self.loans,

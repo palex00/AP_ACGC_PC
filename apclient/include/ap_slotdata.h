@@ -126,7 +126,7 @@ typedef struct {
   int new_item_chance;               // percent: a random item from a source is a needed open-pool item
   int catalog_sources;               // AP_CATALOG_SOURCE_* bits (Nook is always a source)
   int beach_per_month;                // Shellsanity: checks per month washing up on the beach, 0 = off
-  int beach_item_chance;              // Shellsanity: percent of washed-up shells that are AP items
+  int shellsanity_item_chance;        // Shellsanity: percent of washed-up shells that are AP items
   int catalog_goal_count;            // Catalog goal: pool items to get into the catalog (apworld computes it from its % option)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit
   char world_version[16];            // apworld version the seed was generated with ("" if missing)

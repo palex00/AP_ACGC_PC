@@ -5,7 +5,7 @@
 
 void pc_ap_shellsanity_init(pc_ap_shellsanity* s, const ap_slotdata* sd) {
   s->per_month = sd->valid ? sd->beach_per_month : 0;
-  s->chance = sd->beach_item_chance;
+  s->chance = sd->shellsanity_item_chance;
 }
 
 int pc_ap_shellsanity_is_item(mActor_name_t item) {
