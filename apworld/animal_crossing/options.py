@@ -640,8 +640,8 @@ class StartingTime(Choice):
 class Catalogsanity(DefaultOnToggle):
     """
     Catalog items are split into pools. Getting an item of an unlocked pool
-    into your catalog (picking it up, wearing it, ...) sends a check. Pool 1
-    is open from the start, each Progressive Catalog Pool unlocks the next.
+    into your catalog (picking it up, wearing it, ...) sends a check. No pool
+    is open at the start: each Progressive Catalog Pool unlocks the next one.
     Must be on for the Catalog goal.
     """
     display_name = "Catalogsanity"
@@ -650,7 +650,7 @@ class Catalogsanity(DefaultOnToggle):
 class CatalogPools(Range):
     """
     Catalog is split into pools, each one requiring a Progressive Catalog Pool
-    unlock. You always start with 1. Pools x Pool Size = total catalog checks,
+    unlock (none open at the start). Pools x Pool Size = total catalog checks,
     at most 575 (furniture, clothes, carpets and wallpaper; no stationery or diaries).
     """
     display_name = "Catalog Pools"

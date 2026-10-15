@@ -22,8 +22,8 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   checks (set per category). Blathers only takes a donation while its check is unsent. With
   Instant fossil checks, fossils come out of the ground already appraised.
 - **Catalog (Catalogsanity):** catalog items are split into pools. Getting an item of an unlocked pool
-  into your catalog (buying, picking up, wearing...) sends a check. Pool 1 is open from the start; each
-  Progressive Catalog Pool unlocks the next. Nook's shop stocks items you still need, and Catalog
+  into your catalog (buying, picking up, wearing...) sends a check. No pool is open at the start; each
+  Progressive Catalog Pool unlocks the next one. Nook's shop stocks items you still need, and Catalog
   Sources picks what else can give them (favors, trades, presents, the dump...). Passwords don't work.
 - **Favors (Favorsanity):** a number of villager favors (errands and contests) send checks.
 - **Beach (Shellsanity, off by default):** Archipelago items sometimes wash up on the town beach in place

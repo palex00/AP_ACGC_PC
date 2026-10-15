@@ -1,5 +1,5 @@
 # Catalogsanity: N pools of M catalog items; registering a pool item in the catalog sends its check.
-# Pool 1 is open at the start, pool k needs k - 1 Progressive Catalog Pool items.
+# No pool is open at the start, pool k (1-based) needs k Progressive Catalog Pool items.
 # The eligible items are generated (catalog_data.py); this file is hand-written.
 # WARN: the client mirrors the location base (pc side, step 2).
 import re

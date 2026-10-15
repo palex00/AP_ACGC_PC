@@ -288,7 +288,7 @@ class AnimalCrossingWorld(World):
             self.store_thresholds = [self.options.nook_n_go_catalog.value, self.options.nookway_catalog.value,
                                      self.options.nookingtons_catalog.value]
 
-        # Catalogsanity: pools of game item ids; pool k (0-based) needs k Progressive Catalog Pool
+        # Catalogsanity: pools of game item ids; pool k (0-based) needs k + 1 Progressive Catalog Pool (none open at start)
         self.catalog_pools = []
         if self.options.catalogsanity:
             pools, size = self.options.catalog_pools.value, self.options.catalog_pool_size.value
@@ -299,12 +299,12 @@ class AnimalCrossingWorld(World):
             self.catalog_pools = make_pools(self.random, pools, size)
         if ut is not None and "catalog_pools" in ut:
             self.catalog_pools = ut["catalog_pools"]
-        self.catalog_pool_items = max(len(self.catalog_pools) - 1, 0)
+        self.catalog_pool_items = len(self.catalog_pools)
         catalog_total = sum(len(pool) for pool in self.catalog_pools)
         self.catalog_goal_count = math.ceil(catalog_total * self.options.catalog_goal_percent.value / 100)
         if ut is not None and "catalog_goal_count" in ut:
             self.catalog_goal_count = ut["catalog_goal_count"]
-        # Catalog goal: pools needed to hold catalog_goal_count items, so k-1 Progressive Catalog Pool
+        # Catalog goal: pools needed to hold catalog_goal_count items, one Progressive Catalog Pool each
         self.catalog_goal_pools = 0
         held = 0
         while held < self.catalog_goal_count:
@@ -317,6 +317,10 @@ class AnimalCrossingWorld(World):
         if locations == 0:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favorsanity must be "
                               f"at least 1.")
+        # Catalog checks all need a Progressive Catalog Pool, so they can't be the only checks
+        if locations == catalog_total:
+            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Catalog checks can't be the only checks (no "
+                              f"pool is open at the start). Turn on Loansanity or set Favorsanity to at least 1.")
         # Every non-filler item needs a location (the starting month and slot are given at the start)
         items = len(LOANS) - 1 if self.options.loansanity else 0
         if self.options.timesanity:
@@ -397,13 +401,12 @@ class AnimalCrossingWorld(World):
                     add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
                                                                    self.player))
 
-        # Catalog pool k (0-based) needs k Progressive Catalog Pool. Nook's shop is the one source that's always
+        # Catalog pool k (0-based) needs k + 1 Progressive Catalog Pool. Nook's shop is the one source that's always
         # on: with Timesanity it needs a slot with the store open (as for loans above)
         for k, pool in enumerate(self.catalog_pools):
             for item_id in pool:
                 location = self.multiworld.get_location(catalog_location_name(item_id), self.player)
-                if k > 0:
-                    set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_CATALOG_POOL, self.player, k))
+                set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_CATALOG_POOL, self.player, k + 1))
                 if self.options.timesanity and not self.options.shops_always_open:
                     add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
                                                                    self.player))
@@ -454,8 +457,7 @@ class AnimalCrossingWorld(World):
             # No AP item gates it: Nook's shop, trees, villagers, ... can all hand it out
             "Froggy Chair": lambda state: True,
             # Enough pools open (with Timesanity also a shop slot, below)
-            "Catalog": lambda state: state.has(PROGRESSIVE_CATALOG_POOL, self.player,
-                                               max(self.catalog_goal_pools - 1, 0)),
+            "Catalog": lambda state: state.has(PROGRESSIVE_CATALOG_POOL, self.player, self.catalog_goal_pools),
         }
         chosen = [goals[g] for g in sorted(self.options.goal.value)]
         # Catalog goal: Nook's shop (as for the catalog locations above)

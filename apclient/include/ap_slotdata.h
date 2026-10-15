@@ -109,7 +109,7 @@ typedef struct {
   int catalogsanity;                 // nonzero: catalog checks + Progressive Catalog Pool items
   int catalog_count;                 // items in all pools (entries used in the two arrays below)
   unsigned short catalog_items[AP_CATALOG_MAX]; // game item ids, pools flattened in order
-  unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k Progressive Catalog Pools
+  unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k + 1 Progressive Catalog Pools
   int new_item_chance;               // percent: a random item from a source is a needed open-pool item
   int catalog_sources;               // AP_CATALOG_SOURCE_* bits (Nook is always a source)
   int beach_per_month;                // Shellsanity: checks per month washing up on the beach, 0 = off

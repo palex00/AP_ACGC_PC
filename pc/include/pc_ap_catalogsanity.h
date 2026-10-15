@@ -1,5 +1,5 @@
 // Catalogsanity: catalog items are split into pools; an item of an open pool in
-// the current player's catalog is a check. Pool 1 is open from the start, each
+// the current player's catalog is a check. No pool is open at the start, each
 // Progressive Catalog Pool opens the next one. Checks are derived from the
 // catalog bits (no hook on registering), so a pool opening sends the items
 // already in the catalog at once.
@@ -51,7 +51,7 @@ typedef struct {
 
 void pc_ap_catalogsanity_init(pc_ap_catalogsanity* c, const ap_slotdata* sd);
 
-// Pools open: 1 + Progressive Catalog Pools received (0 without catalogsanity)
+// Pools open: Progressive Catalog Pools received (0 without catalogsanity)
 int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c);
 // Pools in the seed (0 without catalogsanity)
 int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c);

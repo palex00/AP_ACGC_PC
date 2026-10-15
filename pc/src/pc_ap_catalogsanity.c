@@ -43,7 +43,7 @@ int pc_ap_catalogsanity_open_pools(const pc_ap_catalogsanity* c) {
   if(c->count == 0) {
     return 0;
   }
-  return 1 + ap_item_count(PC_AP_ITEM_PROGRESSIVE_CATALOG_POOL);
+  return ap_item_count(PC_AP_ITEM_PROGRESSIVE_CATALOG_POOL);
 }
 
 int pc_ap_catalogsanity_pool_count(const pc_ap_catalogsanity* c) {
