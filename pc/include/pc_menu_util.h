@@ -31,6 +31,11 @@ enum {
   PC_MENU_RESUME, // close the pause menu
 };
 
+// Font ortho projection + identity modelview into NOW_FONT_DISP, for screen-space menu drawing. Like
+// mFont_SetMatrix(graph, mFont_MODE_FONT) minus the CPU matrix stack (Matrix_push), which doesn't exist in
+// every scene (NULL during boot, stale between scenes -> crash). Nothing here needs it. No unset needed.
+void pc_menu_set_font_matrix(struct graph_s* graph);
+
 /* Full-screen translucent black backdrop, drawn into NOW_FONT_DISP. */
 void pc_menu_dim_rect(struct graph_s* graph, int alpha);
 // Translucent black box in 320x240 coords with rounded corners (radius 0 = square)

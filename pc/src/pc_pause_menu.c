@@ -370,8 +370,9 @@ void pc_pause_menu_draw(struct game_s* game) {
     if (!g_pc_paused || game == NULL || game->graph == NULL) return;
 
     /* Font ortho projection + identity modelview, else our screen-space quads
-     * inherit whatever projection the scene ended its frame with. */
-    mFont_SetMatrix(game->graph, mFont_MODE_FONT);
+     * inherit whatever projection the scene ended its frame with. Not mFont_SetMatrix:
+     * its CPU matrix stack doesn't exist in boot scenes (pc_menu_set_font_matrix). */
+    pc_menu_set_font_matrix(game->graph);
     pc_settings_menu_tick();
 
     if (cur_page == PAGE_SETTINGS) {
@@ -392,6 +393,4 @@ void pc_pause_menu_draw(struct game_s* game) {
         if (cur_page == PAGE_MAIN)              draw_main_page(game);
         else if (cur_page == PAGE_CONFIRM_QUIT) draw_confirm_page(game);
     }
-
-    mFont_UnSetMatrix(game->graph, mFont_MODE_FONT);
 }

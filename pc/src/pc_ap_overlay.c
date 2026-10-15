@@ -14,7 +14,6 @@
 #include "m_common_data.h" // clip.animal_logo_clip
 #include "game.h"
 #include "graph.h"
-#include "sys_matrix.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -53,21 +52,6 @@ int pc_ap_overlay_toggle(void) {
 #define _APO_TOAST_FADE_IN_MS  100
 #define _APO_TOAST_FADE_OUT_MS 500
 #define _APO_TOAST_SLIDE_MS    60.0f // time constant of the slide up when a toast above goes (~3x to settle)
-
-// Like mFont_SetMatrix(graph, mFont_MODE_FONT), minus the CPU matrix stack (Matrix_push),
-// which doesn't exist in every scene (NULL during boot -> crash). pc_text_draw doesn't need it.
-static void apo_set_font_matrix(GRAPH* graph) {
-  static Mtx proj;
-  static int init = 0;
-  if (!init) {
-    mFont_CulcOrthoMatrix(&proj);
-    init = 1;
-  }
-  OPEN_DISP(graph);
-  gSPMatrix(NOW_FONT_DISP++, &proj, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(NOW_FONT_DISP++, &Mtx_clear, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-  CLOSE_DISP(graph);
-}
 
 // Connection status line, bottom left. Returns the y of its text, for stacking above it
 static f32 pc_ap_draw_status(struct game_s* game) {
@@ -355,7 +339,7 @@ void pc_ap_overlay_draw(struct game_s* game) {
   if(!menu_screen && !show_status && !show_tracker && !show_toasts) {
     return;
   }
-  apo_set_font_matrix(game->graph);
+  pc_menu_set_font_matrix(game->graph);
 
   if(show_status) {
     f32 status_y = pc_ap_draw_status(game);

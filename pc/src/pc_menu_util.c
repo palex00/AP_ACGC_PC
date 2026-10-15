@@ -5,8 +5,22 @@
 #include "m_font.h"
 #include "m_rcp.h"
 #include "main.h" /* SCREEN_WIDTH_F */
+#include "sys_matrix.h"
 
 #include <math.h>
+
+void pc_menu_set_font_matrix(GRAPH* graph) {
+    static Mtx proj;
+    static int init = 0;
+    if (!init) {
+        mFont_CulcOrthoMatrix(&proj);
+        init = 1;
+    }
+    OPEN_DISP(graph);
+    gSPMatrix(NOW_FONT_DISP++, &proj, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(NOW_FONT_DISP++, &Mtx_clear, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    CLOSE_DISP(graph);
+}
 
 void pc_menu_dim_rect(GRAPH* graph, int alpha) {
     Gfx* gfx;
