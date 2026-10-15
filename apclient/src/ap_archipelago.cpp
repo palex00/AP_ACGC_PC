@@ -276,11 +276,21 @@ int ap_start(void) {
           g_ap->get_seed().c_str(), g_ap->get_team_number(), g_ap->get_player_number());
       return;
     }
+    // Set every time. A wrong value type throws (json value()); apclientpp would only printf it
+    // and we'd sit on CONNECTED with Start blocked, so refuse with a reason instead.
+    ap_slotdata * sd = ap_getslotdata();
+    try {
+      ap_slotdata_fill(sd, slot_data);
+    } catch (const nlohmann::json::exception& e) {
+      ap_slotdata_init(sd);
+      g_ap_connectstate.state = AP_CSTATE_SLOTREFUSED;
+      snprintf(g_ap_connectstate.last_refuse_reason, sizeof(g_ap_connectstate.last_refuse_reason),
+          "Bad slot_data (client/apworld mismatch?)");
+      APLOG_ERROR("BAD SLOT_DATA: %s", e.what());
+      return;
+    }
     g_ap_connectstate.connect_once = 1;
     g_ap_connectstate.state = AP_CSTATE_CONNECTED;
-    // Set every time
-    ap_slotdata * sd = ap_getslotdata();
-    ap_slotdata_fill(sd, slot_data);
     if(!ap_roomplayer_valid(&g_ap_connectstate.roomplayer)) {
       g_ap_connectstate.roomplayer.player = g_ap->get_player_number();
       g_ap_connectstate.roomplayer.team = g_ap->get_team_number();
