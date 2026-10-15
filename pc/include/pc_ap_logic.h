@@ -160,6 +160,12 @@ int pc_ap_critter_status(int cat, int idx);
 int pc_ap_fish_passes_on(void);
 // Fish pass p (PC_AP_FISH_PASS_*) received, or passes off
 int pc_ap_fish_pass_open(int pass);
+// Bug Availability "Progressive" is on (bug pass items gate bugs)
+int pc_ap_bug_passes_on(void);
+// Bug pass p (PC_AP_BUG_PASS_*) received, or passes off
+int pc_ap_bug_pass_open(int pass);
+// mAGrw_SetHoneycombTree (daily grow): 0 = no new bee trees (the Bee's pass is closed)
+int pc_ap_bee_trees_allowed(void);
 
 // Tools in Pool hooks (pc_ap_tools.h). The tick mails received tools.
 

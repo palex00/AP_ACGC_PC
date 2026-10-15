@@ -2386,7 +2386,7 @@ BELL_CREDITS = {
 }
 
 # Museumsanity donation items ("Museum: X"), names and ids in museum.py
-from .museum import FISH_PASS_ITEM_NAME_TO_ID, FOSSIL_SERIES_ITEM_NAME_TO_ID, MUSEUM_ITEM_NAME_TO_ID  # noqa: E402
+from .museum import BUG_PASS_ITEM_NAME_TO_ID, FISH_PASS_ITEM_NAME_TO_ID, FOSSIL_SERIES_ITEM_NAME_TO_ID, MUSEUM_ITEM_NAME_TO_ID  # noqa: E402
 
 AP_ITEM_NAME_TO_ID.update(MUSEUM_ITEM_NAME_TO_ID)
 ITEM_NAME_TO_ID.update(MUSEUM_ITEM_NAME_TO_ID)
@@ -2396,3 +2396,6 @@ ITEM_NAME_TO_ID.update(FOSSIL_SERIES_ITEM_NAME_TO_ID)
 # Fish Availability "Progressive": one item per fish pass
 AP_ITEM_NAME_TO_ID.update(FISH_PASS_ITEM_NAME_TO_ID)
 ITEM_NAME_TO_ID.update(FISH_PASS_ITEM_NAME_TO_ID)
+# Bug Availability "Progressive": one item per bug pass
+AP_ITEM_NAME_TO_ID.update(BUG_PASS_ITEM_NAME_TO_ID)
+ITEM_NAME_TO_ID.update(BUG_PASS_ITEM_NAME_TO_ID)

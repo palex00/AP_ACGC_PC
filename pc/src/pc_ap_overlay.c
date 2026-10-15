@@ -48,7 +48,7 @@ int pc_ap_overlay_toggle(void) {
 #define _APO_BOTTOM(text)  (_APO_HEIGHT - _APO_SCREENPAD - PC_SPAN_PAD - pc_span_height(text, _APO_SCALE))
 
 #define _APO_TOAST_SLOTS 16
-#define _APO_TOAST_GAP   2.0f // between stacked toast boxes
+#define _APO_TOAST_GAP   1.0f // between stacked toast boxes
 #define _APO_TOAST_FADE_IN_MS  100
 #define _APO_TOAST_FADE_OUT_MS 500
 #define _APO_TOAST_SLIDE_MS    60.0f // time constant of the slide up when a toast above goes (~3x to settle)

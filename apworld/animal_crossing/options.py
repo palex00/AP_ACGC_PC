@@ -868,6 +868,21 @@ class CritterOdds(Choice):
     default = 2
 
 
+class BugAvailability(Choice):
+    """
+    Which bugs can spawn.
+    All: every bug.
+    Progressive: a bug only spawns once you have its item: "Tree Bugs" (cicadas, Bagworm, Spider, Purple
+    Butterfly, Bee), "Beetles", "Flower Bugs" (butterflies, ladybugs, Mantis, Snail), "Ground Bugs" (crickets,
+    Grasshopper, locusts, Mole Cricket, Pill Bug, Ant, Cockroach) and "Flying Bugs" (dragonflies, Mosquito,
+    Firefly, Pond Skater). Needs Bug Checks (with Museumsanity); without them this is All.
+    """
+    display_name = "Bug Availability"
+    option_all = 0
+    option_progressive = 1
+    default = 1
+
+
 class FishAvailability(Choice):
     """
     Which fish can spawn.
@@ -986,6 +1001,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     fish_checks: FishChecks
     fossil_checks: FossilChecks
     painting_checks: PaintingChecks
+    bug_availability: BugAvailability
     fish_availability: FishAvailability
     fossil_availability: FossilAvailability
     museum_goal_percent: MuseumGoalPercent

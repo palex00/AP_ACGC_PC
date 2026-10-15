@@ -31,6 +31,8 @@ extern const pc_ap_critter_data pc_ap_fish_data[PC_AP_CRITTER_NUM];
 // river, waterfall and river mouth rows, by shadow size.
 extern const u8 pc_ap_fish_passes[PC_AP_CRITTER_NUM];
 extern const u8 pc_ap_fish_river_pass[PC_AP_CRITTER_NUM];
+// Bug passes (Bug Availability), museum index order: the pass (PC_AP_BUG_PASS_*) that opens it.
+extern const u8 pc_ap_bug_pass[PC_AP_CRITTER_NUM];
 
 #ifdef __cplusplus
 }

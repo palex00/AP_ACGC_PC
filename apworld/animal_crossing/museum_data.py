@@ -177,3 +177,47 @@ FISH_PASSES = [
     (4,),  # Barred Knifejaw
     (2,),  # Arapaima
 ]
+
+# Bug passes per bug (BUGS order): index into museum.BUG_PASS_ITEMS
+BUG_PASSES = [
+    2,  # Common Butterfly
+    2,  # Yellow Butterfly
+    2,  # Tiger Butterfly
+    0,  # Purple Butterfly
+    0,  # Robust Cicada
+    0,  # Walker Cicada
+    0,  # Evening Cicada
+    0,  # Brown Cicada
+    0,  # Bee
+    4,  # Common Dragonfly
+    4,  # Red Dragonfly
+    4,  # Darner Dragonfly
+    4,  # Banded Dragonfly
+    3,  # Long Locust
+    3,  # Migratory Locust
+    3,  # Cricket
+    3,  # Grasshopper
+    3,  # Bell Cricket
+    3,  # Pine Cricket
+    1,  # Drone Beetle
+    1,  # Dynastid Beetle
+    1,  # Flat Stag Beetle
+    1,  # Jewel Beetle
+    1,  # Longhorn Beetle
+    2,  # Ladybug
+    2,  # Spotted Ladybug
+    2,  # Mantis
+    4,  # Firefly
+    3,  # Cockroach
+    1,  # Saw Stag Beetle
+    1,  # Mountain Beetle
+    1,  # Giant Beetle
+    2,  # Snail
+    3,  # Mole Cricket
+    4,  # Pond Skater
+    0,  # Bagworm
+    3,  # Pill Bug
+    0,  # Spider
+    3,  # Ant
+    4,  # Mosquito
+]

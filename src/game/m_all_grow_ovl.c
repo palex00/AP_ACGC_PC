@@ -991,6 +991,12 @@ static void mAGrw_SetTreeBlockLine(int block_x, mActor_name_t* target_table) {
 static void mAGrw_SetHoneycombTree(u8 honeycomb_record) {
     u8 block_num = mMsm_GetDepositBlockNum(honeycomb_record);
 
+#ifdef TARGET_PC
+    /* Bug Availability: no bees before the Bee's bug pass */
+    if (!pc_ap_bee_trees_allowed()) {
+        return;
+    }
+#endif
     if (block_num < FG_BLOCK_X_NUM) {
         int i;
 

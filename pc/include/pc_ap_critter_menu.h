@@ -7,6 +7,7 @@
 // fish pass (header line "= Small River Fish =", ...); a closed pass shows one
 // "(Locked)" line instead of its fish; a pass with no fish that month has no section;
 // a fish of several passes is listed under each. "x / y caught" counts the whole month.
+// Bugs with Bug Availability "Progressive": the same with bug passes ("= Tree Bugs =", ...).
 #ifndef PC_AP_CRITTER_MENU_H
 #define PC_AP_CRITTER_MENU_H
 
@@ -24,8 +25,8 @@ struct game_s;
 
 // Line kinds
 #define PC_AP_CRITTER_LINE_SPECIES 0 // value = museum index
-#define PC_AP_CRITTER_LINE_HEADER  1 // value = fish pass (PC_AP_FISH_PASS_*)
-#define PC_AP_CRITTER_LINE_LOCKED  2 // value = fish pass
+#define PC_AP_CRITTER_LINE_HEADER  1 // value = fish or bug pass (PC_AP_FISH_PASS_* / PC_AP_BUG_PASS_*)
+#define PC_AP_CRITTER_LINE_LOCKED  2 // value = pass
 // Fish of several passes twice, plus a header and a "(Locked)" per pass
 #define PC_AP_CRITTER_LINES_MAX (2 * PC_AP_CRITTER_NUM + 2 * PC_AP_FISH_PASS_NUM)
 

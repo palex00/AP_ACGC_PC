@@ -6,6 +6,7 @@
 #include "ac_gyoei.h"
 #include "ac_insect_h.h"
 #include "ac_set_ovl_gyoei.h"
+#include "ac_set_ovl_insect.h"
 
 #include <string.h>
 
@@ -17,6 +18,7 @@ static const int pc_ap_museum_count[mMmd_CATEGORY_NUM] = {
 void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   memset(m, 0, sizeof(*m));
   m->critter_odds = sd->critter_odds;
+  m->bug_availability = sd->bug_availability;
   m->fish_availability = sd->fish_availability;
   m->fossil_availability = sd->fossil_availability;
   m->fossil_odds = sd->fossil_odds;
@@ -29,6 +31,10 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
     m->checks[mMmd_CATEGORY_INSECT] = sd->bug_checks;
     m->checks[mMmd_CATEGORY_FISH] = sd->fish_checks;
     m->goal_count = sd->museum_goal_count;
+  }
+  // Bug passes: the items only exist with bug checks (also not offline)
+  if(m->bug_availability == AP_BUG_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_INSECT)) {
+    m->bug_availability = AP_BUG_AVAIL_ALL;
   }
   // Fish passes: the items only exist with fish checks (also not offline)
   if(m->fish_availability == AP_FISH_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FISH)) {
@@ -500,6 +506,33 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
     int s = pc_ap_insect_species(rows[i].type);
     if(s >= 0) {
       rows[i].weight *= factor[s];
+    }
+  }
+}
+
+int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass) {
+  if(m->bug_availability != AP_BUG_AVAIL_PROGRESSIVE) {
+    return 1;
+  }
+  return ap_item_count(PC_AP_ITEM_BUG_PASS_BASE + pass) > 0;
+}
+
+void pc_ap_museumsanity_bug_lock(const pc_ap_museumsanity* m, aSOI_insect_spawn_info_f_c* rows, int n) {
+  if(m->bug_availability != AP_BUG_AVAIL_PROGRESSIVE) {
+    return;
+  }
+  for(int i = 0; i < n; i++) {
+    int s = pc_ap_insect_species(rows[i].type);
+    if(s >= 0 && !pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[s])) {
+      rows[i].spawn_area = aSOI_SPAWN_AREA_NOTHING; // aSOI_ins_decide_insect: no bug
+    }
+  }
+}
+
+void pc_ap_museumsanity_bug_unwant_locked(const pc_ap_museumsanity* m, u8 wanted[PC_AP_CRITTER_NUM]) {
+  for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
+    if(!pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[s])) {
+      wanted[s] = 0;
     }
   }
 }

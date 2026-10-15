@@ -5,6 +5,7 @@
 #include "pc_ap_favorsanity.h"
 #include "pc_ap_timesanity.h"
 #include "pc_ap_museumsanity.h"
+#include "pc_ap_critter_data.h"
 #include "pc_ap_mail.h"
 #include "pc_ap_tools.h"
 #include "pc_ap_store.h"
@@ -43,6 +44,7 @@
 #include "m_kankyo.h"
 #include "m_msg.h"
 #include "m_museum_display.h"
+#include "ac_insect_h.h"
 #include "m_room_type.h"
 #include "m_shop.h"
 #include "m_name_table.h"
@@ -1116,12 +1118,34 @@ void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
 }
 
 void pc_ap_insect_spawns(aSOI_insect_spawn_info_f_c* rows, int n) {
-  if(g_ap.museum.critter_odds == AP_CRITTER_ODDS_VANILLA || Common_Get(now_private) == NULL) {
+  // The journal needs a player (none on the title demo)
+  if(Common_Get(now_private) == NULL) {
     return;
   }
-  u8 wanted[PC_AP_CRITTER_NUM];
-  pc_ap_critter_wanted(mMmd_CATEGORY_INSECT, wanted);
-  pc_ap_museumsanity_insect_spawns(&g_ap.museum, wanted, rows, n);
+  if(g_ap.museum.critter_odds != AP_CRITTER_ODDS_VANILLA) {
+    u8 wanted[PC_AP_CRITTER_NUM];
+    pc_ap_critter_wanted(mMmd_CATEGORY_INSECT, wanted);
+    if(!mFI_CheckInIsland()) {
+      pc_ap_museumsanity_bug_unwant_locked(&g_ap.museum, wanted);
+    }
+    pc_ap_museumsanity_insect_spawns(&g_ap.museum, wanted, rows, n);
+  }
+  // Bug passes: town only
+  if(!mFI_CheckInIsland()) {
+    pc_ap_museumsanity_bug_lock(&g_ap.museum, rows, n);
+  }
+}
+
+int pc_ap_bug_passes_on(void) {
+  return g_ap.museum.bug_availability == AP_BUG_AVAIL_PROGRESSIVE;
+}
+
+int pc_ap_bug_pass_open(int pass) {
+  return pc_ap_museumsanity_bug_pass_open(&g_ap.museum, pass);
+}
+
+int pc_ap_bee_trees_allowed(void) {
+  return pc_ap_museumsanity_bug_pass_open(&g_ap.museum, pc_ap_bug_pass[aINS_INSECT_TYPE_BEE]);
 }
 
 void pc_ap_museum_plaque_name(mActor_name_t item) {

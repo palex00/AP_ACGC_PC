@@ -46,6 +46,9 @@ extern "C" {
 #define AP_CRITTER_ODDS_VANILLA    0
 #define AP_CRITTER_ODDS_NORMALIZED 1 // every species equally likely
 #define AP_CRITTER_ODDS_DYNAMIC    2 // wanted ones (unsent check / missing) more likely
+// bug_availability (which bugs can spawn)
+#define AP_BUG_AVAIL_ALL          0
+#define AP_BUG_AVAIL_PROGRESSIVE  1 // a bug only once its bug pass item is received
 // fish_availability (which fish can spawn)
 #define AP_FISH_AVAIL_ALL         0
 #define AP_FISH_AVAIL_PROGRESSIVE 1 // a fish only once one of its fish pass items is received
@@ -110,6 +113,7 @@ typedef struct {
   int museum_goal_count;             // Museum goal: donation items to receive (apworld computes it from its % option)
   // Spawns: also without museumsanity and offline
   int critter_odds;                  // AP_CRITTER_ODDS_*
+  int bug_availability;              // AP_BUG_AVAIL_*
   int fish_availability;             // AP_FISH_AVAIL_*
   int fossil_availability;           // AP_FOSSIL_AVAIL_*
   int fossil_odds;                   // AP_FOSSIL_ODDS_*

@@ -38,6 +38,15 @@ extern "C" {
 #define PC_AP_FISH_PASS_POND          3 // ponds + the river lake's own fish
 #define PC_AP_FISH_PASS_SEA           4
 #define PC_AP_FISH_PASS_NUM           5
+// WARN: keep in sync with apworld museum.py BUG_PASS_ITEMS! Bug Availability
+// "Progressive": pass p item = base + p (bug -> pass: pc_ap_bug_pass, generated)
+#define PC_AP_ITEM_BUG_PASS_BASE      0x10050
+#define PC_AP_BUG_PASS_TREE           0 // cicadas, Bagworm, Spider, Purple Butterfly, Bee
+#define PC_AP_BUG_PASS_BEETLE         1
+#define PC_AP_BUG_PASS_FLOWER         2
+#define PC_AP_BUG_PASS_GROUND         3
+#define PC_AP_BUG_PASS_FLYING         4 // dragonflies, Mosquito, Firefly, Pond Skater
+#define PC_AP_BUG_PASS_NUM            5
 
 typedef struct {
   // Config (slot_data); all 0 when museumsanity is off or offline
@@ -45,6 +54,7 @@ typedef struct {
   int goal_count;                // Museum goal: donation items to receive
   // Spawns: set even when museumsanity is off and offline
   int critter_odds;                      // AP_CRITTER_ODDS_* (Settings > AP)
+  int bug_availability;                    // AP_BUG_AVAIL_* (progressive without bug checks = all)
   int fish_availability;                   // AP_FISH_AVAIL_* (progressive without fish checks = all)
   int fossil_availability;                 // AP_FOSSIL_AVAIL_* (progressive without fossil checks = all)
   int fossil_odds;                         // AP_FOSSIL_ODDS_* (Settings > AP)
@@ -143,6 +153,15 @@ void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aS
                                            int n, u8 wanted[PC_AP_CRITTER_NUM]);
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
+// Bug Availability: nonzero if bug pass p is open (always unless progressive)
+int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass);
+// Bug Availability on the spawn list (after the odds): a bug whose pass is closed keeps
+// its weight but gets spawn area "nothing", so picking it spawns nothing (the others
+// keep vanilla odds). Not for the island.
+void pc_ap_museumsanity_bug_lock(const pc_ap_museumsanity* m, aSOI_insect_spawn_info_f_c* rows, int n);
+// Bug Availability x dynamic odds: bugs whose pass is closed aren't wanted (no boost).
+// Call before the odds; not for the island.
+void pc_ap_museumsanity_bug_unwant_locked(const pc_ap_museumsanity* m, u8 wanted[PC_AP_CRITTER_NUM]);
 
 #ifdef __cplusplus
 }

@@ -20,9 +20,12 @@ static const char* l_month_names[12] = {
   "July", "August", "September", "October", "November", "December",
 };
 static const char* l_slot_names[4] = { "Mn", "Dy", "Ev", "Ni" };
-// PC_AP_FISH_PASS_* order (the item names)
-static const char* l_pass_names[PC_AP_FISH_PASS_NUM] = {
+// PC_AP_FISH_PASS_* / PC_AP_BUG_PASS_* order (the item names)
+static const char* l_fish_pass_names[PC_AP_FISH_PASS_NUM] = {
   "Small River Fish", "Medium River Fish", "Large River Fish", "Pond Fish", "Sea Fish",
+};
+static const char* l_bug_pass_names[PC_AP_BUG_PASS_NUM] = {
+  "Tree Bugs", "Beetles", "Flower Bugs", "Ground Bugs", "Flying Bugs",
 };
 
 int pc_ap_critter_menu_half(const u8 halves[2], int reach_slots) {
@@ -49,6 +52,27 @@ static int pc_ap_critter_menu_reach_slots(int month) {
   return (pc_ap_time_owned_months() & (1 << month)) ? pc_ap_time_owned_slots() : 0;
 }
 
+// Passes of the page's category: on, count, bits of a species (bit p = pass p opens it), open, name
+static int pc_ap_critter_menu_passes_on(const pc_ap_critter_menu* m) {
+  return m->cat == mMmd_CATEGORY_FISH ? pc_ap_fish_passes_on() : pc_ap_bug_passes_on();
+}
+
+static int pc_ap_critter_menu_pass_num(const pc_ap_critter_menu* m) {
+  return m->cat == mMmd_CATEGORY_FISH ? PC_AP_FISH_PASS_NUM : PC_AP_BUG_PASS_NUM;
+}
+
+static int pc_ap_critter_menu_species_passes(const pc_ap_critter_menu* m, int idx) {
+  return m->cat == mMmd_CATEGORY_FISH ? pc_ap_fish_passes[idx] : 1 << pc_ap_bug_pass[idx];
+}
+
+static int pc_ap_critter_menu_pass_open(const pc_ap_critter_menu* m, int pass) {
+  return m->cat == mMmd_CATEGORY_FISH ? pc_ap_fish_pass_open(pass) : pc_ap_bug_pass_open(pass);
+}
+
+static const char* pc_ap_critter_menu_pass_name(const pc_ap_critter_menu* m, int pass) {
+  return m->cat == mMmd_CATEGORY_FISH ? l_fish_pass_names[pass] : l_bug_pass_names[pass];
+}
+
 static void pc_ap_critter_menu_add(pc_ap_critter_menu* m, int* count, int kind, int value) {
   m->lines[*count].kind = (u8)kind;
   m->lines[*count].value = (u8)value;
@@ -67,23 +91,23 @@ static void pc_ap_critter_menu_load(pc_ap_critter_menu* m, int month) {
   }
 
   int count = 0;
-  if(m->cat == mMmd_CATEGORY_FISH && pc_ap_fish_passes_on()) {
-    // One section per fish pass that has fish this month
-    for(int pass = 0; pass < PC_AP_FISH_PASS_NUM; pass++) {
+  if(pc_ap_critter_menu_passes_on(m)) {
+    // One section per pass that has species this month
+    for(int pass = 0; pass < pc_ap_critter_menu_pass_num(m); pass++) {
       int any = 0;
       for(int i = 0; i < m->month_count; i++) {
-        any |= pc_ap_fish_passes[m->month_species[i]] & (1 << pass);
+        any |= pc_ap_critter_menu_species_passes(m, m->month_species[i]) & (1 << pass);
       }
       if(!any) {
         continue;
       }
       pc_ap_critter_menu_add(m, &count, PC_AP_CRITTER_LINE_HEADER, pass);
-      if(!pc_ap_fish_pass_open(pass)) {
+      if(!pc_ap_critter_menu_pass_open(m, pass)) {
         pc_ap_critter_menu_add(m, &count, PC_AP_CRITTER_LINE_LOCKED, pass);
         continue;
       }
       for(int i = 0; i < m->month_count; i++) {
-        if(pc_ap_fish_passes[m->month_species[i]] & (1 << pass)) {
+        if(pc_ap_critter_menu_species_passes(m, m->month_species[i]) & (1 << pass)) {
           pc_ap_critter_menu_add(m, &count, PC_AP_CRITTER_LINE_SPECIES, m->month_species[i]);
         }
       }
@@ -122,13 +146,13 @@ int pc_ap_critter_menu_input(pc_ap_critter_menu* m, pc_menu_action act) {
   return PC_MENU_STAY;
 }
 
-// Fish pass section lines, centered: "= Name =" (light blue), "(Locked)" (gray)
+// Pass section lines, centered: "= Name =" (light blue), "(Locked)" (gray)
 static void pc_ap_critter_menu_section_line(const pc_ap_critter_menu* m, struct game_s* game, int line) {
   f32 y = pc_menu_list_y(&m->list, line);
   const pc_ap_critter_line* l = &m->lines[line];
   char text[32];
   if(l->kind == PC_AP_CRITTER_LINE_HEADER) {
-    snprintf(text, sizeof(text), "= %s =", l_pass_names[l->value]);
+    snprintf(text, sizeof(text), "= %s =", pc_ap_critter_menu_pass_name(m, l->value));
     pc_menu_fixtext(text);
     pc_menu_draw_centered(game, text, y, 140, 200, 255, 255, 0.9f);
   } else {
