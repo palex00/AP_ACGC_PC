@@ -42,6 +42,11 @@ int pc_ap_qol_no_falling_stalks(void) {
   return sd->valid && sd->no_falling_stalks;
 }
 
+int pc_ap_qol_no_fishing_trash(void) {
+  ap_slotdata* sd = ap_getslotdata();
+  return sd->valid && sd->no_fishing_trash;
+}
+
 int pc_ap_qol_shops_always_open(void) {
   ap_slotdata* sd = ap_getslotdata();
   return sd->valid && sd->shops_always_open;

@@ -3,6 +3,9 @@
 #include "m_common_data.h"
 #include "m_player_lib.h"
 #include "ac_uki.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#endif
 
 enum {
     aGTT_ACTION_SWIM,
@@ -589,7 +592,11 @@ static void aGTT_touch(ACTOR* actorx, GAME* game) {
                     uki->gyo_command = 2;
 
                     // If a free space exists, 1/20 chance of switching the fish out for trash
-                    if (mPlib_Get_space_putin_item() >= 0 && aGTT_random_check(20.0f) != 0) {
+                    if (mPlib_Get_space_putin_item() >= 0 && aGTT_random_check(20.0f) != 0
+#ifdef TARGET_PC
+                        && !pc_ap_qol_no_fishing_trash()
+#endif
+                    ) {
                         static int gomi[] = { aGYO_TYPE_EMPTY_CAN, aGYO_TYPE_EMPTY_CAN, aGYO_TYPE_BOOT, aGYO_TYPE_BOOT, aGYO_TYPE_BOOT, aGYO_TYPE_OLD_TIRE, aGYO_TYPE_OLD_TIRE, aGYO_TYPE_OLD_TIRE };
 
                         gyo->gyo_type = gomi[gyo->size_type];

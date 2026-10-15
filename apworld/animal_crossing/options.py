@@ -568,6 +568,11 @@ class TurnipsNeverSpoil(Toggle):
     display_name = "Turnips Never Spoil"
 
 
+class NoFishingTrash(DefaultOnToggle):
+    """Fishing never hooks an empty can, boot or old tire."""
+    display_name = "No Fishing Trash"
+
+
 class NoFallingStalks(Toggle):
     """
     The stalk market never rolls the falling pattern (prices only go down all week).
@@ -902,5 +907,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     villagers_never_sleep: VillagersNeverSleep
     turnips_never_spoil: TurnipsNeverSpoil
     no_falling_stalks: NoFallingStalks
+    no_fishing_trash: NoFishingTrash
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel

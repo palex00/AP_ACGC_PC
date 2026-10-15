@@ -48,6 +48,10 @@ int pc_ap_qol_turnips_never_spoil(void);
 // Hooked in Kabu_decide_trade_market.
 int pc_ap_qol_no_falling_stalks(void);
 
+// Nonzero when fishing never hooks trash. Hooked in the bite code of aGTT (fish)
+// and aGKK (coelacanth), which swap the fish for a can, boot or tire 1 in 20.
+int pc_ap_qol_no_fishing_trash(void);
+
 #ifdef __cplusplus
 }
 #endif
