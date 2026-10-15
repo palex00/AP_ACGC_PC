@@ -77,6 +77,15 @@ void pc_ap_timesanity_day_before(lbRTC_time_c* out, const lbRTC_time_c* date) {
   out->weekday = lbRTC_Week(out->year, out->month, out->day);
 }
 
+// lbRTC_Sub_DD only steps back one month (the day wraps past that), so a day at a time
+static void pc_ap_timesanity_sub_days(lbRTC_time_c* t, int days) {
+  int i;
+
+  for(i = 0; i < days; i++) {
+    lbRTC_Sub_DD(t, 1);
+  }
+}
+
 int pc_ap_timesanity_turnips_spoil(const lbRTC_time_c* old_time, const lbRTC_time_c* new_time) {
   lbRTC_time_c point;
   int weekday;
@@ -132,7 +141,7 @@ static void pc_ap_timesanity_shift_force_remove(lbRTC_ymd_c* ymd, const lbRTC_ti
   days = lbRTC_GetIntervalDays(&from, &old_day) + lbRTC_GetIntervalDays(&old_day, &from); // one is 0
 
   to.hour = to.min = to.sec = 0;
-  lbRTC_Sub_DD(&to, days + 1);
+  pc_ap_timesanity_sub_days(&to, days + 1);
   ymd->year = to.year;
   ymd->month = to.month;
   ymd->day = to.day;
@@ -175,6 +184,36 @@ static void pc_ap_timesanity_shift_renewal(Save_t* save, const lbRTC_time_c* old
   *renewal = to;
 }
 
+// A villager's memory of when each player last talked to them: the greeting says "long time
+// no see" at 14+ days, "really long time" at 60+ (cosmetic, aQMgr_get_meet_time). Like the
+// move-out countdown: keeps the days between that talk and the old date, plus the one day a
+// date change counts as.
+static void pc_ap_timesanity_shift_memories(Animal_c* animal, const lbRTC_time_c* old_time,
+                                            const lbRTC_time_c* new_time) {
+  lbRTC_time_c old_day = *old_time;
+  int i;
+
+  old_day.hour = old_day.min = old_day.sec = 0;
+  for(i = 0; i < ANIMAL_MEMORY_NUM; i++) {
+    lbRTC_time_c* spoke = &animal->memories[i].last_speak_time;
+    lbRTC_time_c from = *spoke;
+    lbRTC_time_c to = *new_time;
+    int days;
+
+    if(pc_ap_timesanity_cleared(spoke) || spoke->year == 0) { // 0: zeroed slot, never set
+      continue;
+    }
+    from.hour = from.min = from.sec = 0;
+    days = lbRTC_GetIntervalDays(&from, &old_day) + lbRTC_GetIntervalDays(&old_day, &from); // one is 0
+    to.hour = spoke->hour;
+    to.min = spoke->min;
+    to.sec = spoke->sec;
+    pc_ap_timesanity_sub_days(&to, days + 1);
+    to.weekday = lbRTC_Week(to.year, to.month, to.day);
+    *spoke = to;
+  }
+}
+
 int pc_ap_timesanity_normalize(pc_ap_timesanity* t, Save_t* save,
                                const lbRTC_time_c* old_time, const lbRTC_time_c* new_time) {
   lbRTC_time_c before;
@@ -196,6 +235,10 @@ int pc_ap_timesanity_normalize(pc_ap_timesanity* t, Save_t* save,
     pc_ap_timesanity_set_last(&save->island.cottage.goki.time, &before);
   }
   pc_ap_timesanity_set_last(&save->good_field.renew_time, &before); // perfect-town streak +1
+  for(i = 0; i < ANIMAL_NUM_MAX; i++) {
+    pc_ap_timesanity_shift_memories(&save->animals[i], old_time, new_time); // "long time no see"
+  }
+  pc_ap_timesanity_shift_memories(&save->island.animal, old_time, new_time);
 
   pc_ap_timesanity_clamp(&save->post_office.delivery_time, &before); // no mail until it comes again
   for(i = 0; i < mFR_RECORD_NUM; i++) {

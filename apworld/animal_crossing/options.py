@@ -623,8 +623,8 @@ class NormalizedTimeTravel(DefaultOnToggle):
     or back: changing the date (pause menu or the game's own clock setting) or
     coming back after days away.
     Off: the game sees the real jump, so a big jump forward is like being away
-    that long (weeds, villagers moving out) and going back in time has the
-    usual penalties.
+    that long (weeds, villagers moving out or greeting you like you were gone)
+    and going back in time has the usual penalties.
     """
     display_name = "Normalized Time Travel"
 
