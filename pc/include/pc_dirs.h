@@ -20,6 +20,16 @@ void pc_save_root_file_out(char * out, size_t size, const char * fname);
 void pc_card_dir_create(void);
 void pc_mkdir_p(const char * path);
 
+// Save backups kept next to a file: <file>.bak1 (newest) .. .bak<PC_SAVE_MAX_BACKUPS>
+#define PC_SAVE_MAX_BACKUPS 3
+// .bak<max> deleted, the others move up one, file -> .bak1 (if it exists)
+void pc_save_rotate_backups(const char* path);
+// Puts finished temp files in place: rotates the backups of path (and side_path), then renames tmp -> path
+// (and side_tmp -> side_path), so <path>.bakN and <side_path>.bakN always belong together. side_path NULL =
+// one file. If the main rename fails, both are restored from .bak1 and the temps removed: returns 0. If only
+// the side rename fails, side_path gets its .bak1 back (one save older) and it still returns 1.
+int pc_save_commit(const char* tmp, const char* path, const char* side_tmp, const char* side_path);
+
 int pc_card_filename_safe(const char* name);
 void pc_path_sanitize(char* path);
 

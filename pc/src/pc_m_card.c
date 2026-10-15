@@ -56,7 +56,6 @@
 //#define PC_GCI_PATH       PC_CARD_A_DIR "/" PC_GCI_FILENAME
 //#define PC_GCI_TMP_PATH   PC_CARD_A_DIR "/" PC_GCI_FILENAME ".tmp"
 // #define PC_SAVE_DIR       "save"
-#define PC_SAVE_MAX_BACKUPS 3
 
 #define GCI_HEADER_SIZE      sizeof(CARDDir)        /* 64 bytes */
 #define GCI_FILE_DATA_SIZE   mCD_LAND_SAVE_SIZE     /* 0x72000 */
@@ -199,30 +198,6 @@ static void put_be32(u8* dst, u32 val) {
 static void put_be16(u8* dst, u16 val) {
     dst[0] = (u8)(val >> 8);
     dst[1] = (u8)(val);
-}
-
-/* rotate backups: .bak3→delete, .bak2→.bak3, .bak1→.bak2, current→.bak1 */
-static void pc_save_rotate_backups(const char* base_path) {
-    char older[PC_PATHSIZE + 256 + 8], newer[PC_PATHSIZE + 256 + 8];
-    int i;
-    struct stat st;
-
-    snprintf(older, sizeof(older), "%s.bak%d", base_path, PC_SAVE_MAX_BACKUPS);
-    remove(older);
-
-    /* Windows rename() fails if dest exists, so remove first */
-    for (i = PC_SAVE_MAX_BACKUPS; i > 1; i--) {
-        snprintf(older, sizeof(older), "%s.bak%d", base_path, i - 1);
-        snprintf(newer, sizeof(newer), "%s.bak%d", base_path, i);
-        remove(newer);
-        rename(older, newer);
-    }
-
-    if (stat(base_path, &st) == 0) {
-        snprintf(newer, sizeof(newer), "%s.bak1", base_path);
-        remove(newer);
-        rename(base_path, newer);
-    }
 }
 
 static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path);
@@ -424,30 +399,28 @@ static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path) {
     fclose(fp);
     free(file_data);
 
-    pc_save_rotate_backups(gci_path);
-    if (rename(tmp_path, gci_path) != 0) {
-        OSReport("[PC] GCI save: rename '%s' -> '%s' failed, recovering...\n",
-                 tmp_path, gci_path);
-        {
-            char bak1[PC_PATHSIZE + 256 + 8];
-            snprintf(bak1, sizeof(bak1), "%s.bak1", gci_path);
-            rename(bak1, gci_path);
+    // Home town: the AP sidecar goes through the same steps (written before anything is rotated, then
+    // committed together), so GCI .bakN and sidecar .bakN stay a pair. Card B saves belong to another town.
+    if (strcmp(gci_path, l_card_b_gci_path) != 0) {
+        char ap_path[PC_PATHSIZE];
+        char ap_tmp[PC_PATHSIZE + 8];
+        pc_ap_state_path(ap_path, sizeof(ap_path), 0);
+        snprintf(ap_tmp, sizeof(ap_tmp), "%s.tmp", ap_path);
+        if (!pc_ap_save(ap_tmp)) {
+            OSReport("[PC] AP state save failed: %s\n", ap_tmp);
+            remove(tmp_path);
+            return FALSE;
         }
-        remove(tmp_path);
+        if (!pc_save_commit(tmp_path, gci_path, ap_tmp, ap_path)) {
+            OSReport("[PC] GCI save: rename '%s' -> '%s' failed, previous save restored\n", tmp_path, gci_path);
+            return FALSE;
+        }
+    } else if (!pc_save_commit(tmp_path, gci_path, NULL, NULL)) {
+        OSReport("[PC] GCI save: rename '%s' -> '%s' failed, previous save restored\n", tmp_path, gci_path);
         return FALSE;
     }
 
     OSReport("[PC] GCI save: written successfully to %s (backups rotated)\n", gci_path);
-
-    // Home town only: Card B saves belong to another town
-    if (strcmp(gci_path, l_card_b_gci_path) != 0) {
-        char ap_path[PC_PATHSIZE];
-        pc_ap_state_path(ap_path, sizeof(ap_path), 0);
-        pc_save_rotate_backups(ap_path); // same rotation as the GCI above
-        if (!pc_ap_save(ap_path)) {
-            OSReport("[PC] AP state save failed: %s\n", ap_path);
-        }
-    }
     return TRUE;
 }
 

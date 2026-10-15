@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #include <direct.h>
 #else
-#include <sys/stat.h>
 #include <dirent.h>
 #endif
 
@@ -125,4 +125,53 @@ void pc_path_sanitize(char* path) {
       *path = '_';
     }
   }
+}
+
+void pc_save_rotate_backups(const char* path) {
+  char older[PC_PATHSIZE + 16], newer[PC_PATHSIZE + 16];
+  struct stat st;
+  int i;
+
+  snprintf(older, sizeof(older), "%s.bak%d", path, PC_SAVE_MAX_BACKUPS);
+  remove(older);
+  // Windows rename() fails if dest exists, so remove first
+  for (i = PC_SAVE_MAX_BACKUPS; i > 1; i--) {
+    snprintf(older, sizeof(older), "%s.bak%d", path, i - 1);
+    snprintf(newer, sizeof(newer), "%s.bak%d", path, i);
+    remove(newer);
+    rename(older, newer);
+  }
+  if (stat(path, &st) == 0) {
+    snprintf(newer, sizeof(newer), "%s.bak1", path);
+    remove(newer);
+    rename(path, newer);
+  }
+}
+
+// .bak1 back in place of path (undoes the last step of a rotation)
+static void pc_save_restore_bak1(const char* path) {
+  char bak1[PC_PATHSIZE + 16];
+  snprintf(bak1, sizeof(bak1), "%s.bak1", path);
+  rename(bak1, path);
+}
+
+int pc_save_commit(const char* tmp, const char* path, const char* side_tmp, const char* side_path) {
+  pc_save_rotate_backups(path);
+  if (side_path != NULL) {
+    pc_save_rotate_backups(side_path);
+  }
+  if (rename(tmp, path) != 0) {
+    pc_save_restore_bak1(path);
+    remove(tmp);
+    if (side_path != NULL) {
+      pc_save_restore_bak1(side_path);
+      remove(side_tmp);
+    }
+    return 0;
+  }
+  if (side_path != NULL && rename(side_tmp, side_path) != 0) {
+    pc_save_restore_bak1(side_path);
+    remove(side_tmp);
+  }
+  return 1;
 }
