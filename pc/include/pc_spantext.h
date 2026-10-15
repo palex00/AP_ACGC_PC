@@ -21,7 +21,9 @@ struct game_s;
 #define PC_RGBA(c) PC_RGBA_R(c), PC_RGBA_G(c), PC_RGBA_B(c), PC_RGBA_A(c)
 
 #define PC_SPAN_FONTHEIGHT 16.0f
-#define PC_SPAN_PAD        1.5f  // box padding around the text
+#define PC_SPAN_PAD        1.5f  // box padding above and below the text
+#define PC_SPAN_PAD_X      3.0f  // and left and right (room for the rounded corners)
+#define PC_SPAN_RADIUS     3.0f  // box corner radius
 #define PC_SPAN_ALPHA      167   // box alpha
 #define PC_SPAN_EDGE       5.0f  // text is clipped this far from the right edge of the screen
 
@@ -38,7 +40,7 @@ f32 pc_span_height(const char* text, f32 scale);
 // edge of the screen. Returns the width of the widest drawn line.
 f32 pc_span_draw(struct game_s* game, const char* text, f32 x, f32 y, f32 scale);
 
-// Same, with a dim box behind it (PC_SPAN_PAD around the text).
+// Same, with a rounded dim box behind it (PC_SPAN_PAD / PC_SPAN_PAD_X around the text).
 // Returns the box height, for stacking boxes.
 f32 pc_span_boxtext(struct game_s* game, const char* text, f32 x, f32 y, f32 scale);
 

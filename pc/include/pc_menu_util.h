@@ -33,7 +33,8 @@ enum {
 
 /* Full-screen translucent black backdrop, drawn into NOW_FONT_DISP. */
 void pc_menu_dim_rect(struct graph_s* graph, int alpha);
-void pc_menu_dim_box(struct graph_s* graph, f32 x, f32 y, f32 w, f32 h, int alpha);
+// Translucent black box in 320x240 coords with rounded corners (radius 0 = square)
+void pc_menu_dim_box(struct graph_s* graph, f32 x, f32 y, f32 w, f32 h, f32 radius, int alpha);
 
 /* Yellow when selected, grey otherwise. */
 void pc_menu_row_colors(int selected, int* r, int* g, int* b, int* a);

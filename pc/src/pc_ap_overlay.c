@@ -36,12 +36,16 @@ int pc_ap_overlay_toggle(void) {
 
 #define _APO_MAXSTRING  128
 #define _APO_SCALE      0.5f
-#define _APO_SCREENPAD  5.0f
+#define _APO_SCREENPAD  2.0f // screen edge to box edge, the same on every side
 #define _APO_WIDTH      320.0f
 #define _APO_HEIGHT     240.0f
 
-// Top y for text sitting on the bottom edge (grows upward with more lines)
-#define _APO_BOTTOM(text) (_APO_HEIGHT - _APO_SCREENPAD - pc_span_height(text, _APO_SCALE))
+// Text position for a box against each edge (the box adds PC_SPAN_PAD_X / PC_SPAN_PAD around it)
+#define _APO_LEFT          (_APO_SCREENPAD + PC_SPAN_PAD_X)
+#define _APO_TOP           (_APO_SCREENPAD + PC_SPAN_PAD)
+#define _APO_RIGHT(text)   (_APO_WIDTH - _APO_SCREENPAD - PC_SPAN_PAD_X - pc_span_width(text, _APO_SCALE))
+// grows upward with more lines
+#define _APO_BOTTOM(text)  (_APO_HEIGHT - _APO_SCREENPAD - PC_SPAN_PAD - pc_span_height(text, _APO_SCALE))
 
 #define _APO_TOAST_SLOTS 16
 
@@ -92,7 +96,7 @@ static f32 pc_ap_draw_status(struct game_s* game) {
       break;
   }
   f32 y = _APO_BOTTOM(output);
-  pc_span_boxtext(game, output, _APO_SCREENPAD, y, _APO_SCALE);
+  pc_span_boxtext(game, output, _APO_LEFT, y, _APO_SCALE);
   return y;
 }
 
@@ -105,7 +109,7 @@ static void pc_ap_draw_seed(struct game_s* game, f32 status_y) {
   }
   // Same as the save folder name (pc_card_dir_set_root_ap)
   snprintf(output, sizeof(output), "SessionID: %.32s_%d_%d", rp->seed, rp->team, rp->player);
-  pc_span_boxtext(game, output, _APO_SCREENPAD, status_y - PC_SPAN_LINE(_APO_SCALE) - PC_SPAN_PAD, _APO_SCALE);
+  pc_span_boxtext(game, output, _APO_LEFT, status_y - PC_SPAN_LINE(_APO_SCALE) - PC_SPAN_PAD, _APO_SCALE);
 }
 
 typedef struct {
@@ -161,8 +165,8 @@ void pc_ap_overlay_toast(const char* text) {
 
 // Toasts, top left, one line each, oldest on top
 static void pc_ap_draw_toasts(struct game_s* game) {
-  f32 x = _APO_SCREENPAD;
-  f32 y = _APO_SCREENPAD;
+  f32 x = _APO_LEFT;
+  f32 y = _APO_TOP;
   for(int i = 0; i < s_toast_count; i++) {
     y += pc_span_boxtext(game, s_toasts[i].text, x, y, _APO_SCALE);
   }
@@ -184,8 +188,7 @@ static void pc_ap_draw_version(struct game_s* game) {
   } else {
     snprintf(output, sizeof(output), "v%s", PC_AP_VERSION);
   }
-  f32 x = _APO_WIDTH - _APO_SCREENPAD - pc_span_width(output, _APO_SCALE);
-  pc_span_boxtext(game, output, x, _APO_BOTTOM(output), _APO_SCALE);
+  pc_span_boxtext(game, output, _APO_RIGHT(output), _APO_BOTTOM(output), _APO_SCALE);
 }
 
 // Append to the tracker text; stops quietly when full
@@ -291,8 +294,7 @@ static void pc_ap_draw_tracker(struct game_s* game) {
   } else {
     snprintf(output, sizeof(output), "Waiting on save...");
   }
-  f32 x = _APO_WIDTH - _APO_SCREENPAD - pc_span_width(output, _APO_SCALE);
-  pc_span_boxtext(game, output, x, _APO_SCREENPAD, _APO_SCALE);
+  pc_span_boxtext(game, output, _APO_RIGHT(output), _APO_TOP, _APO_SCALE);
 }
 
 void pc_ap_overlay_draw(struct game_s* game) {

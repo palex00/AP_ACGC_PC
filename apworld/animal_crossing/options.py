@@ -932,9 +932,10 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     favor_pools: FavorPools
     favors_per_pool: FavorsPerPool
     shellsanity: Shellsanity
-    shellsanity_item_chance: ShellsanityItemChance
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
+    shops_always_open: ShopsAlwaysOpen
+    turnips_never_spoil: TurnipsNeverSpoil
     skip_intro: SkipIntro
     player_name: PlayerName
     town_name: TownName
@@ -965,7 +966,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     catalogsanity: Catalogsanity
     catalog_pools: CatalogPools
     catalog_pool_size: CatalogPoolSize
-    new_item_chance: NewItemChance
     catalog_sources: CatalogSources
     catalog_goal_percent: CatalogGoalPercent
     museumsanity: Museumsanity
@@ -973,10 +973,8 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     fish_checks: FishChecks
     fossil_checks: FossilChecks
     painting_checks: PaintingChecks
-    critter_odds: CritterOdds
     fish_availability: FishAvailability
     fossil_availability: FossilAvailability
-    fossil_odds: FossilOdds
     museum_goal_percent: MuseumGoalPercent
     nook_store_upgrades: NookStoreUpgrades
     nook_n_go_sales: NookNGoSales
@@ -986,15 +984,17 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     nookway_catalog: NookwayCatalog
     nookingtons_catalog: NookingtonsCatalog
     no_cockroaches: NoCockroaches
-    shops_always_open: ShopsAlwaysOpen
     no_weeds: NoWeeds
     more_favors: MoreFavors
     villagers_dont_leave: VillagersDontLeave
     villagers_never_sleep: VillagersNeverSleep
-    turnips_never_spoil: TurnipsNeverSpoil
     no_falling_stalks: NoFallingStalks
     no_fishing_trash: NoFishingTrash
     easier_critter_catch: EasierCritterCatch
     skip_hra_talk: SkipHRATalk
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel
+    critter_odds: CritterOdds
+    fossil_odds: FossilOdds
+    new_item_chance: NewItemChance
+    shellsanity_item_chance: ShellsanityItemChance

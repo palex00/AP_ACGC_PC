@@ -98,7 +98,8 @@ f32 pc_span_boxtext(struct game_s* game, const char* text, f32 x, f32 y, f32 sca
   // Measure with the same clipping, so the box matches what gets drawn
   f32 w = pc_span_walk(NULL, text, x, y, scale, 1);
   f32 h = pc_span_height(text, scale) + PC_SPAN_PAD * 2;
-  pc_menu_dim_box(game->graph, x - PC_SPAN_PAD, y - PC_SPAN_PAD, w + PC_SPAN_PAD * 2, h, PC_SPAN_ALPHA);
+  pc_menu_dim_box(game->graph, x - PC_SPAN_PAD_X, y - PC_SPAN_PAD, w + PC_SPAN_PAD_X * 2, h, PC_SPAN_RADIUS,
+                  PC_SPAN_ALPHA);
   pc_span_draw(game, text, x, y, scale);
   return h;
 }

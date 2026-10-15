@@ -6,6 +6,8 @@
 #include "m_rcp.h"
 #include "main.h" /* SCREEN_WIDTH_F */
 
+#include <math.h>
+
 void pc_menu_dim_rect(GRAPH* graph, int alpha) {
     Gfx* gfx;
     OPEN_DISP(graph);
@@ -27,9 +29,32 @@ void pc_menu_dim_rect(GRAPH* graph, int alpha) {
     CLOSE_DISP(graph);
 }
 
-// Dim box in 320x240 coords, same look as the pause menu backdrop (alpha 180)
-void pc_menu_dim_box(GRAPH* graph, f32 x, f32 y, f32 w, f32 h, int alpha) {
+// Corner strips per virtual pixel of radius (rect coords are in quarter pixels). Each strip is
+// its own rectangle draw (emu64 doesn't batch them), so this stays low.
+#define PC_MENU_BOX_STRIPS_PER_PX 2
+
+// Box rectangle in quarter pixels
+static Gfx* pc_menu_box_rect(Gfx* gfx, int x0, int y0, int x1, int y1) {
+  return gfx_gSPTextureRectangle1(gfx, x0, y0, x1, y1, 0, 0, 0, 0, 0);
+}
+
+// Dim box in 320x240 coords, same look as the pause menu backdrop (alpha 180). Rounded
+// corners: the body plus thin full-width strips at the top and bottom, each inset to the
+// circle. Strips never overlap (translucent overlaps would show darker).
+void pc_menu_dim_box(GRAPH* graph, f32 x, f32 y, f32 w, f32 h, f32 radius, int alpha) {
+  int x0 = (int)(x * 4), y0 = (int)(y * 4);
+  int x1 = (int)((x + w) * 4), y1 = (int)((y + h) * 4);
+  int strip = 4 / PC_MENU_BOX_STRIPS_PER_PX;
+  int strips = (int)(radius * PC_MENU_BOX_STRIPS_PER_PX);
+  f32 r;
   Gfx* gfx;
+
+  // At most half the box each way
+  if (strips * strip * 2 > y1 - y0) strips = (y1 - y0) / (strip * 2);
+  if (strips * strip * 2 > x1 - x0) strips = (x1 - x0) / (strip * 2);
+  if (strips < 0) strips = 0;
+  r = (f32)(strips * strip);
+
   OPEN_DISP(graph);
   gfx = NOW_FONT_DISP;
   gDPPipeSync(gfx++);
@@ -40,8 +65,16 @@ void pc_menu_dim_box(GRAPH* graph, f32 x, f32 y, f32 w, f32 h, int alpha) {
       G_AC_NONE | G_ZS_PRIM | G_RM_XLU_SURF | G_RM_XLU_SURF2);
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, alpha);
-  gfx = gfx_gSPTextureRectangle1(gfx,
-      (int)(x * 4), (int)(y * 4), (int)((x + w) * 4), (int)((y + h) * 4), 0, 0, 0, 0, 0);
+  gfx = pc_menu_box_rect(gfx, x0, y0 + (int)r, x1, y1 - (int)r);
+  for (int i = 0; i < strips; i++) {
+    // distance from the strip's middle to the corner circle's center row
+    f32 d = r - ((f32)(i * strip) + strip * 0.5f);
+    int inset = (int)(r - sqrtf(r * r - d * d) + 0.5f);
+    int top = y0 + i * strip;
+    int bottom = y1 - (i + 1) * strip;
+    gfx = pc_menu_box_rect(gfx, x0 + inset, top, x1 - inset, top + strip);
+    gfx = pc_menu_box_rect(gfx, x0 + inset, bottom, x1 - inset, bottom + strip);
+  }
   gDPPipeSync(gfx++);
   SET_FONT_DISP(gfx);
   CLOSE_DISP(graph);
