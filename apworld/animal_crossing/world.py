@@ -495,11 +495,10 @@ class AnimalCrossingWorld(World):
                 months = [MONTHS[m] for m in SEASON_MONTHS[season]]
                 self.set_museum_rule(MUSEUM_FOSSIL, name, lambda state, months=months: state.has_any(months, self.player))
 
-        # Progressive fossils: a series fossil needs its series item (the shovel rule below comes on top)
+        # Progressive fossils: a fossil needs its series item (singles: "Single Fossils") (the shovel rule below comes on top)
         if self.fossil_series_items:
             for name, item in zip(FOSSILS, FOSSIL_SERIES_OF):
-                if item is not None:
-                    self.add_museum_rule(MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, self.player))
+                self.add_museum_rule(MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, self.player))
 
         # Fish passes: a fish needs any of its items (the rod rule below comes on top)
         if self.fish_pass_items:

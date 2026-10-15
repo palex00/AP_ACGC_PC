@@ -1039,6 +1039,10 @@ int pc_ap_pick_fossil(mActor_name_t* fossil) {
   return 1;
 }
 
+int pc_ap_fossils_spawn(void) {
+  return pc_ap_museumsanity_fossils_spawn(&g_ap.museum);
+}
+
 // Sends the stored instant fossil check, if any
 static void pc_ap_send_dug_check(void) {
   if(g_ap.dug_check >= 0) {

@@ -891,8 +891,9 @@ class FossilAvailability(Choice):
     Autumn: September-November, Winter: December-February). With Timesanity, fossil checks need a month of
     their season.
     Progressive: each dinosaur series (Tricera, T-rex, Apato, Stego, Ptera, Plesio, Mammoth) only comes out once
-    you have its item ("T-rex Fossils", ...). Amber, Dinosaur Track, Ammonite, Dinosaur Egg and Trilobite are
-    always open. Needs Fossil Checks (with Museumsanity); without them this is All.
+    you have its item ("T-rex Fossils", ...); "Single Fossils" opens Amber, Dinosaur Track, Ammonite, Dinosaur Egg
+    and Trilobite. No fossils are buried until you have one of these items. Needs Fossil Checks (with
+    Museumsanity); without them this is All.
     """
     display_name = "Fossil Availability"
     option_all = 0

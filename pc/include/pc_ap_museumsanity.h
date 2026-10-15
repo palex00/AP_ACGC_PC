@@ -25,9 +25,10 @@ extern "C" {
 #define PC_AP_LOC_FIND_BASE          0x30100 // "Catch X" / "Dig Up X"
 // WARN: keep in sync with apworld museum.py FOSSIL_SERIES! Progressive fossil
 // spawns: "<series> Fossils" = base + series (Tricera, T-rex, Apato, Stego,
-// Ptera, Plesio, Mammoth)
+// Ptera, Plesio, Mammoth, Single)
 #define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10030
-#define PC_AP_FOSSIL_SERIES_NUM       7
+#define PC_AP_FOSSIL_SERIES_NUM       8
+#define PC_AP_FOSSIL_SERIES_SINGLE    7 // Amber, Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite
 // WARN: keep in sync with apworld museum.py FISH_PASS_ITEMS! Fish Availability
 // "Progressive": pass p item = base + p
 #define PC_AP_ITEM_FISH_PASS_BASE     0x10040
@@ -93,12 +94,14 @@ int pc_ap_museumsanity_instant_fossils(const pc_ap_museumsanity* m);
 // is unsent (fossils active), else while it isn't on display in info
 void pc_ap_museumsanity_fossil_wanted(const pc_ap_museumsanity* m, const mMmd_info_c* info,
                                       u8 wanted[mMmd_FOSSIL_NUM]);
-// Progressive fossils: series (0-6) of a fossil (museum index), -1 for
-// the always-open ones (Amber, Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite)
+// Progressive fossils: series (0-7) of a fossil (museum index), -1 if out of range
 int pc_ap_museumsanity_fossil_series(int idx);
 // Nonzero if a fossil can come out: always, unless progressive and its
 // series item isn't received
 int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx);
+// Nonzero if fossils get buried: always, unless progressive and no series item
+// is received yet
+int pc_ap_museumsanity_fossils_spawn(const pc_ap_museumsanity* m);
 // Progressive fossils: find and donate checks of the open fossils (sent or not),
 // -1 when not progressive
 int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m);

@@ -135,6 +135,8 @@ void pc_ap_caught(mActor_name_t item);
 // mMsm_GetFossil (museum mail appraisal): *fossil = the fossil_availability / fossil_odds pick.
 // Always 1 (handled); vanilla odds reproduce the game's own pick.
 int pc_ap_pick_fossil(mActor_name_t* fossil);
+// mMsm_DepositFossil (daily burying): 0 = bury none (progressive fossils, no series item yet)
+int pc_ap_fossils_spawn(void);
 // Item the shovel digs up (Get_scoop setup): with fossil find checks an unappraised
 // fossil comes out appraised (mMsm_GetFossil, as by mail), and its "Dig Up" check waits
 // for pc_ap_dug_item_shown. Anything else is returned unchanged.

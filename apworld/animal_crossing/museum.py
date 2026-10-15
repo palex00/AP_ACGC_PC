@@ -63,10 +63,10 @@ _SEASON_OF_FOSSIL = {
 }
 FOSSIL_SEASONS = [_SEASON_OF_FOSSIL[name] for name in FOSSILS]  # museum fossil index -> season
 
-# Fossil Availability "Progressive": one item per series opens its fossils; the rest (Amber, Dinosaur Track, Ammonite,
-# Dinosaur Egg, Trilobite) are always open.
+# Fossil Availability "Progressive": one item per series opens its fossils; "Single Fossils" opens the rest (Amber,
+# Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite). Nothing is buried before the first of these.
 # WARN: the client mirrors the series order and ids (pc_ap_museumsanity_fossil_series, PC_AP_ITEM_FOSSIL_SERIES_BASE)!
-FOSSIL_SERIES = ["Tricera", "T-rex", "Apato", "Stego", "Ptera", "Plesio", "Mammoth"]
+FOSSIL_SERIES = ["Tricera", "T-rex", "Apato", "Stego", "Ptera", "Plesio", "Mammoth", "Single"]
 FOSSIL_SERIES_ID_BASE = 0x10030  # series s (0-6) = base + s (in the AP item range of items.py)
 
 
@@ -76,11 +76,11 @@ def fossil_series_item_name(series: str) -> str:
 
 FOSSIL_SERIES_ITEMS = [fossil_series_item_name(series) for series in FOSSIL_SERIES]
 FOSSIL_SERIES_ITEM_NAME_TO_ID = {name: FOSSIL_SERIES_ID_BASE + s for s, name in enumerate(FOSSIL_SERIES_ITEMS)}
-# museum fossil index -> its series item name ("T-rex Skull" -> "T-rex Fossils"), None for the always-open ones
+# museum fossil index -> its series item name ("T-rex Skull" -> "T-rex Fossils", "Amber" -> "Single Fossils")
 FOSSIL_SERIES_OF = []
 for _name in FOSSILS:
     _series = _name.split(" ")[0]
-    FOSSIL_SERIES_OF.append(fossil_series_item_name(_series) if _series in FOSSIL_SERIES else None)
+    FOSSIL_SERIES_OF.append(fossil_series_item_name(_series if _series in FOSSIL_SERIES else "Single"))
 
 # Fish Availability "Progressive": a fish spawns once any of its items is received (FISH_PASSES, generated from the
 # game's spawn areas and shadow sizes: river by size, ponds + the river's lake, sea).

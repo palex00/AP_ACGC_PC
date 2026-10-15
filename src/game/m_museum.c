@@ -565,6 +565,12 @@ extern void mMsm_DepositFossil(u8 deposit_record, int fossil_count, u16* cancel_
     u8 already_deposited = mMsm_GetDepositBlockNum(deposit_record);
     u8 available_blocks;
 
+#ifdef TARGET_PC
+    /* Progressive fossils before any series item: bury none (appraisal mail still goes out) */
+    if (!pc_ap_fossils_spawn()) {
+        fossil_count = mMsm_DEPOSIT_FOSSIL_MAX;
+    }
+#endif
     if (fossil_count < mMsm_DEPOSIT_FOSSIL_MAX) {
         deposit_count = mMsm_DEPOSIT_FOSSIL_MAX - fossil_count;
         available_blocks = FG_BLOCK_X_NUM - already_deposited;

@@ -248,12 +248,15 @@ void pc_ap_museumsanity_fossil_wanted(const pc_ap_museumsanity* m, const mMmd_in
 }
 
 int pc_ap_museumsanity_fossil_series(int idx) {
-  // Museum order: three each for Tricera .. Plesio (0-17), then Mammoth skull + torso
+  // Museum order: three each for Tricera .. Plesio (0-17), then Mammoth skull + torso, then the singles
   if(idx >= 0 && idx < 18) {
     return idx / 3;
   }
   if(idx == 18 || idx == 19) {
     return 6;
+  }
+  if(idx >= 20 && idx < mMmd_FOSSIL_NUM) {
+    return PC_AP_FOSSIL_SERIES_SINGLE;
   }
   return -1;
 }
@@ -264,6 +267,18 @@ int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx) {
   }
   int series = pc_ap_museumsanity_fossil_series(idx);
   return series < 0 || ap_item_count(PC_AP_ITEM_FOSSIL_SERIES_BASE + series) > 0;
+}
+
+int pc_ap_museumsanity_fossils_spawn(const pc_ap_museumsanity* m) {
+  if(m->fossil_availability != AP_FOSSIL_AVAIL_PROGRESSIVE) {
+    return 1;
+  }
+  for(int series = 0; series < PC_AP_FOSSIL_SERIES_NUM; series++) {
+    if(ap_item_count(PC_AP_ITEM_FOSSIL_SERIES_BASE + series) > 0) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m) {
@@ -296,7 +311,7 @@ int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[
     // Odds. Vanilla (mMsm_GetFossil): a coin flip between the 5 single fossils and
     // the 20 dinosaur parts, so a single is 4 times as likely as a part.
     weight[idx] = 1;
-    if(m->fossil_odds == AP_FOSSIL_ODDS_VANILLA && pc_ap_museumsanity_fossil_series(idx) < 0) {
+    if(m->fossil_odds == AP_FOSSIL_ODDS_VANILLA && pc_ap_museumsanity_fossil_series(idx) == PC_AP_FOSSIL_SERIES_SINGLE) {
       weight[idx] = 4;
     }
     if(m->fossil_odds == AP_FOSSIL_ODDS_DYNAMIC && wanted[idx]) {
