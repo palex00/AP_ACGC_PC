@@ -133,3 +133,47 @@ FISH = [
     ('Barred Knifejaw', {2: (0, 1, 2, 3), 3: (0, 1, 2, 3), 4: (0, 1, 2, 3), 5: (0, 1, 2, 3), 6: (0, 1, 2, 3), 7: (0, 1, 2, 3), 8: (0, 1, 2, 3), 9: (0, 1, 2, 3), 10: (0, 1, 2, 3)}),
     ('Arapaima', {6: (0, 2, 3), 7: (0, 2, 3), 8: (0, 2, 3)}),
 ]
+
+# Fish passes per fish (FISH order): indices into museum.FISH_PASS_ITEMS, any one opens it
+FISH_PASSES = [
+    (1,),  # Crucian Carp
+    (3,),  # Brook Trout
+    (2,),  # Carp
+    (2,),  # Koi
+    (2,),  # Catfish
+    (1,),  # Small Bass
+    (2,),  # Bass
+    (2,),  # Large Bass
+    (1,),  # Bluegill
+    (3,),  # Giant Catfish
+    (3,),  # Giant Snakehead
+    (2,),  # Barbel Steed
+    (2,),  # Dace
+    (1,),  # Pale Chub
+    (0,),  # Bitterling
+    (0,),  # Loach
+    (0,),  # Pond Smelt
+    (1,),  # Sweetfish
+    (1,),  # Cherry Salmon
+    (2,),  # Large Char
+    (2,),  # Rainbow Trout
+    (2,),  # Stringfish
+    (2,),  # Salmon
+    (0,),  # Goldfish
+    (1,),  # Piranha
+    (2,),  # Arowana
+    (1,),  # Eel
+    (1,),  # Freshwater Goby
+    (1,),  # Angelfish
+    (0,),  # Guppy
+    (0,),  # Popeyed Goldfish
+    (4,),  # Coelacanth
+    (3,),  # Crawfish
+    (3,),  # Frog
+    (0, 3),  # Killifish
+    (4,),  # Jellyfish
+    (4,),  # Sea Bass
+    (4,),  # Red Snapper
+    (4,),  # Barred Knifejaw
+    (2,),  # Arapaima
+]

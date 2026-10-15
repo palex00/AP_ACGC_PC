@@ -148,7 +148,9 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->fossil_checks = slot_data.value("fossil_checks", 0) % 4;
   sd->painting_checks = slot_data.value("painting_checks", 0) % 4;
   sd->museum_goal_count = slot_data.value("museum_goal_count", 0);
-  sd->critter_spawns = slot_data.value("critter_spawns", 2) % 3;
+  sd->critter_odds = slot_data.value("critter_odds", 2) % 3;
+  // Missing = all (older seeds have no fish pass items)
+  sd->fish_availability = slot_data.value("fish_availability", 0) % 2;
   // Missing = all (0.3 seeds have no series items, progressive would never spawn dinosaurs)
   sd->fossil_availability = slot_data.value("fossil_availability", 0) % 3;
   sd->fossil_odds = slot_data.value("fossil_odds", 2) % 3;

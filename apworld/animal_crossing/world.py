@@ -15,10 +15,10 @@ from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOO
                     TIME_SLOTS, TOOLS)
 from .locations import (FAVORS_MAX, LOANS, LOCATION_NAME_TO_ID, beach_location_name, favor_location_name,
                         loan_location_name, split_loan_checks)
-from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FOSSIL_SEASONS, FOSSIL_SERIES_ITEMS, FOSSIL_SERIES_OF,
-                     FOSSILS, MUSEUM_BUG, MUSEUM_FISH,
-                     MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS,
-                     museum_donate_name, museum_find_name, museum_item_name)
+from .museum import (BUGS, CHECK_DONATE, CHECK_FIND, FISH, FISH_PASS_ITEMS, FISH_PASS_OF, FOSSIL_SEASONS,
+                     FOSSIL_SERIES_ITEMS, FOSSIL_SERIES_OF, FOSSILS, MUSEUM_BUG, MUSEUM_FISH, MUSEUM_FOSSIL,
+                     MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING, SEASON_MONTHS, museum_donate_name,
+                     museum_find_name, museum_item_name)
 from . import options
 from .options import AnimalCrossingOptions, personality_key, villager_key
 from .villagers import PERSONALITIES, VILLAGERS
@@ -120,7 +120,8 @@ class AnimalCrossingWeb(WebWorld):
             options.FishChecks,
             options.FossilChecks,
             options.PaintingChecks,
-            options.CritterSpawns,
+            options.CritterOdds,
+            options.FishAvailability,
             options.FossilAvailability,
             options.FossilOdds,
             options.MuseumGoalPercent,
@@ -229,6 +230,11 @@ class AnimalCrossingWorld(World):
         if (self.options.fossil_availability == options.FossilAvailability.option_progressive
                 and self.museum_modes[MUSEUM_FOSSIL]):
             self.fossil_series_items = list(FOSSIL_SERIES_ITEMS)
+        # Fish passes: one item per pass, only with fish checks (else the client spawns every fish)
+        self.fish_pass_items = []
+        if (self.options.fish_availability == options.FishAvailability.option_progressive
+                and self.museum_modes[MUSEUM_FISH]):
+            self.fish_pass_items = list(FISH_PASS_ITEMS)
         # Starting tool: also without Tools in Pool (a freebie, mailed at the start)
         self.starting_tool = None
         choice = self.options.starting_tool.value
@@ -344,7 +350,7 @@ class AnimalCrossingWorld(World):
         if self.options.timesanity:
             items += len(MONTHS) + len(TIME_SLOTS) - 2
         items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items + self.catalog_pool_items
-        items += len(self.fossil_series_items) + self.favor_pool_items
+        items += len(self.fossil_series_items) + self.favor_pool_items + len(self.fish_pass_items)
         if locations < items:
             raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Total checks at {locations}, it must be at "
                               f"least {items} with these options. Raise optional checks such as Favor Pools.")
@@ -375,6 +381,7 @@ class AnimalCrossingWorld(World):
         pool += [self.create_item(name) for name in self.museum_item_names]
         pool += [self.create_item(name) for name in self.pool_tools]
         pool += [self.create_item(name) for name in self.fossil_series_items]
+        pool += [self.create_item(name) for name in self.fish_pass_items]
         pool += [self.create_item(PROGRESSIVE_NOOK_STORE) for _ in range(self.store_items)]
         pool += [self.create_item(PROGRESSIVE_CATALOG_POOL) for _ in range(self.catalog_pool_items)]
         pool += [self.create_item(PROGRESSIVE_FAVOR_POOL) for _ in range(self.favor_pool_items)]
@@ -388,7 +395,8 @@ class AnimalCrossingWorld(World):
 
     def create_item(self, name: str) -> AnimalCrossingItem:
         if (name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_FAVOR_POOL)
-                or name in MONTHS or name in TIME_SLOTS or name in FOSSIL_SERIES_ITEMS):
+                or name in MONTHS or name in TIME_SLOTS or name in FOSSIL_SERIES_ITEMS
+                or name in FISH_PASS_ITEMS):
             classification = ItemClassification.progression
         elif name in self.museum_progression:
             classification = ItemClassification.progression
@@ -475,6 +483,11 @@ class AnimalCrossingWorld(World):
             for name, item in zip(FOSSILS, FOSSIL_SERIES_OF):
                 if item is not None:
                     self.add_museum_rule(MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, self.player))
+
+        # Fish passes: a fish needs any of its items (the rod rule below comes on top)
+        if self.fish_pass_items:
+            for name, passes in FISH_PASS_OF.items():
+                self.add_museum_rule(MUSEUM_FISH, name, lambda state, p=passes: state.has_any(p, self.player))
 
         # Tools in Pool: catching, digging up and donating need the tool (on top of the rules above)
         if self.options.tools_in_pool:
@@ -608,7 +621,8 @@ class AnimalCrossingWorld(World):
             "museum_goal_count": self.museum_goal_count,
             # Museum donation items that are progression (Museum goal); for Universal Tracker
             "museum_progression": sorted(ITEM_NAME_TO_ID[name] for name in self.museum_progression),
-            "critter_spawns": self.options.critter_spawns.value,
+            "critter_odds": self.options.critter_odds.value,
+            "fish_availability": self.options.fish_availability.value,
             "fossil_availability": self.options.fossil_availability.value,
             "fossil_odds": self.options.fossil_odds.value,
             "fossil_seasons": FOSSIL_SEASONS,

@@ -42,10 +42,13 @@ extern "C" {
 #define AP_STORE_CATALOG     3 // catalog entries reach store_thresholds
 #define AP_STORE_LEVELS      3 // upgrades: Nook 'n' Go, Nookway, Nookington's
 
-// critter_spawns (bugs + fish)
-#define AP_CRITTER_SPAWNS_VANILLA    0
-#define AP_CRITTER_SPAWNS_NORMALIZED 1 // every species equally likely
-#define AP_CRITTER_SPAWNS_DYNAMIC    2 // wanted ones (unsent check / missing) more likely
+// critter_odds (bugs + fish)
+#define AP_CRITTER_ODDS_VANILLA    0
+#define AP_CRITTER_ODDS_NORMALIZED 1 // every species equally likely
+#define AP_CRITTER_ODDS_DYNAMIC    2 // wanted ones (unsent check / missing) more likely
+// fish_availability (which fish can spawn)
+#define AP_FISH_AVAIL_ALL         0
+#define AP_FISH_AVAIL_PROGRESSIVE 1 // a fish only once one of its fish pass items is received
 // fossil_availability (which fossils a dug-up one can be)
 #define AP_FOSSIL_AVAIL_ALL           0
 #define AP_FOSSIL_AVAIL_SEASON_LOCKED 1 // only fossils of the current season (fossil_seasons)
@@ -105,7 +108,8 @@ typedef struct {
   int painting_checks;               // AP_MUSEUM_* bits; always 0 for now (apworld only has "Disabled")
   int museum_goal_count;             // Museum goal: donation items to receive (apworld computes it from its % option)
   // Spawns: also without museumsanity and offline
-  int critter_spawns;                // AP_CRITTER_SPAWNS_*
+  int critter_odds;                  // AP_CRITTER_ODDS_*
+  int fish_availability;             // AP_FISH_AVAIL_*
   int fossil_availability;           // AP_FOSSIL_AVAIL_*
   int fossil_odds;                   // AP_FOSSIL_ODDS_*
   int fossil_seasons[AP_FOSSIL_NUM]; // per museum fossil index: 0 spring (Mar-May), 1 summer, 2 autumn, 3 winter (Dec-Feb)

@@ -126,7 +126,7 @@ int pc_ap_pick_fossil(mActor_name_t* fossil);
 // fossil comes out appraised (mMsm_GetFossil, as by mail) and sends its "Dig Up" check.
 // Anything else is returned unchanged.
 mActor_name_t pc_ap_dug_item(mActor_name_t item);
-// critter_spawns, right before the weighted draw of the spawn lists (copies, not the
+// critter_odds, right before the weighted draw of the spawn lists (copies, not the
 // stored tables): fish in aSOG_gyoei_set_with_list, bugs in aSOI_ins_decide_insect
 struct gyoei_spawn_info_weight_f_s;
 struct insect_spawn_info_f_s;
@@ -139,6 +139,10 @@ void pc_ap_museum_plaque_name(mActor_name_t item);
 // (cat mMmd_CATEGORY_INSECT/FISH, museum index idx), see pc_ap_museumsanity_critter_status.
 // Needs a player (journal).
 int pc_ap_critter_status(int cat, int idx);
+// Fish Availability "Progressive" is on (fish pass items gate fish)
+int pc_ap_fish_passes_on(void);
+// Fish pass p (PC_AP_FISH_PASS_*) received, or passes off
+int pc_ap_fish_pass_open(int pass);
 
 // Tools in Pool hooks (pc_ap_tools.h). The tick mails received tools.
 

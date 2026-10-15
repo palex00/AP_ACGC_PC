@@ -1,7 +1,7 @@
 # Museumsanity: categories, check modes, item and location names/ids, fossil seasons.
 # The museum things themselves are generated (museum_data.py); this file is hand-written.
 # WARN: the client mirrors the ids, bits and seasons (pc_ap_museumsanity.h, ap_slotdata.h/.cpp)!
-from .museum_data import BUGS, FISH, FOSSILS, PAINTINGS
+from .museum_data import BUGS, FISH, FISH_PASSES, FOSSILS, PAINTINGS
 
 # Categories in the game's order (mMmd_CATEGORY_*), things in museum index order.
 MUSEUM_FOSSIL, MUSEUM_PAINTING, MUSEUM_BUG, MUSEUM_FISH = range(4)
@@ -81,3 +81,12 @@ FOSSIL_SERIES_OF = []
 for _name in FOSSILS:
     _series = _name.split(" ")[0]
     FOSSIL_SERIES_OF.append(fossil_series_item_name(_series) if _series in FOSSIL_SERIES else None)
+
+# Fish Availability "Progressive": a fish spawns once any of its items is received (FISH_PASSES, generated from the
+# game's spawn areas and shadow sizes: river by size, ponds + the river's lake, sea).
+# WARN: the client mirrors the order and ids (PC_AP_FISH_PASS_*, PC_AP_ITEM_FISH_PASS_BASE)!
+FISH_PASS_ITEMS = ["Small River Fish", "Medium River Fish", "Large River Fish", "Pond Fish", "Sea Fish"]
+FISH_PASS_ID_BASE = 0x10040  # pass p (0-4) = base + p (in the AP item range of items.py)
+FISH_PASS_ITEM_NAME_TO_ID = {name: FISH_PASS_ID_BASE + p for p, name in enumerate(FISH_PASS_ITEMS)}
+# museum fish name -> its item names (any one opens it)
+FISH_PASS_OF = {name: [FISH_PASS_ITEMS[p] for p in passes] for (name, _), passes in zip(FISH, FISH_PASSES)}

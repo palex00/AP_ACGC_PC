@@ -819,19 +819,34 @@ class FossilChecks(Choice):
     default = CHECK_FIND
 
 
-class CritterSpawns(Choice):
+class CritterOdds(Choice):
     """
-    Which bugs and fish spawn. Works without Museumsanity too.
+    How likely each bug and fish is. Works without Museumsanity too.
     Vanilla: the game's odds.
     Normalized: every bug and fish that can spawn is equally likely.
     Dynamic: like Normalized, but bugs and fish whose check isn't sent yet (or, with no checks, that are missing
     from the journal or the museum) are 4 times as likely.
     """
-    display_name = "Critter Spawns"
+    display_name = "Critter Odds"
     option_vanilla = 0
     option_normalized = 1
     option_dynamic = 2
     default = 2
+
+
+class FishAvailability(Choice):
+    """
+    Which fish can spawn.
+    All: every fish.
+    Progressive: a fish only spawns once you have one of its items: "Small River Fish", "Medium River Fish" and
+    "Large River Fish" (river, waterfall and river mouth, by the size of the fish's shadow), "Pond Fish" (ponds and
+    the fish that live only in the river's lake) and "Sea Fish". The fishing tourney needs the river items for the
+    basses. Needs Fish Checks (with Museumsanity); without them this is All.
+    """
+    display_name = "Fish Availability"
+    option_all = 0
+    option_progressive = 1
+    default = 1
 
 
 class FossilAvailability(Choice):
@@ -935,7 +950,8 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     fish_checks: FishChecks
     fossil_checks: FossilChecks
     painting_checks: PaintingChecks
-    critter_spawns: CritterSpawns
+    critter_odds: CritterOdds
+    fish_availability: FishAvailability
     fossil_availability: FossilAvailability
     fossil_odds: FossilOdds
     museum_goal_percent: MuseumGoalPercent

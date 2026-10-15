@@ -20,7 +20,10 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
 - **Museum (Museumsanity):** donation items fill the museum, not your own donations, and each
   exhibit shows who sent it. Catching bugs and fish, digging up fossils and/or donating them sends
   checks (set per category). Blathers only takes a donation while its check is unsent. With
-  Instant fossil checks, fossils come out of the ground already appraised.
+  Instant fossil checks, fossils come out of the ground already appraised. By default fish and
+  dinosaur fossils are gated by items: "Small/Medium/Large River Fish" (river fish by shadow size),
+  "Pond Fish" (ponds and the river lake's own fish), "Sea Fish", and one "<Series> Fossils" item per
+  dinosaur. A locked fish simply doesn't spawn; the Fish page splits fish by these items.
 - **Catalog (Catalogsanity):** catalog items are split into pools. Getting an item of an unlocked pool
   into your catalog (buying, picking up, wearing...) sends a check. No pool is open at the start; each
   Progressive Catalog Pool unlocks the next one. Nook's shop stocks items you still need, and Catalog
@@ -103,7 +106,7 @@ Animal Crossing:
   loansanity: false
   favor_pools: 0
   fossil_checks: instant
-  critter_spawns: dynamic
+  critter_odds: dynamic
 ```
 
 A house-only game with no time locks:

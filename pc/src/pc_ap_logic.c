@@ -1000,18 +1000,32 @@ int pc_ap_critter_status(int cat, int idx) {
   return pc_ap_museumsanity_critter_status(&g_ap.museum, cat, idx, journal, displayed);
 }
 
+int pc_ap_fish_passes_on(void) {
+  return g_ap.museum.fish_availability == AP_FISH_AVAIL_PROGRESSIVE;
+}
+
+int pc_ap_fish_pass_open(int pass) {
+  return pc_ap_museumsanity_fish_pass_open(&g_ap.museum, pass);
+}
+
 void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
   // The journal needs a player (none on the title demo)
-  if(g_ap.museum.critter_spawns == AP_CRITTER_SPAWNS_VANILLA || Common_Get(now_private) == NULL) {
+  if(Common_Get(now_private) == NULL) {
     return;
   }
-  u8 wanted[PC_AP_CRITTER_NUM];
-  pc_ap_critter_wanted(mMmd_CATEGORY_FISH, wanted);
-  pc_ap_museumsanity_fish_spawns(&g_ap.museum, wanted, rows, n);
+  if(g_ap.museum.critter_odds != AP_CRITTER_ODDS_VANILLA) {
+    u8 wanted[PC_AP_CRITTER_NUM];
+    pc_ap_critter_wanted(mMmd_CATEGORY_FISH, wanted);
+    pc_ap_museumsanity_fish_spawns(&g_ap.museum, wanted, rows, n);
+  }
+  // Fish passes: town only (island rows are tagged sea too, the island isn't part of it)
+  if(!mFI_CheckInIsland()) {
+    pc_ap_museumsanity_fish_lock(&g_ap.museum, rows, n);
+  }
 }
 
 void pc_ap_insect_spawns(aSOI_insect_spawn_info_f_c* rows, int n) {
-  if(g_ap.museum.critter_spawns == AP_CRITTER_SPAWNS_VANILLA || Common_Get(now_private) == NULL) {
+  if(g_ap.museum.critter_odds == AP_CRITTER_ODDS_VANILLA || Common_Get(now_private) == NULL) {
     return;
   }
   u8 wanted[PC_AP_CRITTER_NUM];

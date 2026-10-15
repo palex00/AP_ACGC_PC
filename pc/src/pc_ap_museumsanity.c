@@ -1,9 +1,11 @@
 #include "pc_ap_museumsanity.h"
+#include "pc_ap_critter_data.h"
 #include "ap_archipelago.h"
 #include "m_name_table.h"
 #include "m_room_type.h"
 #include "ac_gyoei.h"
 #include "ac_insect_h.h"
+#include "ac_set_ovl_gyoei.h"
 
 #include <string.h>
 
@@ -14,7 +16,8 @@ static const int pc_ap_museum_count[mMmd_CATEGORY_NUM] = {
 
 void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   memset(m, 0, sizeof(*m));
-  m->critter_spawns = sd->critter_spawns;
+  m->critter_odds = sd->critter_odds;
+  m->fish_availability = sd->fish_availability;
   m->fossil_availability = sd->fossil_availability;
   m->fossil_odds = sd->fossil_odds;
   for(int i = 0; i < mMmd_FOSSIL_NUM; i++) {
@@ -26,6 +29,10 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
     m->checks[mMmd_CATEGORY_INSECT] = sd->bug_checks;
     m->checks[mMmd_CATEGORY_FISH] = sd->fish_checks;
     m->goal_count = sd->museum_goal_count;
+  }
+  // Fish passes: the items only exist with fish checks (also not offline)
+  if(m->fish_availability == AP_FISH_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FISH)) {
+    m->fish_availability = AP_FISH_AVAIL_ALL;
   }
   // Progressive fossils: the series items only exist with fossil checks (also not offline)
   if(m->fossil_availability == AP_FOSSIL_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_FOSSIL)) {
@@ -358,7 +365,7 @@ static void pc_ap_spawn_factors(int mode, const f32 sum[PC_AP_CRITTER_NUM], cons
   f32 total = 0.0f; // all species
   int shares = 0;   // all species
   for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
-    share[s] = mode == AP_CRITTER_SPAWNS_DYNAMIC && wanted[s] ? PC_AP_SPAWN_BOOST : 1;
+    share[s] = mode == AP_CRITTER_ODDS_DYNAMIC && wanted[s] ? PC_AP_SPAWN_BOOST : 1;
     if(sum[s] > 0.0f) {
       total += sum[s];
       shares += share[s];
@@ -366,7 +373,7 @@ static void pc_ap_spawn_factors(int mode, const f32 sum[PC_AP_CRITTER_NUM], cons
   }
   for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
     factor[s] = 1.0f;
-    if(sum[s] > 0.0f && mode != AP_CRITTER_SPAWNS_VANILLA) {
+    if(sum[s] > 0.0f && mode != AP_CRITTER_ODDS_VANILLA) {
       factor[s] = total * share[s] / shares / sum[s];
     }
   }
@@ -390,11 +397,50 @@ void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted
       sum[s] += rows[i].spawn_weight;
     }
   }
-  pc_ap_spawn_factors(m->critter_spawns, sum, wanted, factor);
+  pc_ap_spawn_factors(m->critter_odds, sum, wanted, factor);
   for(int i = 0; i < n; i++) {
     int s = pc_ap_fish_species(rows[i].type);
     if(s >= 0) {
       rows[i].spawn_weight *= factor[s];
+    }
+  }
+}
+
+int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass) {
+  if(m->fish_availability != AP_FISH_AVAIL_PROGRESSIVE) {
+    return 1;
+  }
+  return ap_item_count(PC_AP_ITEM_FISH_PASS_BASE + pass) > 0;
+}
+
+int pc_ap_museumsanity_fish_row_pass(int type, int area) {
+  int s = pc_ap_fish_species(type);
+  if(s < 0) {
+    return -1;
+  }
+  switch(area) {
+    case aSOG_SPAWN_AREA_RIVER:
+    case aSOG_SPAWN_AREA_RIVER_MOUTH:
+    case aSOG_SPAWN_AREA_WATERFALL:
+      return pc_ap_fish_river_pass[s];
+    case aSOG_SPAWN_AREA_POOL:
+    case aSOG_SPAWN_AREA_POND:
+      return PC_AP_FISH_PASS_POND;
+    case aSOG_SPAWN_AREA_SEA:
+      return PC_AP_FISH_PASS_SEA;
+    default:
+      return -1; // offing
+  }
+}
+
+void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
+  if(m->fish_availability != AP_FISH_AVAIL_PROGRESSIVE) {
+    return;
+  }
+  for(int i = 0; i < n; i++) {
+    int pass = pc_ap_museumsanity_fish_row_pass(rows[i].type, rows[i].spawn_area);
+    if(pass >= 0 && !pc_ap_museumsanity_fish_pass_open(m, pass)) {
+      rows[i].spawn_area = aSOG_SPAWN_AREA_NUM; // aSOG_gyoei_decide_gyoei: no fish
     }
   }
 }
@@ -414,7 +460,7 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
       sum[s] += rows[i].weight;
     }
   }
-  pc_ap_spawn_factors(m->critter_spawns, sum, wanted, factor);
+  pc_ap_spawn_factors(m->critter_odds, sum, wanted, factor);
   for(int i = 0; i < n; i++) {
     int s = pc_ap_insect_species(rows[i].type);
     if(s >= 0) {

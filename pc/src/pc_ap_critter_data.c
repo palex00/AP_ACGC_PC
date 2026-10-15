@@ -166,3 +166,89 @@ const pc_ap_critter_data pc_ap_fish_data[PC_AP_CRITTER_NUM] = {
   // Arapaima
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
 };
+
+const u8 pc_ap_fish_passes[PC_AP_CRITTER_NUM] = {
+  0x02, // Crucian Carp
+  0x08, // Brook Trout
+  0x04, // Carp
+  0x04, // Koi
+  0x04, // Catfish
+  0x02, // Small Bass
+  0x04, // Bass
+  0x04, // Large Bass
+  0x02, // Bluegill
+  0x08, // Giant Catfish
+  0x08, // Giant Snakehead
+  0x04, // Barbel Steed
+  0x04, // Dace
+  0x02, // Pale Chub
+  0x01, // Bitterling
+  0x01, // Loach
+  0x01, // Pond Smelt
+  0x02, // Sweetfish
+  0x02, // Cherry Salmon
+  0x04, // Large Char
+  0x04, // Rainbow Trout
+  0x04, // Stringfish
+  0x04, // Salmon
+  0x01, // Goldfish
+  0x02, // Piranha
+  0x04, // Arowana
+  0x02, // Eel
+  0x02, // Freshwater Goby
+  0x02, // Angelfish
+  0x01, // Guppy
+  0x01, // Popeyed Goldfish
+  0x10, // Coelacanth
+  0x08, // Crawfish
+  0x08, // Frog
+  0x09, // Killifish
+  0x10, // Jellyfish
+  0x10, // Sea Bass
+  0x10, // Red Snapper
+  0x10, // Barred Knifejaw
+  0x04, // Arapaima
+};
+
+const u8 pc_ap_fish_river_pass[PC_AP_CRITTER_NUM] = {
+  1, // Crucian Carp
+  1, // Brook Trout
+  2, // Carp
+  2, // Koi
+  2, // Catfish
+  1, // Small Bass
+  2, // Bass
+  2, // Large Bass
+  1, // Bluegill
+  2, // Giant Catfish
+  2, // Giant Snakehead
+  2, // Barbel Steed
+  2, // Dace
+  1, // Pale Chub
+  0, // Bitterling
+  0, // Loach
+  0, // Pond Smelt
+  1, // Sweetfish
+  1, // Cherry Salmon
+  2, // Large Char
+  2, // Rainbow Trout
+  2, // Stringfish
+  2, // Salmon
+  0, // Goldfish
+  1, // Piranha
+  2, // Arowana
+  1, // Eel
+  1, // Freshwater Goby
+  1, // Angelfish
+  0, // Guppy
+  0, // Popeyed Goldfish
+  2, // Coelacanth
+  1, // Crawfish
+  0, // Frog
+  0, // Killifish
+  2, // Jellyfish
+  2, // Sea Bass
+  2, // Red Snapper
+  2, // Barred Knifejaw
+  2, // Arapaima
+};

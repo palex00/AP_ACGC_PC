@@ -28,13 +28,23 @@ extern "C" {
 // Ptera, Plesio, Mammoth)
 #define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10030
 #define PC_AP_FOSSIL_SERIES_NUM       7
+// WARN: keep in sync with apworld museum.py FISH_PASS_ITEMS! Fish Availability
+// "Progressive": pass p item = base + p
+#define PC_AP_ITEM_FISH_PASS_BASE     0x10040
+#define PC_AP_FISH_PASS_SMALL_RIVER   0
+#define PC_AP_FISH_PASS_MEDIUM_RIVER  1
+#define PC_AP_FISH_PASS_LARGE_RIVER   2
+#define PC_AP_FISH_PASS_POND          3 // ponds + the river lake's own fish
+#define PC_AP_FISH_PASS_SEA           4
+#define PC_AP_FISH_PASS_NUM           5
 
 typedef struct {
   // Config (slot_data); all 0 when museumsanity is off or offline
   int checks[mMmd_CATEGORY_NUM]; // AP_MUSEUM_* bits per category, 0 = vanilla
   int goal_count;                // Museum goal: donation items to receive
   // Spawns: set even when museumsanity is off and offline
-  int critter_spawns;                      // AP_CRITTER_SPAWNS_*
+  int critter_odds;                      // AP_CRITTER_ODDS_*
+  int fish_availability;                   // AP_FISH_AVAIL_* (progressive without fish checks = all)
   int fossil_availability;                 // AP_FOSSIL_AVAIL_* (progressive without fossil checks = all)
   int fossil_odds;                         // AP_FOSSIL_ODDS_*
   int fossil_seasons[mMmd_FOSSIL_NUM];     // season per fossil (0 spring .. 3 winter)
@@ -107,13 +117,23 @@ void pc_ap_museumsanity_critter_wanted(const pc_ap_museumsanity* m, int cat, con
 // checks sent (one check mode -> 0 or 1). Inactive: journal (caught) and museum
 // display (donated, displayed nonzero).
 int pc_ap_museumsanity_critter_status(const pc_ap_museumsanity* m, int cat, int idx, int journal, int displayed);
-// critter_spawns on the game's spawn list right before the weighted draw, in
+// critter_odds on the game's spawn list right before the weighted draw, in
 // place. Only the species' weights change (whale, trash, spirits, island "nothing"
 // rows untouched) and their total stays the same, so the "nothing spawns" chance
 // stays vanilla. Normalized: equal per species. Dynamic: normalized, then wanted ones
 // x PC_AP_SPAWN_BOOST.
 void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                     aSOG_gyoei_spawn_info_weight_f_c* rows, int n);
+// Fish Availability: nonzero if fish pass p is open (always unless progressive)
+int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass);
+// Fish pass of one spawn row (aGYO_TYPE_*, aSOG_SPAWN_AREA_*): river, waterfall and
+// river mouth by the fish's size, lake and ponds = pond, sea = sea. -1 for rows that
+// aren't a museum fish or are left alone (whale, offing, trash)
+int pc_ap_museumsanity_fish_row_pass(int type, int area);
+// Fish Availability on the spawn list (after the odds): a row whose pass is closed keeps
+// its weight but gets an invalid spawn area, so picking it spawns nothing (the others
+// keep vanilla odds). Not for the island (its rows are tagged sea too).
+void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n);
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
 
