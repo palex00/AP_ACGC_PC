@@ -48,6 +48,7 @@ int pc_ap_overlay_toggle(void) {
 #define _APO_BOTTOM(text)  (_APO_HEIGHT - _APO_SCREENPAD - PC_SPAN_PAD - pc_span_height(text, _APO_SCALE))
 
 #define _APO_TOAST_SLOTS 16
+#define _APO_TOAST_GAP   2.0f // between stacked toast boxes
 
 // Like mFont_SetMatrix(graph, mFont_MODE_FONT), minus the CPU matrix stack (Matrix_push),
 // which doesn't exist in every scene (NULL during boot -> crash). pc_text_draw doesn't need it.
@@ -168,7 +169,7 @@ static void pc_ap_draw_toasts(struct game_s* game) {
   f32 x = _APO_LEFT;
   f32 y = _APO_TOP;
   for(int i = 0; i < s_toast_count; i++) {
-    y += pc_span_boxtext(game, s_toasts[i].text, x, y, _APO_SCALE);
+    y += pc_span_boxtext(game, s_toasts[i].text, x, y, _APO_SCALE) + _APO_TOAST_GAP;
   }
 }
 

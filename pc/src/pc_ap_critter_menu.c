@@ -122,7 +122,7 @@ int pc_ap_critter_menu_input(pc_ap_critter_menu* m, pc_menu_action act) {
   return PC_MENU_STAY;
 }
 
-// Fish pass section lines: "= Name =" from the star column (light blue), "(Locked)" in the name column (gray)
+// Fish pass section lines, centered: "= Name =" (light blue), "(Locked)" (gray)
 static void pc_ap_critter_menu_section_line(const pc_ap_critter_menu* m, struct game_s* game, int line) {
   f32 y = pc_menu_list_y(&m->list, line);
   const pc_ap_critter_line* l = &m->lines[line];
@@ -130,11 +130,11 @@ static void pc_ap_critter_menu_section_line(const pc_ap_critter_menu* m, struct 
   if(l->kind == PC_AP_CRITTER_LINE_HEADER) {
     snprintf(text, sizeof(text), "= %s =", l_pass_names[l->value]);
     pc_menu_fixtext(text);
-    pc_menu_draw_left(game, text, 14.0f, y, 140, 200, 255, 255, 0.9f);
+    pc_menu_draw_centered(game, text, y, 140, 200, 255, 255, 0.9f);
   } else {
     snprintf(text, sizeof(text), "(Locked)");
     pc_menu_fixtext(text);
-    pc_menu_draw_left(game, text, 26.0f, y, 150, 150, 150, 200, 0.9f);
+    pc_menu_draw_centered(game, text, y, 150, 150, 150, 200, 0.9f);
   }
 }
 

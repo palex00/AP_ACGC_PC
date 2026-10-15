@@ -117,6 +117,7 @@ typedef struct {
   int settings_open;  // ap_settings.ini read for this save (the AP tab shows)
   int catalog_source; // who asks for random catalog items now (pc_ap_catalog_source)
   int goal_letter_sent; // persisted: "goals done, go see K.K." letter is in the mailbox (or was)
+  int64_t dug_check;    // instant fossil's "Dig Up" check, sent when its "You got" message shows (-1 = none)
   pc_ap_reload reload;
   int time_change_allowed; // Date & Time gate on the last play frame (pause menu reads it)
   pc_ap_request request;
@@ -147,6 +148,7 @@ void pc_ap_init(void) {
   g_ap.time_change_allowed = 0;
   memset(&g_ap.request, 0, sizeof(g_ap.request));
   g_ap.goal_letter_sent = 0; // persisted: pc_ap_load sets it
+  g_ap.dug_check = -1;
   g_ap.initialized = 1;
 }
 
@@ -1037,7 +1039,17 @@ int pc_ap_pick_fossil(mActor_name_t* fossil) {
   return 1;
 }
 
+// Sends the stored instant fossil check, if any
+static void pc_ap_send_dug_check(void) {
+  if(g_ap.dug_check >= 0) {
+    ap_send_location(g_ap.dug_check);
+    g_ap.dug_check = -1;
+  }
+}
+
 mActor_name_t pc_ap_dug_item(mActor_name_t item) {
+  // The last dig's message never showed (shouldn't happen): send it late rather than never
+  pc_ap_send_dug_check();
   if(item != ITM_FOSSIL || !pc_ap_museumsanity_instant_fossils(&g_ap.museum) || !pc_ap_accepting()) {
     return item;
   }
@@ -1046,12 +1058,14 @@ mActor_name_t pc_ap_dug_item(mActor_name_t item) {
   mMsm_GetFossil(&fossil);
   int cat, idx;
   if(pc_ap_museumsanity_slot_of(fossil, &cat, &idx)) {
-    int64_t id = pc_ap_museumsanity_find_check(&g_ap.museum, cat, idx);
-    if(id >= 0) {
-      ap_send_location(id);
-    }
+    // Sent by pc_ap_dug_item_shown, once the player sees what they dug up
+    g_ap.dug_check = pc_ap_museumsanity_find_check(&g_ap.museum, cat, idx);
   }
   return fossil;
+}
+
+void pc_ap_dug_item_shown(void) {
+  pc_ap_send_dug_check();
 }
 
 // Bugs or fish dynamic spawns favour, from the AP state, the journal and the museum

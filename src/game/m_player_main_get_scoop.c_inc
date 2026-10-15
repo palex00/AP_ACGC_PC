@@ -167,6 +167,9 @@ static void Player_actor_Get_scoop_demo_ct(ACTOR* actor) {
     u8 str[mIN_ITEM_NAME_LEN];
     mActor_name_t item = main_scoop->item;
 
+#ifdef TARGET_PC
+    pc_ap_dug_item_shown();
+#endif
     mIN_copy_name_str(str, item);
     mMsg_Set_item_str_art(win, 0, str, sizeof(str), mIN_get_item_article(item));
     mDemo_Set_msg_num(0x17AF);

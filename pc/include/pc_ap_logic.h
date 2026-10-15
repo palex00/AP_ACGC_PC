@@ -136,9 +136,11 @@ void pc_ap_caught(mActor_name_t item);
 // Always 1 (handled); vanilla odds reproduce the game's own pick.
 int pc_ap_pick_fossil(mActor_name_t* fossil);
 // Item the shovel digs up (Get_scoop setup): with fossil find checks an unappraised
-// fossil comes out appraised (mMsm_GetFossil, as by mail) and sends its "Dig Up" check.
-// Anything else is returned unchanged.
+// fossil comes out appraised (mMsm_GetFossil, as by mail), and its "Dig Up" check waits
+// for pc_ap_dug_item_shown. Anything else is returned unchanged.
 mActor_name_t pc_ap_dug_item(mActor_name_t item);
+// The dig's "You got" message opens (Player_actor_Get_scoop_demo_ct): sends that check
+void pc_ap_dug_item_shown(void);
 // critter_odds, right before the weighted draw of the spawn lists (copies, not the
 // stored tables): fish in aSOG_gyoei_set_with_list, bugs in aSOI_ins_decide_insect
 struct gyoei_spawn_info_weight_f_s;
