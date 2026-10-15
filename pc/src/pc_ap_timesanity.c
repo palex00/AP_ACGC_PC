@@ -146,6 +146,35 @@ static void pc_ap_timesanity_clamp(lbRTC_time_c* t, const lbRTC_time_c* before) 
   }
 }
 
+// Nook's renovation countdown (aSL_JudgeRenewShop: due 2 days after it's set, closed the
+// day before). Not an absence timer either: the days left go down by the one day a date
+// change counts as, from the new date. Without this a backward jump cancels it and the
+// game starts a new 2-day countdown. Only while one is pending (renewal_time stays set after).
+static void pc_ap_timesanity_shift_renewal(Save_t* save, const lbRTC_time_c* old_time,
+                                           const lbRTC_time_c* new_time) {
+  lbRTC_time_c* renewal = &save->shop.renewal_time;
+  lbRTC_time_c old_day = *old_time;
+  lbRTC_time_c renewal_day = *renewal;
+  lbRTC_time_c to = *new_time;
+  int left;
+
+  if(((save->event_save_data.flags >> mEv_GET_SUBTYPE(mEv_SAVED_RENEWSHOP)) & 1) == 0) {
+    return;
+  }
+  old_day.hour = old_day.min = old_day.sec = 0;
+  renewal_day.hour = renewal_day.min = renewal_day.sec = 0;
+  left = lbRTC_GetIntervalDays(&old_day, &renewal_day); // 0 if already due
+  if(left > 0) {
+    left--;
+  }
+  to.hour = renewal->hour; // opening hour
+  to.min = renewal->min;
+  to.sec = renewal->sec;
+  lbRTC_Add_DD(&to, left);
+  to.weekday = lbRTC_Week(to.year, to.month, to.day);
+  *renewal = to;
+}
+
 int pc_ap_timesanity_normalize(pc_ap_timesanity* t, Save_t* save,
                                const lbRTC_time_c* old_time, const lbRTC_time_c* new_time) {
   lbRTC_time_c before;
@@ -159,6 +188,7 @@ int pc_ap_timesanity_normalize(pc_ap_timesanity* t, Save_t* save,
   pc_ap_timesanity_set_last(&save->all_grow_renew_time, &before); // growth, turnips, dump
   pc_ap_timesanity_set_last(&save->last_grow_time, &before);      // villager move-in (24h)
   pc_ap_timesanity_shift_force_remove(&save->force_remove_date, old_time, new_time); // move-out
+  pc_ap_timesanity_shift_renewal(save, old_time, new_time);                          // Nook's renovation
   for(i = 0; i < PLAYER_NUM; i++) {
     pc_ap_timesanity_set_last(&save->homes[i].goki.time, &before); // cockroaches after 7 days
   }
