@@ -43,6 +43,8 @@ f32 pc_span_draw(struct game_s* game, const char* text, f32 x, f32 y, f32 scale)
 // Same, with a rounded dim box behind it (PC_SPAN_PAD / PC_SPAN_PAD_X around the text).
 // Returns the box height, for stacking boxes.
 f32 pc_span_boxtext(struct game_s* game, const char* text, f32 x, f32 y, f32 scale);
+// Same, faded: alpha 0-1 scales the box's and the text's alpha (toasts fading in and out)
+f32 pc_span_boxtext_alpha(struct game_s* game, const char* text, f32 x, f32 y, f32 scale, f32 alpha);
 
 #ifdef __cplusplus
 }

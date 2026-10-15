@@ -24,9 +24,9 @@ static int pc_span_is_code(char c) {
 }
 
 // Walks the text piece by piece (each piece one color, one line). Draws when game != NULL,
-// otherwise only measures. Clips each line at the right edge when clip is set.
-// Returns the width of the widest line.
-static f32 pc_span_walk(struct game_s* game, const char* text, f32 x, f32 y, f32 scale, int clip) {
+// otherwise only measures; alpha (0-1) scales every color's alpha. Clips each line at the
+// right edge when clip is set. Returns the width of the widest line.
+static f32 pc_span_walk(struct game_s* game, const char* text, f32 x, f32 y, f32 scale, int clip, f32 alpha) {
   char piece[_SPAN_MAXPIECE];
   uint32_t color = s_span_colors[1];
   f32 start = x;
@@ -70,7 +70,8 @@ static f32 pc_span_walk(struct game_s* game, const char* text, f32 x, f32 y, f32
       skip = 1;
     }
     if(game != NULL && n > 0) {
-      pc_text_draw(game, piece, x, y, PC_RGBA(color), scale);
+      pc_text_draw(game, piece, x, y, PC_RGBA_R(color), PC_RGBA_G(color), PC_RGBA_B(color),
+                   (int)(PC_RGBA_A(color) * alpha), scale);
     }
     x += pc_text_width(piece) * scale;
   }
@@ -79,7 +80,7 @@ static f32 pc_span_walk(struct game_s* game, const char* text, f32 x, f32 y, f32
 }
 
 f32 pc_span_width(const char* text, f32 scale) {
-  return pc_span_walk(NULL, text, 0, 0, scale, 0);
+  return pc_span_walk(NULL, text, 0, 0, scale, 0, 1.0f);
 }
 
 f32 pc_span_height(const char* text, f32 scale) {
@@ -91,15 +92,19 @@ f32 pc_span_height(const char* text, f32 scale) {
 }
 
 f32 pc_span_draw(struct game_s* game, const char* text, f32 x, f32 y, f32 scale) {
-  return pc_span_walk(game, text, x, y, scale, 1);
+  return pc_span_walk(game, text, x, y, scale, 1, 1.0f);
 }
 
 f32 pc_span_boxtext(struct game_s* game, const char* text, f32 x, f32 y, f32 scale) {
+  return pc_span_boxtext_alpha(game, text, x, y, scale, 1.0f);
+}
+
+f32 pc_span_boxtext_alpha(struct game_s* game, const char* text, f32 x, f32 y, f32 scale, f32 alpha) {
   // Measure with the same clipping, so the box matches what gets drawn
-  f32 w = pc_span_walk(NULL, text, x, y, scale, 1);
+  f32 w = pc_span_walk(NULL, text, x, y, scale, 1, 1.0f);
   f32 h = pc_span_height(text, scale) + PC_SPAN_PAD * 2;
   pc_menu_dim_box(game->graph, x - PC_SPAN_PAD_X, y - PC_SPAN_PAD, w + PC_SPAN_PAD_X * 2, h, PC_SPAN_RADIUS,
-                  PC_SPAN_ALPHA);
-  pc_span_draw(game, text, x, y, scale);
+                  (int)(PC_SPAN_ALPHA * alpha));
+  pc_span_walk(game, text, x, y, scale, 1, alpha);
   return h;
 }

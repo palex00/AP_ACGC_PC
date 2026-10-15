@@ -16,6 +16,7 @@
 #include "graph.h"
 #include "sys_matrix.h"
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -49,6 +50,9 @@ int pc_ap_overlay_toggle(void) {
 
 #define _APO_TOAST_SLOTS 16
 #define _APO_TOAST_GAP   2.0f // between stacked toast boxes
+#define _APO_TOAST_FADE_IN_MS  100
+#define _APO_TOAST_FADE_OUT_MS 500
+#define _APO_TOAST_SLIDE_MS    60.0f // time constant of the slide up when a toast above goes (~3x to settle)
 
 // Like mFont_SetMatrix(graph, mFont_MODE_FONT), minus the CPU matrix stack (Matrix_push),
 // which doesn't exist in every scene (NULL during boot -> crash). pc_text_draw doesn't need it.
@@ -115,7 +119,9 @@ static void pc_ap_draw_seed(struct game_s* game, f32 status_y) {
 
 typedef struct {
   char text[_APO_MAXSTRING];
+  Uint32 born;    // SDL_GetTicks() time
   Uint32 expires; // SDL_GetTicks() time
+  f32 y;          // where it's drawn now (slides toward its slot); < 0 = not drawn yet
 } apo_toast;
 
 // Toasts on screen, oldest first
@@ -145,7 +151,9 @@ static void pc_ap_update_toasts(void) {
   int max = g_pc_settings.ap_toast_max;
   if(max > _APO_TOAST_SLOTS) max = _APO_TOAST_SLOTS;
   while(s_toast_count < max && ap_pop_toast(s_toasts[s_toast_count].text, _APO_MAXSTRING)) {
+    s_toasts[s_toast_count].born = now;
     s_toasts[s_toast_count].expires = now + (Uint32)g_pc_settings.ap_toast_seconds * 1000;
+    s_toasts[s_toast_count].y = -1.0f;
     s_toast_count++;
   }
 }
@@ -160,16 +168,40 @@ void pc_ap_overlay_toast(const char* text) {
     s_toast_count--;
   }
   snprintf(s_toasts[s_toast_count].text, _APO_MAXSTRING, "%s", text);
-  s_toasts[s_toast_count].expires = SDL_GetTicks() + (Uint32)g_pc_settings.ap_toast_seconds * 1000;
+  s_toasts[s_toast_count].born = SDL_GetTicks();
+  s_toasts[s_toast_count].expires = s_toasts[s_toast_count].born + (Uint32)g_pc_settings.ap_toast_seconds * 1000;
+  s_toasts[s_toast_count].y = -1.0f;
   s_toast_count++;
 }
 
-// Toasts, top left, one line each, oldest on top
+// 0-1: fades in over the first _APO_TOAST_FADE_IN_MS, out over the last _APO_TOAST_FADE_OUT_MS
+static f32 apo_toast_alpha(const apo_toast* t, Uint32 now) {
+  f32 in = (f32)(Sint32)(now - t->born) / _APO_TOAST_FADE_IN_MS;
+  f32 out = (f32)(Sint32)(t->expires - now) / _APO_TOAST_FADE_OUT_MS;
+  f32 a = in < out ? in : out;
+  if(a < 0.0f) return 0.0f;
+  return a > 1.0f ? 1.0f : a;
+}
+
+// Toasts, top left, one line each, oldest on top. When one goes, the ones below slide up.
 static void pc_ap_draw_toasts(struct game_s* game) {
+  static Uint32 last;
+  Uint32 now = SDL_GetTicks();
+  f32 dt = (f32)(now - last);
+  // share of the way to the target this frame (exponential ease; a long gap snaps)
+  f32 step = 1.0f - expf(-dt / _APO_TOAST_SLIDE_MS);
   f32 x = _APO_LEFT;
-  f32 y = _APO_TOP;
+  f32 slot = _APO_TOP;
+  last = now;
   for(int i = 0; i < s_toast_count; i++) {
-    y += pc_span_boxtext(game, s_toasts[i].text, x, y, _APO_SCALE) + _APO_TOAST_GAP;
+    apo_toast* t = &s_toasts[i];
+    if(t->y < 0.0f || t->y < slot) {
+      t->y = slot; // new ones appear in place; never slide down
+    } else {
+      t->y += (slot - t->y) * step;
+    }
+    pc_span_boxtext_alpha(game, t->text, x, t->y, _APO_SCALE, apo_toast_alpha(t, now));
+    slot += pc_span_height(t->text, _APO_SCALE) + PC_SPAN_PAD * 2 + _APO_TOAST_GAP;
   }
 }
 
