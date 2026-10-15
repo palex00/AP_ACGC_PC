@@ -265,6 +265,10 @@ int pc_ap_favors_total(void) {
   return g_ap.favors.count;
 }
 
+int pc_ap_favors_open(void) {
+  return g_ap.favors.per_pool > 0 ? pc_ap_favorsanity_open(&g_ap.favors) : -1;
+}
+
 int pc_ap_museum_received(int counts[mMmd_CATEGORY_NUM]) {
   return pc_ap_museumsanity_received_per_category(&g_ap.museum, counts);
 }
@@ -876,7 +880,8 @@ void pc_ap_tick(GAME_PLAY* play) {
   while((id = pc_ap_loansanity_next_check(&g_ap.loans, paid, &it)) >= 0) {
     ap_send_location(id);
   }
-  // Favor 1..done: covers favors saved while offline that never reached the server
+  // Favor 1..done in open pools: covers favors saved while offline that never reached the
+  // server, and banked ones once their pool opens
   it = 0;
   while((id = pc_ap_favorsanity_next_check(&g_ap.favors, &it)) >= 0) {
     ap_send_location(id);

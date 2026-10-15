@@ -10,6 +10,7 @@
 void pc_ap_favorsanity_init(pc_ap_favorsanity* f, const ap_slotdata* sd) {
   memset(f, 0, sizeof(*f));
   f->count = sd->favorsanity;
+  f->per_pool = sd->favors_per_pool;
 }
 
 void pc_ap_favorsanity_load(pc_ap_favorsanity* f, struct ini_t* ini) {
@@ -28,9 +29,17 @@ int pc_ap_favorsanity_done(const pc_ap_favorsanity* f) {
   return f->done > server ? f->done : server;
 }
 
+int pc_ap_favorsanity_open(const pc_ap_favorsanity* f) {
+  if(f->per_pool <= 0) {
+    return f->count;
+  }
+  int open = (1 + ap_item_count(PC_AP_ITEM_PROGRESSIVE_FAVOR_POOL)) * f->per_pool;
+  return open < f->count ? open : f->count;
+}
+
 int64_t pc_ap_favorsanity_complete(pc_ap_favorsanity* f) {
   f->done = pc_ap_favorsanity_done(f) + 1;
-  if(f->done > f->count) {
+  if(f->done > pc_ap_favorsanity_open(f)) {
     return -1;
   }
   return PC_AP_LOC_FAVOR_BASE + f->done;
@@ -40,7 +49,7 @@ int64_t pc_ap_favorsanity_next_check(const pc_ap_favorsanity* f, int* it) {
   // Only the local count: anything above it the server already has, or was
   // sent this session (the DLL resends those on connect)
   int n = *it + 1;
-  if(n > f->done || n > f->count) {
+  if(n > f->done || n > pc_ap_favorsanity_open(f)) {
     return -1;
   }
   *it = n;

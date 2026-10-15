@@ -93,6 +93,7 @@ typedef struct {
   int loans[AP_LOAN_NUM];            // loan amounts in bells
   int loan_checks[AP_LOAN_NUM];      // checks sent when each loan is paid off
   int favorsanity;                   // number of favor checks
+  int favors_per_pool;               // favor checks per pool (first pool open, Progressive Favor Pool opens the next)
   int tools_in_pool;                 // nonzero: net, rod, shovel are items (shop/lost and found only after received)
   int store_upgrades;                // AP_STORE_*
   int store_thresholds[AP_STORE_LEVELS]; // per upgrade: Bells (SALES) or catalog entries (CATALOG)

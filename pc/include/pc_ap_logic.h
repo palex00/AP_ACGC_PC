@@ -66,6 +66,8 @@ struct home_s* pc_ap_my_home(void);
 int pc_ap_favors_done(void);
 // Number of Favor checks (favorsanity)
 int pc_ap_favors_total(void);
+// Favor checks in the open pools, -1 without pools (old slot_data)
+int pc_ap_favors_open(void);
 // Museum donation items received (museumsanity), total; counts[mMmd_CATEGORY_*] per category
 int pc_ap_museum_received(int counts[4]);
 // Museum find/donate checks sent in a category; *total = its number of checks (0 if not run by AP)

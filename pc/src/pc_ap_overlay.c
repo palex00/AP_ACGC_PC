@@ -271,7 +271,12 @@ static void pc_ap_draw_tracker(struct game_s* game) {
     } else {
       apo_append(output, sizeof(output), "Pending credit: %d", pc_ap_bells_pending());
     }
-    if(pc_ap_favors_total() > 0) {
+    // Favor pools: sent / checks in the open pools / all checks (done past the open pools is banked)
+    int favors_open = pc_ap_favors_open();
+    if(pc_ap_favors_total() > 0 && favors_open >= 0) {
+      int sent = pc_ap_favors_done() < favors_open ? pc_ap_favors_done() : favors_open;
+      apo_append(output, sizeof(output), "\nFavors: %d / %d / %d", sent, favors_open, pc_ap_favors_total());
+    } else if(pc_ap_favors_total() > 0) {
       apo_append(output, sizeof(output), "\nFavors: %d / %d", pc_ap_favors_done(), pc_ap_favors_total());
     }
     apo_append_museum(output, sizeof(output));

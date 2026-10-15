@@ -360,15 +360,27 @@ class FillerBellsPercent(Range):
     default = 80
 
 
-class Favorsanity(Range):
+class FavorPools(Range):
     """
-    Number of villager favors (errands and contests) that send a check. Any
-    favor that gets completed from any villager counts
+    Favorsanity: villager favors (errands and contests) send checks, in pools of Favors per Pool. Any favor
+    from any villager counts. The first pool is open from the start; each Progressive Favor Pool opens the next.
+    Favors done while every open pool is used up still count: their checks are sent once the next pool opens.
+    0 turns Favorsanity off. Favor Pools x Favors per Pool is at most 100.
     """
-    display_name = "Favorsanity"
+    display_name = "Favor Pools"
     range_start = 0
     range_end = 100
-    default = 10
+    default = 5
+
+
+class FavorsPerPool(Range):
+    """
+    Favor checks in each Favor Pool.
+    """
+    display_name = "Favors per Pool"
+    range_start = 1
+    range_end = 100
+    default = 3
 
 
 class Shellsanity(Range):
@@ -879,7 +891,8 @@ class MuseumGoalPercent(Range):
 class AnimalCrossingOptions(PerGameCommonOptions):
     # Same order as the option groups in world.py: the Options Creator lists a group's options in this order
     goal: Goal
-    favorsanity: Favorsanity
+    favor_pools: FavorPools
+    favors_per_pool: FavorsPerPool
     shellsanity: Shellsanity
     beach_item_chance: BeachItemChance
     tools_in_pool: ToolsInPool

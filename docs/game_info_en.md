@@ -25,7 +25,9 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   into your catalog (buying, picking up, wearing...) sends a check. No pool is open at the start; each
   Progressive Catalog Pool unlocks the next one. Nook's shop stocks items you still need, and Catalog
   Sources picks what else can give them (favors, trades, presents, the dump...). Passwords don't work.
-- **Favors (Favorsanity):** a number of villager favors (errands and contests) send checks.
+- **Favors (Favorsanity):** villager favors (errands and contests) send checks, in pools (Favor Pools x
+  Favors per Pool). The first pool is open; each Progressive Favor Pool opens the next. Favors done while the
+  open pools are used up still count and send once the next pool opens.
 - **Beach (Shellsanity, 3 per month by default):** Archipelago items sometimes wash up on the town beach in place
   of shells. Picking one up sends a check for the month it washed up in (Shellsanity sets the checks per month).
 - **Nook's store:** by default each upgrade (Nook 'n' Go, Nookway, Nookington's) is a Progressive Nook
@@ -99,7 +101,7 @@ Animal Crossing:
   goal: ["Museum"]
   museum_goal_percent: 50
   loansanity: false
-  favorsanity: 0
+  favor_pools: 0
   fossil_checks: instant
   critter_spawns: dynamic
 ```
