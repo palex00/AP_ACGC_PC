@@ -181,8 +181,8 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
   sd->beach_per_month = slot_data.value("shellsanity", 0);
   if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
-  sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 15);
-  if (sd->shellsanity_item_chance < 0 || sd->shellsanity_item_chance > 100) { sd->shellsanity_item_chance = 15; }
+  sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 20);
+  if (sd->shellsanity_item_chance < 0 || sd->shellsanity_item_chance > 100) { sd->shellsanity_item_chance = 20; }
 
   // Keyed by item name in the apworld (Small/Modest/Large Bell Credit)
   static const char * credit_names[AP_BELLCREDIT_NUM] = { "Small Bell Credit", "Modest Bell Credit", "Large Bell Credit" };

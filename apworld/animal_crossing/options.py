@@ -408,7 +408,7 @@ class ShellsanityItemChance(Range):
     display_name = "Shellsanity Item Chance"
     range_start = 1
     range_end = 100
-    default = 15
+    default = 20
 
 
 class ToolsInPool(DefaultOnToggle):
