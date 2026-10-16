@@ -106,6 +106,10 @@ class AnimalCrossingWeb(WebWorld):
             options.FavorPools,
             options.FavorsPerPool,
         ]),
+        OptionGroup("Shellsanity", [
+            options.Shellsanity,
+            options.BeachChecksPerMonth,
+        ]),
         OptionGroup("Loansanity", [
             options.Loansanity,
             options.TotalLoanChecks,
@@ -228,7 +232,7 @@ class AnimalCrossingWorld(World):
 
         locations, items = len(self.seed_locations()), len(self.seed_pool_items())
         if not locations:
-            raise self.option_error("Turn on Loansanity or Favorsanity.")
+            raise self.option_error("Turn on Loansanity, Favorsanity or Shellsanity.")
         # Every non-filler item needs a location
         if locations < items:
             raise self.option_error(f"Total checks at {locations}, it must be at least {items} with these options. "
@@ -290,8 +294,8 @@ class AnimalCrossingWorld(World):
         # shop checks at Morning)
         start = CollectionState(self.multiworld)  # every player's precollected items
         if not any(location.can_reach(start) for location in self.get_locations()):
-            raise self.option_error("No check can be done at the start with these options. Turn on Loansanity, or "
-                                    "set Favor Pools or Shellsanity to at least 1. Museum checks only count at the "
+            raise self.option_error("No check can be done at the start with these options. Turn on Loansanity, "
+                                    "Favorsanity or Shellsanity. Museum checks only count at the "
                                     "start with their category's Availability set to All (and, with Tools in Pool, "
                                     "its tool as Starting Tool); loan checks at a Morning start need Shops Always "
                                     "Open.")

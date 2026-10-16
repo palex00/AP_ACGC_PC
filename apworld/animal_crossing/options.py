@@ -395,15 +395,22 @@ class FavorsPerPool(Range):
     default = 3
 
 
-class Shellsanity(Range):
+class Shellsanity(DefaultOnToggle):
     """
     Archipelago items sometimes wash up on the town beach in place of a shell.
-    Picking one up sends a check for the month it washed up in. This many checks
-    per month (3 makes 36); 0 turns it off. No more of a month's items lie on the
-    beach than it has checks left, and they stay there until picked up, like shells.
+    Picking one up sends a check for the month it washed up in. No more of a month's
+    items lie on the beach than it has checks left, and they stay there until picked
+    up, like shells.
     """
     display_name = "Shellsanity"
-    range_start = 0
+
+
+class BeachChecksPerMonth(Range):
+    """
+    With Shellsanity, the beach checks per month (3 makes 36).
+    """
+    display_name = "Beach Checks per Month"
+    range_start = 1
     range_end = 20
     default = 3
 
@@ -981,7 +988,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     goal: Goal
     museum_goal_percent: MuseumGoalPercent
     catalog_goal_percent: CatalogGoalPercent
-    shellsanity: Shellsanity
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
     shops_always_open: ShopsAlwaysOpen
@@ -1011,6 +1017,8 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     favorsanity: Favorsanity
     favor_pools: FavorPools
     favors_per_pool: FavorsPerPool
+    shellsanity: Shellsanity
+    beach_checks_per_month: BeachChecksPerMonth
     loansanity: Loansanity
     total_loan_checks: TotalLoanChecks
     timesanity: Timesanity

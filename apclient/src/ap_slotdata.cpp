@@ -184,7 +184,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
   sd->catalog_sources = read_catalog_sources(slot_data);
   sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
-  sd->beach_per_month = slot_data.value("shellsanity", 0);
+  sd->beach_per_month = slot_data.value("shellsanity", 0) % 2 ? slot_data.value("beach_checks_per_month", 0) : 0;
   if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
   sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 20);
   if (sd->shellsanity_item_chance < 0 || sd->shellsanity_item_chance > 100) { sd->shellsanity_item_chance = 20; }

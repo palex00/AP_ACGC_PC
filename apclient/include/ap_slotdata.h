@@ -131,7 +131,8 @@ typedef struct {
   unsigned char catalog_pool[AP_CATALOG_MAX];   // pool (0-based) of each item; pool k opens with k + 1 Progressive Catalog Pools
   int new_item_chance;               // percent: a random item from a source is a needed open-pool item
   int catalog_sources;               // AP_CATALOG_SOURCE_* bits (Nook is always a source)
-  int beach_per_month;                // Shellsanity: checks per month washing up on the beach, 0 = off
+  int beach_per_month;                // Shellsanity: checks per month washing up on the beach, 0 = off (slot_data
+                                      // beach_checks_per_month, 0 with shellsanity 0)
   int shellsanity_item_chance;        // Shellsanity: percent of washed-up shells that are AP items
   int catalog_goal_count;            // Catalog goal: pool items to get into the catalog (apworld computes it from its % option)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit

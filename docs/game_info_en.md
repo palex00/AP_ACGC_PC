@@ -39,7 +39,7 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   Favors per Pool). The first pool is open; each Progressive Favor Pool opens the next. Favors done while the
   open pools are used up still count and send once the next pool opens.
 - **Beach (Shellsanity, 3 per month by default):** Archipelago items sometimes wash up on the town beach in place
-  of shells. Picking one up sends a check for the month it washed up in (Shellsanity sets the checks per month).
+  of shells. Picking one up sends a check for the month it washed up in (Beach Checks per Month sets how many).
 - **Nook's store:** by default each upgrade (Nook 'n' Go, Nookway, Nookington's) is a Progressive Nook
   Store item. It can also go by Bells spent or catalog size instead. Nookington's never needs a visitor.
 
@@ -134,6 +134,6 @@ Animal Crossing:
   museumsanity: false
   catalogsanity: false
   favorsanity: false
-  shellsanity: 0
+  shellsanity: false
   total_loan_checks: 30
 ```
