@@ -152,6 +152,9 @@ static int pc_msg_cut(u8* buf, int len, const char* from, const char* to) {
 static int pc_ap_msg_short_shop_talk(int index, u8* buf, int len) {
   switch(index) {
     case 4249: // "That's X. The price is Y Bells." [page] "It's a steal at that price! Would you like it?"
+      if(pc_ap_qol_take_shop_follow_up()) {
+        len = pc_msg_cut(buf, len, "That's ", "The price"); // the item was just named
+      }
       return pc_msg_cut(buf, len, "\x7F\x04" "\xCD" "\x7F\x02" "It's a steal", "\x7F\x09");
     case 4237: // "That's X. It's the height of fashion, or so claims Fauna magazine. Would you like to try it on?"
       return pc_msg_cut(buf, len, "It's ", "Would you like");

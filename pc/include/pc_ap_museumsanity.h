@@ -153,6 +153,9 @@ void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aS
                                            int n, u8 wanted[PC_AP_CRITTER_NUM]);
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
+// Bug/Fish Availability (cat bugs or fish): find and donate checks of the open bugs or fish
+// (sent or not), -1 when that category isn't progressive. A fish is open if any of its passes is.
+int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat);
 // Bug Availability: nonzero if bug pass p is open (always unless progressive)
 int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass);
 // Bug Availability on the spawn list (after the odds): a bug whose pass is closed keeps

@@ -2577,6 +2577,7 @@ static void aNSC_show_item_check(NPC_SHOP_COMMON_ACTOR* shop_common, GAME_PLAY* 
         // Short Shop Talk: after trying on / seeing it (or not), the plain price offer
         if (pc_ap_qol_short_shop_talk() && msg_no != aNSC_MSG_WAIT && msg_no != aNSC_MSG_BUY_CANCEL) {
             msg_no = aNSC_MSG_BUY_ONE_OFFER;
+            pc_ap_qol_set_shop_follow_up();
         }
 #endif
         if (msg_no != -1) {

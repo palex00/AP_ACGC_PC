@@ -510,6 +510,38 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
   }
 }
 
+int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat) {
+  int progressive = (cat == mMmd_CATEGORY_FISH && m->fish_availability == AP_FISH_AVAIL_PROGRESSIVE) ||
+                    (cat == mMmd_CATEGORY_INSECT && m->bug_availability == AP_BUG_AVAIL_PROGRESSIVE);
+  if(!progressive) {
+    return -1;
+  }
+  int per_critter = 0;
+  if(m->checks[cat] & AP_MUSEUM_FIND) {
+    per_critter++;
+  }
+  if(m->checks[cat] & AP_MUSEUM_DONATE) {
+    per_critter++;
+  }
+  int count = 0;
+  for(int idx = 0; idx < PC_AP_CRITTER_NUM; idx++) {
+    int open = 0;
+    if(cat == mMmd_CATEGORY_INSECT) {
+      open = pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[idx]);
+    } else {
+      for(int pass = 0; pass < PC_AP_FISH_PASS_NUM; pass++) {
+        if((pc_ap_fish_passes[idx] & (1 << pass)) && pc_ap_museumsanity_fish_pass_open(m, pass)) {
+          open = 1;
+        }
+      }
+    }
+    if(open) {
+      count += per_critter;
+    }
+  }
+  return count;
+}
+
 int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass) {
   if(m->bug_availability != AP_BUG_AVAIL_PROGRESSIVE) {
     return 1;

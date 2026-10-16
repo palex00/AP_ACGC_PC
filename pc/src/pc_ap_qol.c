@@ -55,6 +55,18 @@ int pc_ap_qol_short_shop_talk(void) {
   return pc_ap_setting(PC_AP_SET_SHORT_SHOP_TALK);
 }
 
+static int pc_ap_qol_shop_follow_up;
+
+void pc_ap_qol_set_shop_follow_up(void) {
+  pc_ap_qol_shop_follow_up = 1;
+}
+
+int pc_ap_qol_take_shop_follow_up(void) {
+  int follow_up = pc_ap_qol_shop_follow_up;
+  pc_ap_qol_shop_follow_up = 0;
+  return follow_up;
+}
+
 // Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast, running doesn't scare fish
 #define PC_AP_QOL_BITE_WINDOW_BONUS 60
 #define PC_AP_QOL_BUG_STRESS_SCALE 0.5f

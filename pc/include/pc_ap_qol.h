@@ -62,6 +62,12 @@ int pc_ap_qol_skip_hra_talk(void);
 // follow-ups become the plain price offer) and pc_ap_msg_patch (filler lines trimmed).
 int pc_ap_qol_short_shop_talk(void);
 
+// Short Shop Talk: the next price offer is a follow-up (after trying on / seeing an item, or not),
+// so pc_ap_msg_patch drops its "That's <item>." line. Set by ac_npc_shop_common.c, taken (and
+// cleared) by the message patch.
+void pc_ap_qol_set_shop_follow_up(void);
+int pc_ap_qol_take_shop_follow_up(void);
+
 // Easier Critter Catch. Frames added to a fish's hook window (vanilla 20-90 at 60 Hz),
 // 0 when off; hooked in aGTT_bite_init and aGKK_bite_init.
 int pc_ap_qol_bite_window_bonus(void);
