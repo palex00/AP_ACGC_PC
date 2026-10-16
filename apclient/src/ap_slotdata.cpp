@@ -117,7 +117,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   read_npc_list(slot_data, "starting_villagers", sd->starting_villagers);
   sd->no_cockroaches = slot_data.value("no_cockroaches", 1) % 2;
   sd->shops_always_open = slot_data.value("shops_always_open", 1) % 2;
-  sd->no_weeds = slot_data.value("no_weeds", 0) % 2;
+  sd->no_weeds = slot_data.value("no_weeds", 1) % 2;
   sd->more_favors = slot_data.value("more_favors", 1) % 2;
   sd->villagers_dont_leave = slot_data.value("villagers_dont_leave", 0) % 2;
   sd->villagers_never_sleep = slot_data.value("villagers_never_sleep", 0) % 2;

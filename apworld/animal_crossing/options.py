@@ -550,7 +550,7 @@ class ShopsAlwaysOpen(DefaultOnToggle):
     display_name = "Shops Always Open"
 
 
-class NoWeeds(Toggle):
+class NoWeeds(DefaultOnToggle):
     """
     Weeds never grow in your town.
     Starting value only: change it in game in Settings > AP (kept per save).
@@ -634,7 +634,8 @@ class ShortShopTalk(Toggle):
 class EasierCritterCatch(Toggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
-    bugs take twice as long to notice you moving near them. Shaking a tree or
+    running near them no longer scares them (tools and the bobber still do).
+    Bugs take twice as long to notice you moving near them. Shaking a tree or
     swinging the net next to a bug still scares it.
     Starting value only: change it in game in Settings > AP (kept per save).
     """

@@ -334,7 +334,11 @@ static int aGKK_player_near(aGYO_CTRL_ACTOR* gyo, GAME* game) {
 
     if (
         // clang-format off
-        ((dist < 110.0f && mPlib_get_player_actor_main_index(game) == mPlayer_INDEX_DASH) ||
+        ((dist < 110.0f && mPlib_get_player_actor_main_index(game) == mPlayer_INDEX_DASH
+#ifdef TARGET_PC
+          && pc_ap_qol_fish_run_scare()
+#endif
+         ) ||
         (dist < 150.0f && (
             mPlib_Check_HitAxe(&pos) ||
             mPlib_Check_StopNet(&pos) ||

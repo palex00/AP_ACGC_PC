@@ -31,7 +31,7 @@
   "town_day": 0,
   "no_cockroaches": 1,
   "shops_always_open": 1,
-  "no_weeds": 0,
+  "no_weeds": 1,
   "more_favors": 1,
   "villagers_dont_leave": 0,
   "villagers_never_sleep": 0,

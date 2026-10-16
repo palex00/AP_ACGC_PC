@@ -2,6 +2,7 @@
 #include "pc_ap_critter_data.h"
 #include "pc_ap_logic.h"
 #include "pc_menu_util.h"
+#include "pc_text_draw.h"
 
 #include "m_common_data.h"
 #include "m_font.h"
@@ -15,6 +16,7 @@
 #include <stdio.h>
 
 #define PC_AP_CRITTER_MENU_ROWS 11 // visible lines
+#define PC_AP_CRITTER_MENU_RIGHT 306.0f // right margin x: screen width 320 - 14, like x_star on the left
 
 static const char* l_month_names[12] = {
   "January", "February", "March", "April", "May", "June",
@@ -230,10 +232,14 @@ static void pc_ap_critter_menu_rating(struct game_s* game) {
   if(rank > mFAs_FIELDRANK_SIX) {
     rank = mFAs_FIELDRANK_SIX;
   }
-  snprintf(text, sizeof(text), "Town rating %d/6, acre score %d, spawns %d%%", rank, l_good_block_num,
-           spawn_pct[rank]);
+  // Bottom corners, clear of the list's "..." in the middle
+  snprintf(text, sizeof(text), "Acre Score: %d", l_good_block_num);
   pc_menu_fixtext(text);
-  pc_menu_draw_centered(game, text, 229.0f, 150, 150, 150, 200, 0.5f);
+  pc_menu_draw_left(game, text, 14.0f, 229.0f, 150, 150, 150, 200, 0.5f);
+  snprintf(text, sizeof(text), "Town Rating: %d (%d%%)", rank, spawn_pct[rank]);
+  pc_menu_fixtext(text);
+  pc_menu_draw_left(game, text, PC_AP_CRITTER_MENU_RIGHT - pc_text_width(text) * 0.5f, 229.0f, 150, 150, 150, 200,
+                    0.5f);
 }
 
 void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
