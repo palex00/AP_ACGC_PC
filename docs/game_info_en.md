@@ -20,10 +20,16 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
 - **Museum (Museumsanity):** donation items fill the museum, not your own donations, and each
   exhibit shows who sent it. Catching bugs and fish, digging up fossils and/or donating them sends
   checks (set per category). Blathers only takes a donation while its check is unsent. With
-  Instant fossil checks, fossils come out of the ground already appraised. By default fish and
-  dinosaur fossils are gated by items: "Small/Medium/Large River Fish" (river fish by shadow size),
-  "Pond Fish" (ponds and the river lake's own fish), "Sea Fish", and one "<Series> Fossils" item per
-  dinosaur. A locked fish simply doesn't spawn; the Fish page splits fish by these items.
+  Instant fossil checks, fossils come out of the ground already appraised. By default bugs, fish and
+  fossils are gated by items:
+  - Fish: "Small/Medium/Large River Fish" (river fish by shadow size), "Pond Fish" (ponds and the
+    river lake's own fish), "Sea Fish".
+  - Bugs: "Tree Bugs", "Beetles", "Flower Bugs", "Ground Bugs", "Flying Bugs". No bee trees before
+    Tree Bugs.
+  - Fossils: one "<Series> Fossils" item per dinosaur, plus "Single Fossils" for the rest. Nothing is
+    buried until you have one.
+
+  Locked bugs and fish simply don't spawn; the Bugs / Fish pages group them by these items.
 - **Catalog (Catalogsanity):** catalog items are split into pools. Getting an item of an unlocked pool
   into your catalog (buying, picking up, wearing...) sends a check. No pool is open at the start; each
   Progressive Catalog Pool unlocks the next one. Nook's shop stocks items you still need, and Catalog
@@ -57,24 +63,31 @@ Once your goals are done, a letter arrives telling you to listen to K.K. Slider 
 - Each seed gets its own save folder; existing towns can't be imported. You can't make new players:
   the game loads your player straight away.
 - The island is closed (Kapp'n won't take you) for now.
-- Pause menu pages: Date & Time, Catalog (your unlocked pools), and Bugs / Fish (what's around each
-  month, which time slots, weather, and what you already have).
+- Pause menu pages: Date & Time, Catalog (your unlocked pools), Shells (beach checks per month), and
+  Bugs / Fish (what's around each month, which time slots, weather, what you already have, and your
+  town's spawn rate).
 - Checks made while disconnected are sent when you reconnect. If you quit before that, catches, digs
   and donations are lost; loans, favors and catalog checks are sent again next time.
 
 Quality-of-life options, mostly on by default:
 
 - Skip the intro and start next to your house, with your name, town, face, house and so on set in
-  your options.
+  your options. Faces and starting shirts:
+
+  ![Faces and starting shirts with their option keys](../pc/res/start_reference.png)
 - Normalized time travel: changing the date always counts as one day passing, so no weeds or
   move-outs from jumping around.
 - Bugs, fish and fossils can spawn evenly, or favor ones you still need.
-- No cockroaches, more favors from villagers, shops always open.
+- No cockroaches, no weeds, more favors from villagers, shops always open, turnips never spoil.
+- Easier critter catch (longer bite window, slower bug meter, fish don't flee from running, slower bees).
+- Hidden bug hints: buried mole crickets, pill bug rocks, bagworm/spider trees and the money rock give
+  small visual hints when you're near.
+- Coconuts sometimes wash up on the town beach.
 - Each date always has the same weather (vanilla odds), and the Date & Time page of the pause
   menu shows it for the date you pick. Event days and Nook's job can still override it. It always
   rains on the 13th from February to November, for the Coelacanth and the Snail.
-- Optional: no weeds, villagers never leave, villagers never sleep, turnips never spoil, no falling
-  stalk market.
+- Optional: villagers never leave, villagers never sleep, no falling stalk market, short shop talk.
+- Most of these can be changed in game later, under Settings > AP.
 
 Cosmetic options: town fruit, grass shape, train station, Town Day, starting shirt, starting
 villagers and a villager blacklist, and the stationery, signature and text of letters from Archipelago.
