@@ -80,11 +80,13 @@ int pc_ap_qol_fish_run_scare(void);
 
 // Nonzero when hidden bugs give hints: a dirt clod over a buried mole cricket (aIKR_hide) or in
 // front of a pill bug's rock (aIDG_hide), a small wiggle of the tree a bagworm or spider hides in
-// (aIMN_hide).
+// (aIMN_hide), a hive drawn in bee trees and a sparkle over the money rock (bg_item_common.c_inc).
 int pc_ap_qol_hidden_bug_hints(void);
 
 // Hidden Bug Hints: frames between dirt clods (mole cricket, pill bug)
 #define PC_AP_QOL_CLOD_PERIOD 75
+// Hidden Bug Hints: frames between sparkles over the money rock (bg_item_common.c_inc)
+#define PC_AP_QOL_SPARKLE_PERIOD 60
 
 #ifdef __cplusplus
 }

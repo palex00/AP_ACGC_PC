@@ -2945,6 +2945,64 @@ static void bg_item_common_draw_check(GAME_PLAY* play, bg_item_common_c* common,
     }
 }
 
+#ifdef TARGET_PC
+// Hidden Bug Hints: a small sparkle (Gracie's sewing twinkle) over the money rock every second, when the
+// player is near. Spread over frames by its unit (no stored state), like the dirt clods.
+static void bIT_pc_money_rock_hint(GAME_PLAY* play, bg_item_common_c* common) {
+    PLAYER_ACTOR* player = GET_PLAYER_ACTOR(play);
+    bg_item_draw_table_c* draw_table = common->draw_table;
+    int i;
+
+    if (!pc_ap_qol_hidden_bug_hints() || player == NULL) {
+        return;
+    }
+
+    for (i = 0; i < mFM_VISIBLE_BLOCK_NUM; i++, draw_table++) {
+        mActor_name_t* fg_p;
+        int ut;
+
+        if (draw_table->draw_flag != TRUE) {
+            continue;
+        }
+
+        fg_p = mFI_BkNumtoUtFGTop(draw_table->bx, draw_table->bz);
+        if (fg_p == NULL) {
+            continue;
+        }
+
+        for (ut = 0; ut < UT_TOTAL_NUM; ut++) {
+            // draw_pos[ut + 1] is the unit's draw entry; next_add_cnt 256 = nothing drawn there
+            bg_item_draw_pos_c* draw_pos = &draw_table->draw_data.draw_pos[ut + 1];
+            xyz_t pos;
+            f32 dx;
+            f32 dz;
+
+            if (fg_p[ut] < MONEY_ROCK_A || fg_p[ut] > MONEY_ROCK_E || draw_pos->next_add_cnt == 256) {
+                continue;
+            }
+            if ((play->game_frame + ut * 7 + i * 13) % PC_AP_QOL_SPARKLE_PERIOD != 0) {
+                continue;
+            }
+
+            pos.x = draw_pos->mtxf.xw;
+            pos.y = draw_pos->mtxf.yw;
+            pos.z = draw_pos->mtxf.zw;
+            dx = pos.x - player->actor_class.world.position.x;
+            dz = pos.z - player->actor_class.world.position.z;
+            if (dx * dx + dz * dz > 400.0f * 400.0f) {
+                continue;
+            }
+
+            // Somewhere on top of the rock; it drifts down and is gone at the ground
+            pos.x += RANDOM2_F(20.0f);
+            pos.y += 25.0f + RANDOM_F(10.0f);
+            pos.z += RANDOM2_F(20.0f);
+            eEC_CLIP->effect_make_proc(eEC_EFFECT_MAKE_HEM_KIRA, pos, 2, 0, (GAME*)play, RSV_NO, 0, 0);
+        }
+    }
+}
+#endif
+
 static void bg_item_common_move(GAME_PLAY* play, ACTOR* actorx, bg_item_common_c* common) {
     static f32 logic_accum = 0.0f;
     int flags;
@@ -2979,6 +3037,9 @@ static void bg_item_common_move(GAME_PLAY* play, ACTOR* actorx, bg_item_common_c
             bg_item_common_draw_check(play, common, actorx, draw_tbl);
         }
     }
+#ifdef TARGET_PC
+    bIT_pc_money_rock_hint(play, common);
+#endif
 }
 
 static int bIT_actor_pit_entry_del(bg_item_pit_c* pit, int param_2, int param_3, xyz_t* pos,

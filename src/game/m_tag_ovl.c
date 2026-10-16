@@ -7730,6 +7730,10 @@ static void mTG_move_base(Submenu* submenu, mSM_MenuInfo_c* menu_info, mTG_tag_c
     if (pc_tg_drag_mode >= 0) {
         if (getButton() & BUTTON_X) {
             pc_tg_drag_frames++;
+            // Dragging is armed: one page-turn sound per hold
+            if (pc_tg_drag_frames == PC_TG_DRAG_FRAMES) {
+                sAdo_SysTrgStart(NA_SE_PAGE_OKURI);
+            }
         } else {
             pc_tg_drag_mode = -1;
         }
