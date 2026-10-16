@@ -5,7 +5,11 @@
 #include "m_all_grow.h"
 #include "libultra/libultra.h"
 
-static int l_good_block_num = 0;
+/* PC: also shown on the Bugs / Fish pause pages (pc_ap_critter_menu.c) */
+#ifndef TARGET_PC
+static
+#endif
+int l_good_block_num = 0;
 static int l_field_assessment_rank = 0;
 
 static u8 l_block_rank_tree_num[mFAs_TREE_RANK_COUNT] = { 8, 11, 14, 17, 255 };

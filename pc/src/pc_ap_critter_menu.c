@@ -7,6 +7,7 @@
 #include "m_font.h"
 #include "m_item_name.h"
 #include "m_museum_display.h"
+#include "m_field_assessment.h"
 #include "m_name_table.h"
 #include "lb_rtc.h"
 #include "game.h"
@@ -215,6 +216,26 @@ static void pc_ap_critter_menu_line(const pc_ap_critter_menu* m, struct game_s* 
   }
 }
 
+// Town rating (cached at the daily update): bugs and fish spawn at a rate from it
+// (env_rate_table in ac_set_ovl_insect.c / ac_set_ovl_gyoei.c)
+extern int l_good_block_num; // m_field_assessment.c: perfect acres + good acres / 2
+
+static void pc_ap_critter_menu_rating(struct game_s* game) {
+  static const int spawn_pct[mFAs_FIELDRANK_NUM] = { 50, 75, 88, 100, 100, 100, 100 };
+  char text[64];
+  int rank = mFAs_GetFieldRank();
+  if(rank < 0) {
+    rank = 0;
+  }
+  if(rank > mFAs_FIELDRANK_SIX) {
+    rank = mFAs_FIELDRANK_SIX;
+  }
+  snprintf(text, sizeof(text), "Town rating %d/6, acre score %d, spawns %d%%", rank, l_good_block_num,
+           spawn_pct[rank]);
+  pc_menu_fixtext(text);
+  pc_menu_draw_centered(game, text, 229.0f, 150, 150, 150, 200, 0.5f);
+}
+
 void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
   char header[32];
   char status[32];
@@ -222,6 +243,7 @@ void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
   pc_menu_fixtext(header);
   if(m->locked) {
     pc_menu_list_draw(game, &m->list, header, "Locked", 1);
+    pc_ap_critter_menu_rating(game);
     return;
   }
   int has = 0;
@@ -231,6 +253,7 @@ void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
   snprintf(status, sizeof(status), "%d / %d found", has, m->month_count);
   pc_menu_fixtext(status);
   pc_menu_list_draw(game, &m->list, header, status, 0);
+  pc_ap_critter_menu_rating(game);
   for(int i = pc_menu_list_first(&m->list); i < pc_menu_list_end(&m->list); i++) {
     if(m->lines[i].kind == PC_AP_CRITTER_LINE_SPECIES) {
       pc_ap_critter_menu_line(m, game, i);
