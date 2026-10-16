@@ -71,6 +71,11 @@ int pc_ap_house_stage(void);
 int pc_ap_loans_paid(void);
 // Nonzero if Nook may offer the next upgrade (more houses received than built)
 int pc_ap_house_offer_allowed(void);
+// Nonzero if Nook would offer the next upgrade (same save checks as aNSC_start_wait) but the
+// Progressive House for it hasn't arrived: he greets with the "waiting on a permit" line
+int pc_ap_house_permit_pending_from(u32 loan, int renew, int size, int next_size, int basement_ordered,
+                                    int offer_allowed);
+int pc_ap_house_permit_pending(void);
 
 // The current player's house, or NULL (title screen, visiting another town)
 struct home_s* pc_ap_my_home(void);

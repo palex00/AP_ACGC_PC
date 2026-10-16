@@ -337,6 +337,23 @@ int pc_ap_house_offer_allowed(void) {
   return pc_ap_loansanity_offer_allowed(&g_ap.loans, pc_ap_house_stage());
 }
 
+int pc_ap_house_permit_pending_from(u32 loan, int renew, int size, int next_size, int basement_ordered,
+                                    int offer_allowed) {
+  // Same as the upgrade offer in aNSC_start_wait (ac_npc_shop_common.c), minus the AP gate
+  int would_offer = loan == 0 && !renew && size < 3 && size == next_size && !basement_ordered;
+  return would_offer && !offer_allowed;
+}
+
+int pc_ap_house_permit_pending(void) {
+  mHm_hs_c* home = pc_ap_my_home();
+  if(home == NULL) {
+    return 0;
+  }
+  mHm_rmsz_c* s = &home->size_info;
+  return pc_ap_house_permit_pending_from(Now_Private->inventory.loan, s->renew, s->size, s->next_size,
+                                         s->basement_ordered, pc_ap_house_offer_allowed());
+}
+
 int pc_ap_favors_done(void) {
   return pc_ap_favorsanity_done(&g_ap.favors);
 }

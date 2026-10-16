@@ -167,6 +167,12 @@ static int pc_ap_msg_short_shop_talk(int index, u8* buf, int len) {
   return len;
 }
 
+// Nook's plain shop greeting (4241) while the next upgrade waits on a Progressive House.
+// Sale days use another greeting, so they keep theirs.
+static const u8 pc_ap_msg_permit[] =
+  "Welcome!\x7F\x03\x08 Ah, \x7F\x1A!\xCD" "Your remodel, hm?\x7F\x03\x08 I'm still\xCD"
+  "waiting on the building\xCD" "permit,\x7F\x03\x04 yes?\x7F\x03\x08 Any day now!\xCD\x7F\x00";
+
 // Generic pc message patch, which will patch ANY message which matches
 // one of the patches.
 u32 pc_ap_msg_patch(int index, mMsg_Data_c* msg_data, u32 size) {
@@ -195,6 +201,11 @@ u32 pc_ap_msg_patch(int index, mMsg_Data_c* msg_data, u32 size) {
   }
   if(needle[0]) { // there is a replacement
     size = pc_replace_msg_text(msg_data->text_buf.data, size, needle, replace);
+  }
+
+  if(index == 4241 && pc_ap_house_permit_pending()) {
+    size = sizeof(pc_ap_msg_permit) - 1; // no C string terminator
+    memcpy(msg_data->text_buf.data, pc_ap_msg_permit, size);
   }
 
   if(pc_ap_qol_short_shop_talk()) {
