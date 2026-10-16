@@ -1,44 +1,57 @@
+# The Archipelago world: calls each feature at each generation step, in a fixed order. Everything about a feature
+# (its items, locations, rules, slot_data, ids) is in its own file, named after its option:
+#   goal, intro, town_generation, loansanity, bell_credits, timesanity, favor_pools, shellsanity, museumsanity,
+#   fossil_availability, fish_availability, bug_availability, tools_in_pool, catalogsanity, nook_store_upgrades,
+#   quality_of_life
+# Generated data: game_items, museum_data, catalog_data, villager_data. Options: options.py.
+#
+# A feature file has whichever of these it needs (plain functions taking the world):
+#   setup(world)           generate_early: check options, roll random choices, store decisions on the world
+#   locations(world)       its location names this seed
+#   items(world)           its non-filler pool item names this seed
+#   precollected(world)    its start inventory item names
+#   classify(world, name)  ItemClassification for its own items, None for others
+#   rules(world)           access rules (add_rule only, so the order of features doesn't matter)
+#   slot_data(world)       its slot_data keys
+#   ITEMS / LOCATIONS      name -> id, every possible one (static)
+# Features read each other's decisions from the world (e.g. world.museum_modes, set by museumsanity.setup): a file
+# says so at the top, and the setup order below runs the source first. timesanity.py holds the rule helpers for
+# "when can this be done" (shop hours, months, spawn times).
 import dataclasses
-import datetime
-import math
 from collections.abc import Mapping
 from typing import Any
 
 from BaseClasses import CollectionState, Item, ItemClassification, Location, Region
 from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
-from worlds.generic.Rules import add_rule, set_rule
 
-from .catalog import CATALOG_ELIGIBLE, catalog_location_name, make_pools
-from .items import (BELL_CREDITS, FISHING_ROD, ITEM_NAME_TO_ID, MONTHS, NET, NOOK_STORE_UPGRADES,
-                    PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_FAVOR_POOL, PROGRESSIVE_HOUSE, PROGRESSIVE_NOOK_STORE, SHOVEL,
-                    TIME_SLOTS, TOOLS)
-from .locations import (FAVORS_MAX, LOANS, LOCATION_NAME_TO_ID, beach_location_name, favor_location_name,
-                        loan_location_name, split_loan_checks)
-from .museum import (BUG_PASS_ITEMS, BUG_PASS_OF, BUGS, CHECK_DONATE, CHECK_FIND, FISH, FISH_PASS_ITEMS,
-                     FISH_PASS_OF, FOSSIL_SEASONS, FOSSIL_SERIES_ITEMS, FOSSIL_SERIES_OF, FOSSILS, MUSEUM_BUG,
-                     MUSEUM_FISH, MUSEUM_FOSSIL, MUSEUM_ITEM_NAME_TO_ID, MUSEUM_NAMES, MUSEUM_PAINTING,
-                     SEASON_MONTHS, museum_donate_name, museum_find_name, museum_item_name)
-from . import options
-from .options import AnimalCrossingOptions, personality_key, villager_key
-from .villagers import PERSONALITIES, VILLAGERS
+from . import (bell_credits, bug_availability, catalogsanity, favor_pools, fish_availability, fossil_availability,
+               goal, intro, loansanity, museumsanity, nook_store_upgrades, options, quality_of_life, shellsanity,
+               timesanity, tools_in_pool, town_generation)
+from .game_items import ITEM_NAME_TO_ID as GAME_ITEMS
+from .options import AnimalCrossingOptions
 
 GAME_NAME = "Animal Crossing"
-NAME_MAX = 8  # PLAYER_NAME_LEN / LAND_NAME_SIZE in the game
-DEFAULT_TOWN = "Archi"
-DEFAULT_PLAYER_NAME = "-"  # a blank name breaks the game's name compares (no one is ever "you")
-LETTER_SENDER_MAX = 32  # MAIL_FOOTER_LEN in the game
-DEFAULT_LETTER_SENDER = "Archipelago"
-LETTER_TEXT_MAX = 192  # MAIL_BODY_LEN in the game
-BELLS_ROUND = 100  # Bell credit amounts are rounded to this
-MIN_VILLAGERS = 6  # the game starts with 6 villagers
-MIN_YEAR, MAX_YEAR = 2001, 2100  # mTM_MIN_YEAR / mTM_MAX_YEAR (PC)
 # Universal Tracker: slot_data keys named like an option but holding something else (villager indices, the pools,
 # a tool name), so they're not restored as options
 UT_NOT_OPTIONS = {"villager_blacklist", "starting_villagers", "catalog_pools", "starting_tool"}
-ITEM_ID_TO_NAME = {item_id: name for name, item_id in ITEM_NAME_TO_ID.items()}
-# Tools in Pool: the tool each museum category needs
-CATEGORY_TOOLS = {MUSEUM_BUG: NET, MUSEUM_FISH: FISHING_ROD, MUSEUM_FOSSIL: SHOVEL}
+
+# Every game item is an AP item name (AP item id == the game's item number); the AP-only items are 0x10000+, above
+# every game item number.
+ITEM_NAME_TO_ID = {**GAME_ITEMS, **loansanity.ITEMS, **bell_credits.ITEMS, **nook_store_upgrades.ITEMS,
+                   **catalogsanity.ITEMS, **favor_pools.ITEMS, **timesanity.ITEMS, **museumsanity.ITEMS,
+                   **fossil_availability.ITEMS, **fish_availability.ITEMS, **bug_availability.ITEMS}
+LOCATION_NAME_TO_ID = {**loansanity.LOCATIONS, **favor_pools.LOCATIONS, **shellsanity.LOCATIONS,
+                       **museumsanity.LOCATIONS, **catalogsanity.LOCATIONS}
+# A name in two features would silently keep only one id
+assert len(ITEM_NAME_TO_ID) == len(GAME_ITEMS) + sum(len(f.ITEMS) for f in (
+    loansanity, bell_credits, nook_store_upgrades, catalogsanity, favor_pools, timesanity, museumsanity,
+    fossil_availability, fish_availability, bug_availability)), "item name in two features"
+assert len(LOCATION_NAME_TO_ID) == sum(len(f.LOCATIONS) for f in (
+    loansanity, favor_pools, shellsanity, museumsanity, catalogsanity)), "location name in two features"
+# Features with items, for create_item's classification
+ITEM_FEATURES = (loansanity, timesanity, favor_pools, catalogsanity, fossil_availability, fish_availability,
+                 bug_availability, museumsanity, tools_in_pool, nook_store_upgrades)
 
 
 class AnimalCrossingItem(Item):
@@ -47,26 +60,6 @@ class AnimalCrossingItem(Item):
 
 class AnimalCrossingLocation(Location):
     game = GAME_NAME
-
-
-def clamp_name(text: str, max_len: int = NAME_MAX) -> str:
-    # The client does the real charset conversion; keep printable ASCII and the length here.
-    text = "".join(c for c in text if " " <= c <= "~")
-    return text.strip()[:max_len]
-
-
-def letter_text(text: str) -> str:
-    # | is the line break (FreeText is one line on the web options page)
-    text = "".join(c for c in text if " " <= c <= "~")
-    return text.strip().replace("|", "\n")[:LETTER_TEXT_MAX]
-
-
-def villager_indices(chosen: set[str]) -> list[int]:
-    # Expand personality shorthands into their villagers; the client gets npc indices
-    return sorted(
-        index for name, (index, looks) in VILLAGERS.items()
-        if villager_key(name) in chosen or personality_key(PERSONALITIES[looks]) in chosen
-    )
 
 
 class AnimalCrossingWeb(WebWorld):
@@ -176,7 +169,7 @@ class AnimalCrossingWorld(World):
     museum_progression: frozenset[str] | set[str] = frozenset()
     museum_modes: dict[int, int] = {}
     # Bell Credit tiers get_filler_item_name draws from (create_items may drop the big ones)
-    filler_tiers: tuple[str, ...] = tuple(BELL_CREDITS)
+    filler_tiers: tuple[str, ...] = tuple(bell_credits.BELL_CREDITS)
 
     # Universal Tracker regenerates the world from slot_data (no yaml needed): see ut_restore_options
     ut_can_gen_without_yaml = True
@@ -196,488 +189,117 @@ class AnimalCrossingWorld(World):
                 option = getattr(self.options, field.name)
                 setattr(self.options, field.name, type(option).from_any(slot_data[field.name]))
 
+    def option_error(self, message: str) -> OptionError:
+        return OptionError(f"[{GAME_NAME} - '{self.player_name}'] {message}")
+
     def generate_early(self) -> None:
         # Universal Tracker: options and random rolls come from the real seed. Rolls below may still happen, but
-        # self.random does NOT follow the real seed (e.g. random_tool, a restored town_day): every rolled result
-        # must be replaced from slot_data.
-        ut = self.ut_slot_data()
-        if ut is not None:
-            self.ut_restore_options(ut)
-        if not self.options.goal.value:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Goal needs at least one goal.")
-        if "Statue" in self.options.goal.value and not self.options.loansanity:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Statue goal needs Loansanity on.")
-        if "Museum" in self.options.goal.value and not self.options.museumsanity:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Museum goal needs Museumsanity on.")
-        if "Catalog" in self.options.goal.value and not self.options.catalogsanity:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] The Catalog goal needs Catalogsanity on.")
-        # Check mode per museum category (CHECK_* bits), 0 = vanilla, no items. All 0 without Museumsanity.
-        self.museum_modes = {MUSEUM_FOSSIL: 0, MUSEUM_PAINTING: 0, MUSEUM_BUG: 0, MUSEUM_FISH: 0}
-        if self.options.museumsanity:
-            self.museum_modes = {
-                MUSEUM_FOSSIL: self.options.fossil_checks.value,
-                MUSEUM_PAINTING: self.options.painting_checks.value,
-                MUSEUM_BUG: self.options.bug_checks.value,
-                MUSEUM_FISH: self.options.fish_checks.value,
-            }
-            if not any(self.museum_modes.values()):
-                raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Museumsanity needs at least one of Bug, "
-                                  f"Fish or Fossil Checks on.")
-        # One donation item per thing in each category with checks; locations per mode bit
-        self.museum_item_names = []
-        self.museum_locations = []
-        for c, names in enumerate(MUSEUM_NAMES):
-            for name in names if self.museum_modes[c] else []:
-                self.museum_item_names.append(museum_item_name(name))
-                if self.museum_modes[c] & CHECK_FIND:
-                    self.museum_locations.append(museum_find_name(c, name))
-                if self.museum_modes[c] & CHECK_DONATE:
-                    self.museum_locations.append(museum_donate_name(name))
-        # Progressive fossils: one item per series, only with fossil checks (else the client opens all fossils)
-        self.fossil_series_items = []
-        if (self.options.fossil_availability == options.FossilAvailability.option_progressive
-                and self.museum_modes[MUSEUM_FOSSIL]):
-            self.fossil_series_items = list(FOSSIL_SERIES_ITEMS)
-        # Fish passes: one item per pass, only with fish checks (else the client spawns every fish)
-        self.fish_pass_items = []
-        if (self.options.fish_availability == options.FishAvailability.option_progressive
-                and self.museum_modes[MUSEUM_FISH]):
-            self.fish_pass_items = list(FISH_PASS_ITEMS)
-        # Bug passes: one item per pass, only with bug checks (else the client spawns every bug)
-        self.bug_pass_items = []
-        if (self.options.bug_availability == options.BugAvailability.option_progressive
-                and self.museum_modes[MUSEUM_BUG]):
-            self.bug_pass_items = list(BUG_PASS_ITEMS)
-        # Starting tool: also without Tools in Pool (a freebie, mailed at the start)
-        self.starting_tool = None
-        choice = self.options.starting_tool.value
-        if choice == options.StartingTool.option_random_tool:
-            self.starting_tool = self.random.choice(TOOLS)
-        elif choice != options.StartingTool.option_none:
-            self.starting_tool = TOOLS[choice - 1]
-        if ut is not None and "starting_tool" in ut:
-            self.starting_tool = ut["starting_tool"]
-        # Tools in Pool: the tools that go in the pool
-        self.pool_tools = []
-        if self.options.tools_in_pool:
-            self.pool_tools = [tool for tool in TOOLS if tool != self.starting_tool]
-        self.museum_goal_count = math.ceil(len(self.museum_item_names) * self.options.museum_goal_percent.value / 100)
-        if ut is not None and "museum_goal_count" in ut:
-            self.museum_goal_count = ut["museum_goal_count"]
-        # Museum goal: only the donation items it needs are progression (picked at random), the rest are useful.
-        # The client counts every donation item received, so a useful one still counts in game.
-        self.museum_progression = set()
-        if "Museum" in self.options.goal.value:
-            self.museum_progression = set(self.random.sample(self.museum_item_names, self.museum_goal_count))
-        if ut is not None and "museum_progression" in ut:
-            self.museum_progression = {ITEM_ID_TO_NAME[item_id] for item_id in ut["museum_progression"]}
-        self.ac_player_name = (clamp_name(self.options.player_name.value) or clamp_name(self.player_name)
-                               or DEFAULT_PLAYER_NAME)
-        self.ac_town_name = clamp_name(self.options.town_name.value) or DEFAULT_TOWN
-        self.ac_letter_sender = (clamp_name(self.options.letter_sender.value, LETTER_SENDER_MAX)
-                                 or DEFAULT_LETTER_SENDER)
-        self.ac_loan_letter_text = (letter_text(self.options.loan_letter_text.value)
-                                    or letter_text(options.LoanLetterText.default))
-        # The 4th of July is the Fireworks Festival; the game never picks it either
-        if self.options.town_day.value == 4:
-            self.options.town_day.value = self.random.choice([d for d in range(1, 32) if d != 4])
+        # self.random does NOT follow the real seed (e.g. random_tool, a restored town_day): every feature replaces
+        # its rolled results from self.ut.
+        self.ut = self.ut_slot_data()
+        if self.ut is not None:
+            self.ut_restore_options(self.ut)
+        # Order: museumsanity before the availability features (they read museum_modes). The rest keeps the order
+        # random choices were made in before the per-feature split, so seeds didn't change with it.
+        goal.setup(self)
+        tools_in_pool.setup(self)
+        museumsanity.setup(self)
+        fossil_availability.setup(self)
+        fish_availability.setup(self)
+        bug_availability.setup(self)
+        intro.setup(self)
+        town_generation.setup(self)
+        loansanity.setup(self)
+        nook_store_upgrades.setup(self)
+        catalogsanity.setup(self)
+        favor_pools.setup(self)
 
-        self.villager_blacklist = villager_indices(self.options.villager_blacklist.value)
-        # The client skips blacklisted ones too; this keeps slot_data readable
-        self.starting_villagers = [index for index in villager_indices(self.options.starting_villagers.value)
-                                   if index not in self.villager_blacklist]
-        if len(VILLAGERS) - len(self.villager_blacklist) < MIN_VILLAGERS:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Villager Blacklist must leave at least "
-                              f"{MIN_VILLAGERS} villagers allowed.")
-
-        # Same order as LOANS
-        self.loans = [
-            self.options.starting_loan.value,
-            self.options.medium_loan.value,
-            self.options.basement_loan.value,
-            self.options.large_loan.value,
-            self.options.upper_loan.value,
-        ]
-        if self.options.loansanity:
-            self.loan_checks = split_loan_checks(self.loans, self.options.total_loan_checks.value)
-        else:
-            self.loan_checks = [0] * len(LOANS)
-        if ut is not None:
-            self.loans = ut.get("loans", self.loans)
-            self.loan_checks = ut.get("loan_checks", self.loan_checks)
-
-        # Nook store upgrades: Progressive Nook Store items, or the thresholds of the chosen mode
-        self.store_items = 0
-        self.store_thresholds = []
-        mode = self.options.nook_store_upgrades.value
-        if mode == options.NookStoreUpgrades.option_progressive:
-            self.store_items = NOOK_STORE_UPGRADES
-        elif mode == options.NookStoreUpgrades.option_sales:
-            self.store_thresholds = [self.options.nook_n_go_sales.value, self.options.nookway_sales.value,
-                                     self.options.nookingtons_sales.value]
-        else:
-            self.store_thresholds = [self.options.nook_n_go_catalog.value, self.options.nookway_catalog.value,
-                                     self.options.nookingtons_catalog.value]
-
-        # Catalogsanity: pools of game item ids; pool k (0-based) needs k + 1 Progressive Catalog Pool (none open at start)
-        self.catalog_pools = []
-        if self.options.catalogsanity:
-            pools, size = self.options.catalog_pools.value, self.options.catalog_pool_size.value
-            if pools * size > CATALOG_ELIGIBLE:
-                raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Catalog Pools x Catalog Pool Size is "
-                                  f"{pools * size}, at most {CATALOG_ELIGIBLE} (with {pools} pools: size at most "
-                                  f"{CATALOG_ELIGIBLE // pools}).")
-            self.catalog_pools = make_pools(self.random, pools, size)
-        if ut is not None and "catalog_pools" in ut:
-            self.catalog_pools = ut["catalog_pools"]
-        self.catalog_pool_items = len(self.catalog_pools)
-        catalog_total = sum(len(pool) for pool in self.catalog_pools)
-        self.catalog_goal_count = math.ceil(catalog_total * self.options.catalog_goal_percent.value / 100)
-        if ut is not None and "catalog_goal_count" in ut:
-            self.catalog_goal_count = ut["catalog_goal_count"]
-        # Catalog goal: pools needed to hold catalog_goal_count items, one Progressive Catalog Pool each
-        self.catalog_goal_pools = 0
-        held = 0
-        while held < self.catalog_goal_count:
-            held += len(self.catalog_pools[self.catalog_goal_pools])
-            self.catalog_goal_pools += 1
-
-        # Favorsanity: pools of favors_per_pool checks, the first open, one Progressive Favor Pool per other pool
-        self.favor_count = self.options.favor_pools.value * self.options.favors_per_pool.value
-        if self.favor_count > FAVORS_MAX:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Favor Pools x Favors per Pool is "
-                              f"{self.favor_count}, at most {FAVORS_MAX}.")
-        self.favor_pool_items = max(self.options.favor_pools.value - 1, 0)
-
-        locations = sum(self.loan_checks) + self.favor_count + len(self.museum_locations)
-        locations += sum(len(pool) for pool in self.catalog_pools)
-        locations += len(self.beach_locations())
-        if locations == 0:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Without Loansanity, Favor Pools must be "
-                              f"at least 1.")
-        # Every non-filler item needs a location (the starting month and slot are given at the start)
-        items = len(LOANS) - 1 if self.options.loansanity else 0
-        if self.options.timesanity:
-            items += len(MONTHS) + len(TIME_SLOTS) - 2
-        items += len(self.museum_item_names) + len(self.pool_tools) + self.store_items + self.catalog_pool_items
-        items += len(self.fossil_series_items) + self.favor_pool_items + len(self.fish_pass_items)
-        items += len(self.bug_pass_items)
+        locations, items = len(self.seed_locations()), len(self.seed_pool_items())
+        if not locations:
+            raise self.option_error("Without Loansanity, Favor Pools must be at least 1.")
+        # Every non-filler item needs a location
         if locations < items:
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] Total checks at {locations}, it must be at "
-                              f"least {items} with these options. Raise optional checks such as Favor Pools.")
+            raise self.option_error(f"Total checks at {locations}, it must be at least {items} with these options. "
+                                    f"Raise optional checks such as Favor Pools.")
+
+    def seed_locations(self) -> list[str]:
+        return (loansanity.locations(self) + favor_pools.locations(self) + museumsanity.locations(self)
+                + catalogsanity.locations(self) + shellsanity.locations(self))
+
+    def seed_pool_items(self) -> list[str]:
+        # Non-filler items, in pool order
+        return (loansanity.items(self) + timesanity.items(self) + museumsanity.items(self) + tools_in_pool.items(self)
+                + fossil_availability.items(self) + fish_availability.items(self) + bug_availability.items(self)
+                + nook_store_upgrades.items(self) + catalogsanity.items(self) + favor_pools.items(self))
 
     def create_regions(self) -> None:
         menu = Region("Menu", self.player, self.multiworld)
-        names = [loan_location_name(k, j) for k in range(len(LOANS)) for j in range(1, self.loan_checks[k] + 1)]
-        names += [favor_location_name(n) for n in range(1, self.favor_count + 1)]
-        names += self.museum_locations
-        names += [catalog_location_name(item_id) for pool in self.catalog_pools for item_id in pool]
-        names += self.beach_locations()
-        menu.add_locations({name: LOCATION_NAME_TO_ID[name] for name in names}, AnimalCrossingLocation)
+        menu.add_locations({name: LOCATION_NAME_TO_ID[name] for name in self.seed_locations()},
+                           AnimalCrossingLocation)
         self.multiworld.regions.append(menu)
 
     def create_items(self) -> None:
-        pool = []
-        if self.options.loansanity:
-            pool += [self.create_item(PROGRESSIVE_HOUSE) for _ in range(len(LOANS) - 1)]
-        if self.options.timesanity:
-            # The starting month and slot are given at the start, the rest go in the pool
-            start_month = MONTHS[self.options.starting_month.value]
-            start_slot = TIME_SLOTS[self.options.starting_time.value]
-            for name in MONTHS + TIME_SLOTS:
-                if name in (start_month, start_slot):
-                    self.multiworld.push_precollected(self.create_item(name))
-                else:
-                    pool.append(self.create_item(name))
-        pool += [self.create_item(name) for name in self.museum_item_names]
-        pool += [self.create_item(name) for name in self.pool_tools]
-        pool += [self.create_item(name) for name in self.fossil_series_items]
-        pool += [self.create_item(name) for name in self.fish_pass_items]
-        pool += [self.create_item(name) for name in self.bug_pass_items]
-        pool += [self.create_item(PROGRESSIVE_NOOK_STORE) for _ in range(self.store_items)]
-        pool += [self.create_item(PROGRESSIVE_CATALOG_POOL) for _ in range(self.catalog_pool_items)]
-        pool += [self.create_item(PROGRESSIVE_FAVOR_POOL) for _ in range(self.favor_pool_items)]
-        if self.starting_tool:
-            self.multiworld.push_precollected(self.create_item(self.starting_tool))
+        for name in timesanity.precollected(self) + tools_in_pool.precollected(self):
+            self.multiworld.push_precollected(self.create_item(name))
+        pool = [self.create_item(name) for name in self.seed_pool_items()]
         # Everything else is filler. Bell credit amounts are set in fill_slot_data from what was actually placed,
         # so adding other items to the pool later doesn't break the total.
         free = len(self.multiworld.get_unfilled_locations(self.player)) - len(pool)
-        self.filler_tiers = tuple(self.bell_credit_tiers(free))
+        self.filler_tiers = tuple(bell_credits.tiers(self, free))
         pool += [self.create_filler() for _ in range(free)]
         self.multiworld.itempool += pool
 
     def create_item(self, name: str) -> AnimalCrossingItem:
-        if (name in (PROGRESSIVE_HOUSE, PROGRESSIVE_CATALOG_POOL, PROGRESSIVE_FAVOR_POOL)
-                or name in MONTHS or name in TIME_SLOTS or name in FOSSIL_SERIES_ITEMS
-                or name in FISH_PASS_ITEMS or name in BUG_PASS_ITEMS):
-            classification = ItemClassification.progression
-        elif name in self.museum_progression:
-            classification = ItemClassification.progression
-        elif name in MUSEUM_ITEM_NAME_TO_ID and "Museum" in self.options.goal.value:
-            classification = ItemClassification.useful
-        elif name in TOOLS:
-            # Progression when a museum category with checks needs it (only with Tools in Pool)
-            needed = self.options.tools_in_pool and any(self.museum_modes.get(c) for c, tool in CATEGORY_TOOLS.items()
-                                                        if tool == name)
-            classification = ItemClassification.progression if needed else ItemClassification.useful
-        elif name == PROGRESSIVE_NOOK_STORE:
-            classification = ItemClassification.useful
-        else:
-            classification = ItemClassification.filler
+        classification = ItemClassification.filler
+        for feature in ITEM_FEATURES:
+            found = feature.classify(self, name)
+            if found is not None:
+                classification = found
+                break
         return AnimalCrossingItem(name, classification, ITEM_NAME_TO_ID[name], self.player)
 
-    def bell_credit_tiers(self, fillers: int) -> list[str]:
-        # Not enough Bells for the big credits: drop the largest tier while a Small Bell Credit would be under
-        # BELLS_ROUND (estimated from the filler count; the real amounts come later, bell_credit_amounts)
-        tiers = list(BELL_CREDITS)  # small to large
-        total_bells = sum(self.loans) * self.options.filler_bells_percent.value / 100
-        while len(tiers) > 1 and fillers > 0:
-            weights = sum(BELL_CREDITS[n][1] for n in tiers)
-            units_per_filler = sum(BELL_CREDITS[n][0] * BELL_CREDITS[n][1] for n in tiers) / weights
-            if total_bells / (fillers * units_per_filler) >= BELLS_ROUND:
-                break
-            tiers.pop()
-        return tiers
-
     def get_filler_item_name(self) -> str:
-        names = self.filler_tiers
-        return self.random.choices(names, weights=[BELL_CREDITS[n][1] for n in names])[0]
+        return bell_credits.filler_name(self)
 
     def set_rules(self) -> None:
-        # Loan k only exists after k house upgrades (Progressive House x k). Without loansanity
-        # there are no loan checks (loan_checks is all 0) and no Statue goal.
-        for k in range(len(LOANS)):
-            for j in range(1, self.loan_checks[k] + 1):
-                location = self.multiworld.get_location(loan_location_name(k, j), self.player)
-                if k > 0:
-                    set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_HOUSE, self.player, k))
-                # Paying needs bells, and selling needs an open shop: no shop is surely open in Morning
-                # (only Nook 'n' Go, from 7), every other slot has at least one open hour (Night: 21)
-                if self.options.timesanity and not self.options.shops_always_open:
-                    add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
-                                                                   self.player))
-
-        # Favor n (1-based) is in pool (n - 1) // favors_per_pool; pool k (0-based) needs k Progressive Favor Pool
-        per = self.options.favors_per_pool.value
-        for n in range(per + 1, self.favor_count + 1):
-            location = self.multiworld.get_location(favor_location_name(n), self.player)
-            set_rule(location, lambda state, k=(n - 1) // per: state.has(PROGRESSIVE_FAVOR_POOL, self.player, k))
-
-        # Catalog pool k (0-based) needs k + 1 Progressive Catalog Pool. Nook's shop is the one source that's always
-        # on: with Timesanity it needs a slot with the store open (as for loans above)
-        for k, pool in enumerate(self.catalog_pools):
-            for item_id in pool:
-                location = self.multiworld.get_location(catalog_location_name(item_id), self.player)
-                set_rule(location, lambda state, k=k: state.has(PROGRESSIVE_CATALOG_POOL, self.player, k + 1))
-                if self.options.timesanity and not self.options.shops_always_open:
-                    add_rule(location, lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"),
-                                                                   self.player))
-
-        # Shellsanity: an item washes up for the current month only
-        if self.options.timesanity:
-            for m in range(len(MONTHS)):
-                for k in range(1, self.beach_per_month() + 1):
-                    location = self.multiworld.get_location(beach_location_name(m, k), self.player)
-                    set_rule(location, lambda state, month=MONTHS[m]: state.has(month, self.player))
-
-        # Bugs and fish (catch and donate): a month and a time slot it spawns in
-        if self.options.timesanity:
-            for c, critters in ((MUSEUM_BUG, BUGS), (MUSEUM_FISH, FISH)):
-                for name, when in critters:
-                    self.set_museum_rule(c, name, self.spawn_rule(when))
-            # Ants spawn on spoiled turnips or candy. With turnips never spoiling only candy is left, sold by
-            # Nook Oct 16-30: needs October and a slot with an open shop (as for loans above)
-            if self.options.turnips_never_spoil:
-                self.add_museum_rule(MUSEUM_BUG, "Ant", lambda state: state.has("October", self.player))
-                if not self.options.shops_always_open:
-                    self.add_museum_rule(MUSEUM_BUG, "Ant", lambda state: state.has_any(
-                        ("Day Hours", "Evening Hours", "Night Hours"), self.player))
-            # Snails spawn on flowers (in the rain). New towns have none and only Nook sells seeds, so it
-            # needs a slot with an open shop. Ladybugs and the Mantis only spawn in Day Hours: already covered.
-            if not self.options.shops_always_open:
-                self.add_museum_rule(MUSEUM_BUG, "Snail", lambda state: state.has_any(
-                    ("Day Hours", "Evening Hours", "Night Hours"), self.player))
-        # Season locked fossils (dig up and donate): a month of its season
-        if (self.options.timesanity
-                and self.options.fossil_availability == options.FossilAvailability.option_season_locked):
-            for name, season in zip(FOSSILS, FOSSIL_SEASONS):
-                months = [MONTHS[m] for m in SEASON_MONTHS[season]]
-                self.set_museum_rule(MUSEUM_FOSSIL, name, lambda state, months=months: state.has_any(months, self.player))
-
-        # Progressive fossils: a fossil needs its series item (singles: "Single Fossils") (the shovel rule below comes on top)
-        if self.fossil_series_items:
-            for name, item in zip(FOSSILS, FOSSIL_SERIES_OF):
-                self.add_museum_rule(MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, self.player))
-
-        # Fish passes: a fish needs any of its items (the rod rule below comes on top)
-        if self.fish_pass_items:
-            for name, passes in FISH_PASS_OF.items():
-                self.add_museum_rule(MUSEUM_FISH, name, lambda state, p=passes: state.has_any(p, self.player))
-
-        # Bug passes: a bug needs its item (the net rule below comes on top)
-        if self.bug_pass_items:
-            for name, item in BUG_PASS_OF.items():
-                self.add_museum_rule(MUSEUM_BUG, name, lambda state, item=item: state.has(item, self.player))
-
-        # Tools in Pool: catching, digging up and donating need the tool (on top of the rules above)
-        if self.options.tools_in_pool:
-            for c, names in enumerate(MUSEUM_NAMES):
-                if c in CATEGORY_TOOLS:
-                    for name in names:
-                        self.add_museum_rule(c, name, lambda state, tool=CATEGORY_TOOLS[c]:
-                                             state.has(tool, self.player))
-
-        # All chosen goals are required
-        goals = {
-            # The statue comes after the last loan, which needs every house upgrade
-            "Statue": lambda state: state.has(PROGRESSIVE_HOUSE, self.player, len(LOANS) - 1),
-            "Museum": lambda state: state.has_from_list(self.museum_item_names, self.player, self.museum_goal_count),
-            # No AP item gates it: Nook's shop, trees, villagers, ... can all hand it out
-            "Froggy Chair": lambda state: True,
-            # Enough pools open (with Timesanity also a shop slot, below)
-            "Catalog": lambda state: state.has(PROGRESSIVE_CATALOG_POOL, self.player, self.catalog_goal_pools),
-        }
-        chosen = [goals[g] for g in sorted(self.options.goal.value)]
-        # Catalog goal: Nook's shop (as for the catalog locations above)
-        if "Catalog" in self.options.goal.value and self.options.timesanity and not self.options.shops_always_open:
-            chosen.append(lambda state: state.has_any(("Day Hours", "Evening Hours", "Night Hours"), self.player))
-        # Goals are only sent when K.K. Slider plays (Saturday 20:00-23:59, any month): needs a slot with those hours
-        if self.options.timesanity:
-            chosen.append(lambda state: state.has_any(("Evening Hours", "Night Hours"), self.player))
-        self.multiworld.completion_condition[self.player] = lambda state: all(goal(state) for goal in chosen)
+        loansanity.rules(self)
+        favor_pools.rules(self)
+        catalogsanity.rules(self)
+        shellsanity.rules(self)
+        museumsanity.rules(self)
+        fossil_availability.rules(self)
+        fish_availability.rules(self)
+        bug_availability.rules(self)
+        tools_in_pool.rules(self)
+        goal.rules(self)
 
         # Something must be reachable with only the start inventory, else the fill fails with a FillError
         # (e.g. only catalog checks, only checks needing a tool not given, only shop checks at Morning)
         start = CollectionState(self.multiworld)  # every player's precollected items
         if not any(location.can_reach(start) for location in self.get_locations()):
-            raise OptionError(f"[{GAME_NAME} - '{self.player_name}'] No check can be done at the start with "
-                              f"these options. Turn on Loansanity, set Favor Pools or Shellsanity to at least 1, "
-                              f"or add a Starting Tool or Shops Always Open.")
-
-    def beach_per_month(self) -> int:
-        # Shellsanity checks per month, 0 when off
-        return self.options.shellsanity.value
-
-    def beach_locations(self) -> list[str]:
-        return [beach_location_name(m, k) for m in range(len(MONTHS)) for k in range(1, self.beach_per_month() + 1)]
-
-    def set_museum_rule(self, category: int, name: str, rule) -> None:
-        # Find and donate locations of one museum thing, the ones that exist
-        for location in (museum_find_name(category, name), museum_donate_name(name)):
-            if location in self.museum_locations:
-                set_rule(self.multiworld.get_location(location, self.player), rule)
-
-    def add_museum_rule(self, category: int, name: str, rule) -> None:
-        for location in (museum_find_name(category, name), museum_donate_name(name)):
-            if location in self.museum_locations:
-                add_rule(self.multiworld.get_location(location, self.player), rule)
-
-    def spawn_rule(self, when: dict[int, tuple[int, ...]]):
-        # when: {month: time slots} from museum.py; any owned month with an owned slot of it
-        pairs = [(MONTHS[m], [TIME_SLOTS[s] for s in slots]) for m, slots in when.items()]
-        return lambda state: any(state.has(month, self.player) and state.has_any(slots, self.player)
-                                 for month, slots in pairs)
-
-    def bell_credit_amounts(self) -> dict[str, int]:
-        # Count the bell credits this player will actually receive (placed anywhere, plus start inventory),
-        # then size them so they add up to filler_bells_percent of the total debt.
-        counts = {name: 0 for name in BELL_CREDITS}
-        items = [loc.item for loc in self.multiworld.get_locations() if loc.item]
-        items += self.multiworld.precollected_items[self.player]
-        for item in items:
-            if item.player == self.player and item.name in counts:
-                counts[item.name] += 1
-
-        total_bells = sum(self.loans) * self.options.filler_bells_percent.value / 100
-        units = sum(counts[name] * BELL_CREDITS[name][0] for name in BELL_CREDITS)
-        unit = total_bells / units if units else 0
-        amounts = {}
-        for name, (size, _) in BELL_CREDITS.items():
-            bells = unit * size
-            # Rounded to BELLS_ROUND; below that (only small credits left, very few Bells) the plain amount, at least 1
-            if bells >= BELLS_ROUND:
-                amounts[name] = round(bells / BELLS_ROUND) * BELLS_ROUND
-            else:
-                amounts[name] = max(1, round(bells))
-        return amounts
+            raise self.option_error("No check can be done at the start with these options. Turn on Loansanity, "
+                                    "set Favor Pools or Shellsanity to at least 1, or add a Starting Tool or Shops "
+                                    "Always Open.")
 
     def fill_slot_data(self) -> Mapping[str, Any]:
         # Random choices are already resolved here, so the client gets plain numbers.
         return {
-            "skip_intro": self.options.skip_intro.value,
-            "player_name": self.ac_player_name,
-            "town_name": self.ac_town_name,
-            "gender": self.options.gender.value,
-            "face": self.options.face.value,
-            "starting_shirt": self.options.starting_shirt.value,
-            "house": self.options.house.value,
-            "town_fruit": self.options.town_fruit.value,
-            "grass_shape": self.options.grass_shape.value,
-            "train_station": self.options.train_station.value,
-            "town_day": self.options.town_day.value,
-            "villager_blacklist": self.villager_blacklist,
-            "starting_villagers": self.starting_villagers,
-            "letter_paper": self.options.letter_paper.value,
-            "letter_sender": self.ac_letter_sender,
-            "loan_letter_text": self.ac_loan_letter_text,
-            "no_cockroaches": self.options.no_cockroaches.value,
-            "shops_always_open": self.options.shops_always_open.value,
-            "no_weeds": self.options.no_weeds.value,
-            "more_favors": self.options.more_favors.value,
-            "villagers_dont_leave": self.options.villagers_dont_leave.value,
-            "villagers_never_sleep": self.options.villagers_never_sleep.value,
-            "turnips_never_spoil": self.options.turnips_never_spoil.value,
-            "no_falling_stalks": self.options.no_falling_stalks.value,
-            "no_fishing_trash": self.options.no_fishing_trash.value,
-            "easier_critter_catch": self.options.easier_critter_catch.value,
-            "hidden_bug_hints": self.options.hidden_bug_hints.value,
-            "skip_hra_talk": self.options.skip_hra_talk.value,
-            "short_shop_talk": self.options.short_shop_talk.value,
-            "coconuts_wash_up": self.options.coconuts_wash_up.value,
-            "shellsanity": self.options.shellsanity.value,
-            "shellsanity_item_chance": self.options.shellsanity_item_chance.value,
-            "normalized_time_travel": self.options.normalized_time_travel.value,
-            "goal": sorted(self.options.goal.value),
-            "loans": self.loans,
-            "loansanity": self.options.loansanity.value,
-            "loan_checks": self.loan_checks,
-            "favor_pools": self.options.favor_pools.value,
-            "favors_per_pool": self.options.favors_per_pool.value,
-            # Favor checks in total (favor_pools x favors_per_pool)
-            "favorsanity": self.favor_count,
-            "tools_in_pool": self.options.tools_in_pool.value,
-            # Resolved starting tool (item name, None for none); for Universal Tracker
-            "starting_tool": self.starting_tool,
-            "nook_store_upgrades": self.options.nook_store_upgrades.value,
-            # Bells (sales) or catalog entries (catalog) per upgrade; empty with progressive
-            "nook_store_thresholds": self.store_thresholds,
-            "timesanity": self.options.timesanity.value,
-            "starting_month": self.options.starting_month.value,
-            "starting_time": self.options.starting_time.value,
-            "catalogsanity": self.options.catalogsanity.value,
-            # Game item ids per pool; [] without Catalogsanity
-            "catalog_pools": self.catalog_pools,
-            "new_item_chance": self.options.new_item_chance.value,
-            "catalog_sources": sorted(self.options.catalog_sources.value),
-            "catalog_goal_count": self.catalog_goal_count,
-            "museumsanity": self.options.museumsanity.value,
-            # Effective modes: 0 without Museumsanity
-            "bug_checks": self.museum_modes[MUSEUM_BUG],
-            "fish_checks": self.museum_modes[MUSEUM_FISH],
-            "fossil_checks": self.museum_modes[MUSEUM_FOSSIL],
-            "painting_checks": self.museum_modes[MUSEUM_PAINTING],
-            "museum_goal_count": self.museum_goal_count,
-            # Museum donation items that are progression (Museum goal); for Universal Tracker
-            "museum_progression": sorted(ITEM_NAME_TO_ID[name] for name in self.museum_progression),
-            "critter_odds": self.options.critter_odds.value,
-            "bug_availability": self.options.bug_availability.value,
-            "fish_availability": self.options.fish_availability.value,
-            "fossil_availability": self.options.fossil_availability.value,
-            "fossil_odds": self.options.fossil_odds.value,
-            "fossil_seasons": FOSSIL_SEASONS,
-            # Timesanity clock year: the year the seed was made, fixed for the whole save
-            "start_year": min(max(datetime.date.today().year, MIN_YEAR), MAX_YEAR),
-            "bell_credits": self.bell_credit_amounts(),
+            **intro.slot_data(self),
+            **town_generation.slot_data(self),
+            **quality_of_life.slot_data(self),
+            **shellsanity.slot_data(self),
+            **goal.slot_data(self),
+            **loansanity.slot_data(self),
+            **favor_pools.slot_data(self),
+            **tools_in_pool.slot_data(self),
+            **nook_store_upgrades.slot_data(self),
+            **timesanity.slot_data(self),
+            **catalogsanity.slot_data(self),
+            **museumsanity.slot_data(self),
+            **bug_availability.slot_data(self),
+            **fish_availability.slot_data(self),
+            **fossil_availability.slot_data(self),
+            **bell_credits.slot_data(self),
             # From archipelago.json; the client compares it with its own build
             "world_version": ".".join(str(n) for n in self.world_version),
         }

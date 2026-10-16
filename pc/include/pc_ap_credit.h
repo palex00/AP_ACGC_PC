@@ -15,7 +15,7 @@ extern "C" {
 
 struct ini_t;
 
-// WARN: keep in sync with apworld items.py! Small/Modest/Large Bell Credit
+// WARN: keep in sync with apworld bell_credits.py! Small/Modest/Large Bell Credit
 #define PC_AP_ITEM_BELL_CREDIT  0x10001
 
 typedef struct {

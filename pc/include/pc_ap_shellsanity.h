@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-// WARN: keep in sync with apworld locations.py! Month m (0-11), check k (1-based) = base + m * 0x100 + k
+// WARN: keep in sync with apworld shellsanity.py! Month m (0-11), check k (1-based) = base + m * 0x100 + k
 #define PC_AP_LOC_BEACH_BASE 0x50000
 #define PC_AP_MONTHS         12
 

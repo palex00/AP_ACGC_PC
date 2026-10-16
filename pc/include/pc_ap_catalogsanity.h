@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-// WARN: keep in sync with apworld items.py / catalog.py!
+// WARN: keep in sync with apworld catalogsanity.py!
 #define PC_AP_ITEM_PROGRESSIVE_CATALOG_POOL 0x10005
 #define PC_AP_LOC_CATALOG_BASE              0x40000 // "Catalog: X" = base + game item id
 

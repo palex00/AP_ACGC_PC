@@ -16,20 +16,20 @@
 extern "C" {
 #endif
 
-// WARN: keep in sync with apworld museum.py! Museum slot = category
+// WARN: keep in sync with apworld museumsanity.py! Museum slot = category
 // (mMmd_CATEGORY_*) * 0x40 + museum index; the item and both locations use it.
 #define PC_AP_MUSEUM_SLOT(cat, idx)  ((cat) * 0x40 + (idx))
 #define PC_AP_MUSEUM_SLOT_NUM        (mMmd_CATEGORY_NUM * 0x40)
 #define PC_AP_ITEM_MUSEUM_BASE       0x10100 // "Museum: X"
 #define PC_AP_LOC_DONATE_BASE        0x30000 // "Donate X"
 #define PC_AP_LOC_FIND_BASE          0x30100 // "Catch X" / "Dig Up X"
-// WARN: keep in sync with apworld museum.py FOSSIL_SERIES! Progressive fossil
+// WARN: keep in sync with apworld fossil_availability.py FOSSIL_SERIES! Progressive fossil
 // spawns: "<series> Fossils" = base + series (Tricera, T-rex, Apato, Stego,
 // Ptera, Plesio, Mammoth, Single)
 #define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10030
 #define PC_AP_FOSSIL_SERIES_NUM       8
 #define PC_AP_FOSSIL_SERIES_SINGLE    7 // Amber, Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite
-// WARN: keep in sync with apworld museum.py FISH_PASS_ITEMS! Fish Availability
+// WARN: keep in sync with apworld fish_availability.py FISH_PASS_ITEMS! Fish Availability
 // "Progressive": pass p item = base + p
 #define PC_AP_ITEM_FISH_PASS_BASE     0x10040
 #define PC_AP_FISH_PASS_SMALL_RIVER   0
@@ -38,7 +38,7 @@ extern "C" {
 #define PC_AP_FISH_PASS_POND          3 // ponds + the river lake's own fish
 #define PC_AP_FISH_PASS_SEA           4
 #define PC_AP_FISH_PASS_NUM           5
-// WARN: keep in sync with apworld museum.py BUG_PASS_ITEMS! Bug Availability
+// WARN: keep in sync with apworld bug_availability.py BUG_PASS_ITEMS! Bug Availability
 // "Progressive": pass p item = base + p (bug -> pass: pc_ap_bug_pass, generated)
 #define PC_AP_ITEM_BUG_PASS_BASE      0x10050
 #define PC_AP_BUG_PASS_TREE           0 // cicadas, Bagworm, Spider, Purple Butterfly, Bee

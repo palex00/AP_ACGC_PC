@@ -13,9 +13,9 @@ extern "C" {
 
 struct ini_t;
 
-// WARN: keep in sync with apworld items.py!
+// WARN: keep in sync with apworld loansanity.py!
 #define PC_AP_ITEM_PROGRESSIVE_HOUSE  0x10000
-// WARN: keep in sync with apworld locations.py! Loan k (0-4), check j (1-based) = base + k * 0x1000 + j
+// WARN: keep in sync with apworld loansanity.py! Loan k (0-4), check j (1-based) = base + k * 0x1000 + j
 #define PC_AP_LOC_LOAN_BASE   0x10000
 
 typedef struct {

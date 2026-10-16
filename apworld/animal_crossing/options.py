@@ -5,8 +5,12 @@ from Options import (
     PerGameCommonOptions, Range, Toggle
 )
 
-from .museum import CHECK_DONATE, CHECK_FIND
-from .villagers import PERSONALITIES, VILLAGERS
+from .villager_data import PERSONALITIES, VILLAGERS
+
+# Museumsanity check mode bits: the Bug/Fish/Fossil Checks option values below.
+# WARN: the client mirrors them (AP_MUSEUM_FIND / AP_MUSEUM_DONATE in ap_slotdata.h)!
+CHECK_FIND = 1    # catching a bug/fish, digging up a fossil (pre-appraised)
+CHECK_DONATE = 2  # donating it
 
 
 class SkipIntro(Choice):
@@ -815,7 +819,7 @@ class Museumsanity(DefaultOnToggle):
     display_name = "Museumsanity"
 
 
-# Values are the check mode bits (museum.py CHECK_*, the client's AP_MUSEUM_*)
+# Values are the check mode bits (CHECK_* at the top, the client's AP_MUSEUM_*)
 class CritterChecks(Choice):
     option_off = 0
     option_journal = CHECK_FIND
@@ -855,7 +859,7 @@ class FossilChecks(Choice):
     Instant Donate: as Instant, plus a second check for donating it.
     """
     display_name = "Fossil Checks"
-    # Values are the check mode bits (museum.py CHECK_*): "Vanilla" is donate only
+    # Values are the check mode bits (CHECK_* at the top): "Vanilla" is donate only
     option_off = 0
     option_instant = CHECK_FIND
     option_vanilla = CHECK_DONATE

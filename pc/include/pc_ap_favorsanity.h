@@ -16,7 +16,7 @@ extern "C" {
 
 struct ini_t;
 
-// WARN: keep in sync with apworld locations.py! Favor n (1-based) = base + n
+// WARN: keep in sync with apworld favor_pools.py! Favor n (1-based) = base + n
 #define PC_AP_LOC_FAVOR_BASE  0x20000
 #define PC_AP_FAVORS_MAX      100
 #define PC_AP_ITEM_PROGRESSIVE_FAVOR_POOL 0x10006

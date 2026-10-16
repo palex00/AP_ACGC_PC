@@ -16,7 +16,7 @@ extern "C" {
 
 struct Save_s;
 
-// WARN: keep in sync with apworld items.py! Month m (0-11) = base + m, slot s (0-3) = base + s
+// WARN: keep in sync with apworld timesanity.py! Month m (0-11) = base + m, slot s (0-3) = base + s
 #define PC_AP_ITEM_MONTH_BASE  0x10010
 #define PC_AP_ITEM_SLOT_BASE   0x10020
 
