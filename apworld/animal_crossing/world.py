@@ -66,6 +66,12 @@ class AnimalCrossingWeb(WebWorld):
     # Options not listed here stay under "Game Options" (Shops Always Open and Turnips Never Spoil change logic,
     # so they're there, not under Quality of Life)
     option_groups = [
+        # Goal settings are named <goal>_goal_<thing> (museum_goal_percent), listed after Goal
+        OptionGroup("Goal", [
+            options.Goal,
+            options.MuseumGoalPercent,
+            options.CatalogGoalPercent,
+        ]),
         OptionGroup("Intro", [
             options.SkipIntro,
             options.PlayerName,
@@ -106,7 +112,6 @@ class AnimalCrossingWeb(WebWorld):
             options.CatalogPools,
             options.CatalogPoolSize,
             options.CatalogSources,
-            options.CatalogGoalPercent,
         ]),
         OptionGroup("Museumsanity", [
             options.Museumsanity,
@@ -117,7 +122,6 @@ class AnimalCrossingWeb(WebWorld):
             options.BugAvailability,
             options.FishAvailability,
             options.FossilAvailability,
-            options.MuseumGoalPercent,
         ]),
         OptionGroup("Nook's Cranny", [
             options.NookStoreUpgrades,

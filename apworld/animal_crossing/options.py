@@ -972,6 +972,8 @@ class MuseumGoalPercent(Range):
 class AnimalCrossingOptions(PerGameCommonOptions):
     # Same order as the option groups in world.py: the Options Creator lists a group's options in this order
     goal: Goal
+    museum_goal_percent: MuseumGoalPercent
+    catalog_goal_percent: CatalogGoalPercent
     favor_pools: FavorPools
     favors_per_pool: FavorsPerPool
     shellsanity: Shellsanity
@@ -1010,7 +1012,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     catalog_pools: CatalogPools
     catalog_pool_size: CatalogPoolSize
     catalog_sources: CatalogSources
-    catalog_goal_percent: CatalogGoalPercent
     museumsanity: Museumsanity
     bug_checks: BugChecks
     fish_checks: FishChecks
@@ -1019,7 +1020,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     bug_availability: BugAvailability
     fish_availability: FishAvailability
     fossil_availability: FossilAvailability
-    museum_goal_percent: MuseumGoalPercent
     nook_store_upgrades: NookStoreUpgrades
     nook_n_go_sales: NookNGoSales
     nookway_sales: NookwaySales
