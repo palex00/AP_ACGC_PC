@@ -2493,8 +2493,10 @@ static void aNSC_sell_answer0(NPC_SHOP_COMMON_ACTOR* shop_common, GAME_PLAY* pla
                 }
             }
 #if defined(TARGET_PC) && !defined(aNSC_MAMEDANUKI)
-            // Short Shop Talk: ticket given (or mailed) silently, plain "<price> Bells it is!"
-            if (pc_ap_qol_short_shop_talk() && (next == 1 || next == 2)) {
+            // Short Shop Talk: ticket given (or mailed) silently and no tool or signboard tutorial (net, axe,
+            // shovel, rod, sign: same follow-up action), plain "<price> Bells it is!"
+            if (pc_ap_qol_short_shop_talk() &&
+                (next == 1 || next == 2 || (next >= 5 && next <= 8) || next == 0xa)) {
                 next = 0;
             }
 #endif
