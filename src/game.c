@@ -4,6 +4,7 @@
 #include "pc_platform.h"
 #include "pc_diag.h"
 extern int g_pc_model_viewer;
+extern int g_pc_sound_test;
 #endif
 
 #include "m_debug.h"
@@ -153,7 +154,7 @@ extern void game_main(GAME* this) {
     GRAPH_SET_DOING_POINT(graph, GAME_EXEC_FINISHED);
     GRAPH_SET_DOING_POINT(graph, GAME_BGM);
 #ifdef TARGET_PC
-    if (!g_pc_model_viewer) {
+    if (!g_pc_model_viewer && !g_pc_sound_test) { /* sound test: no BGM manager */
 #endif
         mBGM_main(this);
 #ifdef TARGET_PC

@@ -21,6 +21,10 @@ extern void Na_BgmStart(u8);
 extern void Na_BgmCrossfadeStart(u8);
 extern void Na_BgmStop(u16);
 extern void Na_SysTrgStart(u16);
+#ifdef TARGET_PC
+extern int Na_PcBooted(void);
+extern void Na_PcTrgStatus(int* busy, int* sounding);
+#endif
 extern void Na_PlyWalkSe(u16 id, u16 angle, f32 distance);
 extern void Na_PlyWalkSeRoom(u8 a, u16 angle, f32 distance);
 extern void Na_NpcWalkSe(u16 id, u16 angle, f32 distance);

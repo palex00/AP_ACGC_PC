@@ -4043,3 +4043,27 @@ extern int Na_GetSoundFrameCounter() {
 extern void Na_kazagurumaLevel(f32 kazagurumaSpeed) {
     sou_kazaguruma_speed = kazagurumaSpeed;
 }
+
+#ifdef TARGET_PC
+/* Sound test (pc_sound_test.c): nonzero once the audio engine has booted */
+int Na_PcBooted(void) {
+    return sou_NeosBootCheck_ok == 3;
+}
+
+/* Sound test: trigger SE slots in use, and how many of them the SE sequence reports as
+ * sounding (sub-port 5, as Sou_TrgEndCheck reads it) */
+void Na_PcTrgStatus(int* busy, int* sounding) {
+    int i;
+
+    *busy = 0;
+    *sounding = 0;
+    for (i = 0; i < ARRAY_COUNT(sou_trg_se); i++) {
+        if (sou_trg_se[i].id != 0) {
+            (*busy)++;
+            if (Nap_ReadSubPort(SE_GROUP, i, 5)) {
+                (*sounding)++;
+            }
+        }
+    }
+}
+#endif

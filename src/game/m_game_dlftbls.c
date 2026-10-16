@@ -12,6 +12,7 @@
 #include "m_prenmi.h"
 #ifdef TARGET_PC
 #include "pc_model_viewer.h"
+#include "pc_sound_test.h"
 #endif
 
 #define DLFTBL_MAKE(name, class) \
@@ -32,5 +33,6 @@ DLFTBL_GAME game_dlftbls[] = {
   DLFTBL_MAKE(prenmi, PRENMI),
 #ifdef TARGET_PC
   DLFTBL_MAKE(pc_model_viewer, MODEL_VIEWER),  /* Index 10 */
+  DLFTBL_MAKE(pc_sound_test, SOUND_TEST),      /* Index 11, sound test */
 #endif
 };

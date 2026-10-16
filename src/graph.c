@@ -27,6 +27,7 @@
 #include "zurumode.h"
 #ifdef TARGET_PC
 #include "pc_model_viewer.h"
+#include "pc_sound_test.h"
 #include "pc_diag.h"
 #include "pc_platform.h"
 #include "pc_pause_menu.h"
@@ -449,6 +450,9 @@ extern void graph_proc(void* arg) {
 #ifdef TARGET_PC
     if (g_pc_model_viewer) {
         dlftbl = &game_dlftbls[10]; /* model viewer */
+    }
+    if (g_pc_sound_test) {
+        dlftbl = &game_dlftbls[11]; /* sound test */
     }
 #endif
     graph_ct(&graph_class);

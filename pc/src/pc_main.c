@@ -15,6 +15,7 @@
 #include "pc_ap_logic.h"
 #include "pc_crash.h"
 #include "pc_actor_probe.h"
+#include "pc_sound_test.h"
 #include "pc_window_icon.h"
 
 // Single implementation of the vendored ini.h (pc/lib/ini) for the exe
@@ -324,6 +325,7 @@ int main(int argc, char* argv[]) {
             printf("  --framelimit N      Set the target frame rate (default 60, 0 = uncapped)\n");
             printf("  --profile [N]       Print frame profiler summary every N frames (default 120)\n");
             printf("  --model-viewer [N]  Launch model viewer (optional start index)\n");
+            printf("  --sound-test        Launch the sound test (songs, loops, effects) instead of the game\n");
             printf("  --time H[:M[:S]]    Override in-game time (e.g. 5, 17:30, 5:55:00)\n");
             printf("  --date M/D[/Y]      Override in-game date (e.g. 7/4, 12/24/2026)\n");
             printf("  --rain [intensity]  Force rainy weather; intensity is light, normal, or heavy\n");
@@ -362,6 +364,8 @@ int main(int argc, char* argv[]) {
                 g_pc_model_viewer_start = atoi(argv[i + 1]);
                 i++;
             }
+        } else if (strcmp(argv[i], "--sound-test") == 0) {
+            g_pc_sound_test = 1; // sound test
         } else if (strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
             int h = -1, m = -1, s = -1;
             sscanf(argv[i + 1], "%d:%d:%d", &h, &m, &s);
