@@ -2950,23 +2950,20 @@ static void bg_item_common_draw_check(GAME_PLAY* play, bg_item_common_c* common,
 // player is near. Spread over frames by its unit (no stored state), like the dirt clods.
 static void bIT_pc_money_rock_hint(GAME_PLAY* play, bg_item_common_c* common) {
     PLAYER_ACTOR* player = GET_PLAYER_ACTOR(play);
-    bg_item_draw_table_c* draw_table = common->draw_table;
     int i;
 
     if (!pc_ap_qol_hidden_bug_hints() || player == NULL) {
         return;
     }
 
-    for (i = 0; i < mFM_VISIBLE_BLOCK_NUM; i++, draw_table++) {
-        mActor_name_t* fg_p;
+    // Loaded acre i and its draw table, paired the way every refresh rebuilds them. Not the table's own
+    // bx/bz: vanilla never reads those and doesn't update them on every refresh (stale with borderless acres)
+    for (i = 0; i < common->item_table.count; i++) {
+        bg_item_draw_table_c* draw_table = &common->draw_table[common->_139F4[i]];
+        mActor_name_t* fg_p = common->item_table.block_info_tbl[i].items;
         int ut;
 
-        if (draw_table->draw_flag != TRUE) {
-            continue;
-        }
-
-        fg_p = mFI_BkNumtoUtFGTop(draw_table->bx, draw_table->bz);
-        if (fg_p == NULL) {
+        if (draw_table->draw_flag != TRUE || fg_p == NULL) {
             continue;
         }
 
@@ -3238,27 +3235,25 @@ static void bIT_actor_pit_draw(GAME* game, bg_item_common_info_c* common_info, b
 }
 
 #ifdef TARGET_PC
-// Hidden Bug Hints: a hive in every bee tree, at vanilla's shake drop spot (left side) but behind the leaves
+// Hidden Bug Hints: a hive in every bee tree, at vanilla's shake drop spot (left side, pos_part_honey_comb[0])
+// but less far forward (z 7.5, like the top fruit's; vanilla's is 17.5 toward the camera)
 static void bIT_pc_bee_hint_draw(GAME* game, bg_item_common_c* common) {
-    static xyz_t hive_ofs = { -37.5f, 65.0f, -17.5f };
-    static xyz_t scale = { 0.007f, 0.007f, 0.007f }; // 70% of the shaken-down hive
-    bg_item_draw_table_c* draw_table = common->draw_table;
+    static xyz_t hive_ofs = { -37.5f, 65.0f, 7.5f };
+    static xyz_t scale = { 0.008f, 0.008f, 0.008f }; // 80% of the shaken-down hive
     int i;
 
     if (!pc_ap_qol_hidden_bug_hints()) {
         return;
     }
 
-    for (i = 0; i < mFM_VISIBLE_BLOCK_NUM; i++, draw_table++) {
-        mActor_name_t* fg_p;
+    // Loaded acre i and its draw table, paired the way every refresh rebuilds them. Not the table's own
+    // bx/bz: vanilla never reads those and doesn't update them on every refresh (stale with borderless acres)
+    for (i = 0; i < common->item_table.count; i++) {
+        bg_item_draw_table_c* draw_table = &common->draw_table[common->_139F4[i]];
+        mActor_name_t* fg_p = common->item_table.block_info_tbl[i].items;
         int ut;
 
-        if (draw_table->draw_flag != TRUE) {
-            continue;
-        }
-
-        fg_p = mFI_BkNumtoUtFGTop(draw_table->bx, draw_table->bz);
-        if (fg_p == NULL) {
+        if (draw_table->draw_flag != TRUE || fg_p == NULL) {
             continue;
         }
 
