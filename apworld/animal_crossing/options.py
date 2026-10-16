@@ -631,7 +631,7 @@ class ShortShopTalk(Toggle):
     display_name = "Short Shop Talk"
 
 
-class EasierCritterCatch(Toggle):
+class EasierCritterCatch(DefaultOnToggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
     running near them no longer scares them (tools and the bobber still do).

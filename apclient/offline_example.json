@@ -38,7 +38,7 @@
   "turnips_never_spoil": 0,
   "no_falling_stalks": 0,
   "no_fishing_trash": 1,
-  "easier_critter_catch": 0,
+  "easier_critter_catch": 1,
   "skip_hra_talk": 1,
   "short_shop_talk": 0,
   "hidden_bug_hints": 1,
