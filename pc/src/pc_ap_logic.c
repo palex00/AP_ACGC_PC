@@ -357,7 +357,10 @@ int pc_ap_museum_fossils_available(void) {
 }
 
 int pc_ap_museum_critters_available(int cat) {
-  return pc_ap_museumsanity_critter_available(&g_ap.museum, cat);
+  // Without Timesanity every month and time slot counts
+  int months = pc_ap_time_frozen() ? pc_ap_time_owned_months() : 0xFFF;
+  int slots = pc_ap_time_frozen() ? pc_ap_time_owned_slots() : 0xF;
+  return pc_ap_museumsanity_critter_available(&g_ap.museum, cat, months, slots);
 }
 
 int pc_ap_museum_category_size(int cat) {

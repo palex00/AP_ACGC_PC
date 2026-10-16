@@ -87,7 +87,8 @@ int pc_ap_museum_received(int counts[4]);
 int pc_ap_museum_checked(int cat, int* total);
 // Progressive fossils: find/donate checks of the open fossils, -1 when not progressive
 int pc_ap_museum_fossils_available(void);
-// Progressive bugs / fish (cat): find/donate checks of the open ones, -1 when not progressive
+// Progressive bugs / fish (cat): find/donate checks of the open ones (item held, catchable in an owned
+// month + time slot with Timesanity), -1 when not progressive
 int pc_ap_museum_critters_available(int cat);
 // Things in a category if it's run by AP (has checks), else 0
 int pc_ap_museum_category_size(int cat);

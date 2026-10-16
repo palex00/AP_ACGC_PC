@@ -154,8 +154,11 @@ void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aS
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
 // Bug/Fish Availability (cat bugs or fish): find and donate checks of the open bugs or fish
-// (sent or not), -1 when that category isn't progressive. A fish is open if any of its passes is.
-int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat);
+// (sent or not), -1 when that category isn't progressive. Open = its pass is held (a fish: any of
+// its passes) and it can be caught in one of the months (bit m = month m) and time slots (bit s =
+// slot s) the player has: Timesanity's owned ones, or 0xFFF / 0xF without it. Weather and the
+// logic's special cases are ignored (as on the Bugs/Fish pages).
+int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat, int months, int slots);
 // Bug Availability: nonzero if bug pass p is open (always unless progressive)
 int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass);
 // Bug Availability on the spawn list (after the odds): a bug whose pass is closed keeps

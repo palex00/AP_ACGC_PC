@@ -510,7 +510,17 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
   }
 }
 
-int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat) {
+// Nonzero if a bug or fish can be caught in one of months x slots (either half of a month)
+static int pc_ap_museumsanity_critter_in_time(const pc_ap_critter_data* d, int months, int slots) {
+  for(int month = 0; month < 12; month++) {
+    if((months & (1 << month)) && ((d->slots[month][0] | d->slots[month][1]) & slots)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat, int months, int slots) {
   int progressive = (cat == mMmd_CATEGORY_FISH && m->fish_availability == AP_FISH_AVAIL_PROGRESSIVE) ||
                     (cat == mMmd_CATEGORY_INSECT && m->bug_availability == AP_BUG_AVAIL_PROGRESSIVE);
   if(!progressive) {
@@ -526,16 +536,19 @@ int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat) {
   int count = 0;
   for(int idx = 0; idx < PC_AP_CRITTER_NUM; idx++) {
     int open = 0;
+    const pc_ap_critter_data* d;
     if(cat == mMmd_CATEGORY_INSECT) {
       open = pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[idx]);
+      d = &pc_ap_bug_data[idx];
     } else {
       for(int pass = 0; pass < PC_AP_FISH_PASS_NUM; pass++) {
         if((pc_ap_fish_passes[idx] & (1 << pass)) && pc_ap_museumsanity_fish_pass_open(m, pass)) {
           open = 1;
         }
       }
+      d = &pc_ap_fish_data[idx];
     }
-    if(open) {
+    if(open && pc_ap_museumsanity_critter_in_time(d, months, slots)) {
       count += per_critter;
     }
   }
