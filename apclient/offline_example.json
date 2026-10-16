@@ -12,8 +12,10 @@
     "bug_availability, fish_availability 0 all, 1 progressive (needs AP items: all offline).",
     "fossil_availability 0 all, 1 season locked (Spring Mar-May, ...), 2 progressive (needs AP items: all offline).",
     "fossil_odds 0 vanilla, 1 normalized, 2 dynamic (missing from museum more likely).",
-    "New town settings only apply when the town is made. Quality of life settings (no_cockroaches ... normalized_time_travel,",
-    "critter_odds, fossil_odds) only set the first values of the save's ap_settings.ini: change them in game in Settings > AP."
+    "New town settings only apply when the town is made. The Settings > AP ones (every toggle from no_cockroaches on except",
+    "shops_always_open and turnips_never_spoil, plus critter_odds, fossil_odds) only seed the save's ap_settings.ini on its",
+    "first load: editing them here later does nothing for that save, change them in game in Settings > AP instead.",
+    "shops_always_open, turnips_never_spoil and the rest always follow this file."
   ],
   "seed": "offline",
   "team": 0,

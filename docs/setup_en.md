@@ -79,4 +79,5 @@ To play with only the quality-of-life options (no multiworld), replace the conte
 offline=offline_example.json
 ```
 
-and edit `offline_example.json` to choose your options.
+and edit `offline_example.json` to choose your options. Options that are also in the in-game Settings > AP tab are only read when a
+save is first loaded; after that, change them in game (editing the file does nothing for that save).

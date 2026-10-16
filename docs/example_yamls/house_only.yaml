@@ -1,0 +1,11 @@
+# A house-only game with no time locks.
+name: Player
+game: Animal Crossing
+Animal Crossing:
+  goal: ["Statue"]
+  timesanity: false
+  museumsanity: false
+  catalogsanity: false
+  favorsanity: false
+  shellsanity: false
+  total_loan_checks: 30

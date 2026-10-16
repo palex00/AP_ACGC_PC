@@ -112,28 +112,6 @@ Checks are sent in the background; a message shows on screen when you send or re
 
 ## Example options
 
-A short game focused on the museum (the beach checks give you something to do at the start):
+- [museum_short.yaml](example_yamls/museum_short.yaml): a short game focused on the museum.
+- [house_only.yaml](example_yamls/house_only.yaml): a house-only game with no time locks.
 
-```yaml
-Animal Crossing:
-  goal: ["Museum"]
-  museum_goal_percent: 50
-  loansanity: false
-  catalogsanity: false
-  favorsanity: false
-  timesanity: false
-  bug_checks: both
-```
-
-A house-only game with no time locks:
-
-```yaml
-Animal Crossing:
-  goal: ["Statue"]
-  timesanity: false
-  museumsanity: false
-  catalogsanity: false
-  favorsanity: false
-  shellsanity: false
-  total_loan_checks: 30
-```

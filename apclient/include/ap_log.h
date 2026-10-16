@@ -17,10 +17,10 @@ extern "C" {
 #endif
 
 // Define these to disable the various levels entirely from code
-// define AP_LOG_NO_DEBUG
-// define AP_LOG_NO_INFO
-// define AP_LOG_NO_WARN
-// define AP_LOG_NO_ERROR
+// #define AP_LOG_NO_DEBUG
+// #define AP_LOG_NO_INFO
+// #define AP_LOG_NO_WARN
+// #define AP_LOG_NO_ERROR
 
 #define AP_LOG_MSG_MAX 256
 
@@ -38,7 +38,7 @@ struct ApLogEntry {
 
 AP_LOG_API void ap_log_write(const char * level, const char* fmt, ...) AP_LOG_PRINTF_FMT;
 
-// Copies up to max_count of the most recent entries.
+// Copies up to max_count of the most recent entries
 // into out, newest first. Returns the number written.
 AP_LOG_API size_t ap_log_get(size_t max_count, struct ApLogEntry* out);
 // Same, but gives up (returns 0) if the log stays locked for ~50ms. For the crash

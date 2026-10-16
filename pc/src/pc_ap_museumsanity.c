@@ -48,7 +48,8 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   }
 }
 
-// Same ranges and numbering as mMmd_GetDisplayInfo
+// Same numbering as mMmd_GetDisplayInfo. Its fish range ends with <= ITM_FISH_END, one past the last fish;
+// here both critter ends are exclusive.
 int pc_ap_museumsanity_slot_of(mActor_name_t item, int* cat, int* idx) {
   int c;
   int i;
@@ -61,13 +62,13 @@ int pc_ap_museumsanity_slot_of(mActor_name_t item, int* cat, int* idx) {
   } else if(item >= ITM_INSECT_START && item < ITM_INSECT_END) {
     c = mMmd_CATEGORY_INSECT;
     i = item - ITM_INSECT_START;
-  } else if(item >= ITM_FISH_START && item <= ITM_FISH_END) {
+  } else if(item >= ITM_FISH_START && item < ITM_FISH_END) {
     c = mMmd_CATEGORY_FISH;
     i = item - ITM_FISH_START;
   } else {
     return 0;
   }
-  // ITM_FISH_END is one past the last fish
+  // Guard: every range above already ends at its category's size
   if(i >= pc_ap_museum_count[c]) {
     return 0;
   }

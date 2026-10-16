@@ -26,6 +26,9 @@ static int g_ap_goal = 0;
 // new seed): the game's save belongs to the old room, so ap_poll stops the client
 static bool g_ap_room_changed = false;
 #define AP_ROOM_CHANGED_REASON "Seed changed, restart"
+// Reconnect attempts repeat the error every few seconds: log only the first one until the slot connects
+// again (the overlay shows the current one)
+static bool g_ap_outage_logged = false;
 static std::deque<std::string> g_ap_toast;
 static const size_t AP_TOAST_MAX = 16;
 
@@ -269,6 +272,7 @@ int ap_start(void) {
   g_ap_connectstate.state = AP_CSTATE_CONNECTING;
 
   g_ap->set_slot_connected_handler([](const nlohmann::json& slot_data) {
+    g_ap_outage_logged = false;
     ap_roomplayer * rp = &g_ap_connectstate.roomplayer;
     if(ap_roomplayer_valid(rp) && (g_ap->get_seed() != rp->seed ||
         g_ap->get_team_number() != rp->team || g_ap->get_player_number() != rp->player)) {
@@ -329,14 +333,20 @@ int ap_start(void) {
     g_ap_connectstate.state = g_ap_connectstate.connect_once ? AP_CSTATE_RECONNECTING : AP_CSTATE_CONNECTING;
     snprintf(g_ap_connectstate.last_connect_error, 
         sizeof(g_ap_connectstate.last_connect_error), "%s", ap_plain(e).c_str());
-    APLOG_ERROR("CONNECTION ERROR (RECONNECTING): %s", g_ap_connectstate.last_connect_error);
+    if(!g_ap_outage_logged) {
+      g_ap_outage_logged = true;
+      APLOG_WARN("CONNECTION ERROR (RECONNECTING): %s", g_ap_connectstate.last_connect_error);
+    }
   });
 
   g_ap->set_socket_disconnected_handler([](void) { 
     g_ap_connectstate.state = g_ap_connectstate.connect_once ? AP_CSTATE_RECONNECTING : AP_CSTATE_CONNECTING;
     snprintf(g_ap_connectstate.last_connect_error, 
         sizeof(g_ap_connectstate.last_connect_error), "Disconnected");
-    APLOG_ERROR("CONNECTION END (RECONNECTING): %s", g_ap_connectstate.last_connect_error);
+    if(!g_ap_outage_logged) {
+      g_ap_outage_logged = true;
+      APLOG_WARN("CONNECTION END (RECONNECTING): %s", g_ap_connectstate.last_connect_error);
+    }
   });
 
   g_ap->set_room_info_handler([name, pw] {
