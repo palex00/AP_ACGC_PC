@@ -1,6 +1,7 @@
 # Museumsanity: per category (bugs, fish, fossils; paintings not yet) a check mode: find (catch / dig up), donate,
-# or both. Each museum thing is an AP item ("Museum: X") that fills its museum spot; Blathers only takes a thing
-# while its donate check is unsent. Also the Museum goal: Museum Goal Percent of the donation items.
+# or both. With the Museum goal each museum thing is also an AP item ("Museum: X") that fills its museum spot, and
+# Blathers only takes a thing while its donate check is unsent; the goal is Museum Goal Percent of these items.
+# Without the goal there are no donation items: the museum is vanilla and donating sends the donate check.
 # The museum things are generated (museum_data.py).
 # WARN: the client mirrors the ids and the slot numbering (pc_ap_museumsanity.h)!
 import math
@@ -65,12 +66,14 @@ def setup(world) -> None:
         }
         if not any(world.museum_modes.values()):
             raise world.option_error("Museumsanity needs at least one of Bug, Fish or Fossil Checks on.")
-    # One donation item per thing in each category with checks; locations per mode bit
+    # Museum goal: one donation item per thing in each category with checks. Locations per mode bit.
+    with_items = "Museum" in o.goal.value
     world.museum_item_names = []
     world.museum_locations = []
     for c, names in enumerate(MUSEUM_NAMES):
         for name in names if world.museum_modes[c] else []:
-            world.museum_item_names.append(museum_item_name(name))
+            if with_items:
+                world.museum_item_names.append(museum_item_name(name))
             if world.museum_modes[c] & CHECK_FIND:
                 world.museum_locations.append(museum_find_name(c, name))
             if world.museum_modes[c] & CHECK_DONATE:
@@ -81,9 +84,7 @@ def setup(world) -> None:
         world.museum_goal_count = world.ut["museum_goal_count"]
     # Museum goal: only the donation items it needs are progression (picked at random), the rest are useful.
     # The client counts every donation item received, so a useful one still counts in game.
-    world.museum_progression = set()
-    if "Museum" in o.goal.value:
-        world.museum_progression = set(world.random.sample(world.museum_item_names, world.museum_goal_count))
+    world.museum_progression = set(world.random.sample(world.museum_item_names, world.museum_goal_count))
     if world.ut is not None and "museum_progression" in world.ut:
         world.museum_progression = {world.item_id_to_name[item_id] for item_id in world.ut["museum_progression"]}
 
@@ -101,9 +102,7 @@ def classify(world, name: str):
         return None
     if name in world.museum_progression:
         return ItemClassification.progression
-    if "Museum" in world.options.goal.value:
-        return ItemClassification.useful
-    return ItemClassification.filler
+    return ItemClassification.useful
 
 
 def add_museum_rule(world, category: int, name: str, rule) -> None:

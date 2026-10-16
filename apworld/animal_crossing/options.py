@@ -811,9 +811,10 @@ class CatalogGoalPercent(Range):
 
 class Museumsanity(DefaultOnToggle):
     """
-    Museum donations are items: your own donations never fill the museum.
-    Museum shows the donation items you received. Catching, digging up or
-    donating things sends checks (see the options below).
+    Catching, digging up or donating things sends checks (see the options below).
+    With the Museum goal, museum donations are also items: your own donations
+    never fill the museum, it shows the donation items you received.
+    Without it the museum works as usual.
     Must be on for the Museum goal.
     """
     display_name = "Museumsanity"
@@ -832,8 +833,8 @@ class BugChecks(CritterChecks):
     """
     With Museumsanity, what sends a check for each bug.
     Off: no bug checks.
-    Journal: catching it for the first time. Blathers never takes bugs.
-    Museum: donating it. Blathers takes it while its check isn't sent.
+    Journal: catching it for the first time. With the Museum goal, Blathers never takes bugs.
+    Museum: donating it. With the Museum goal, Blathers takes it while its check isn't sent.
     Both: catching and donating are separate checks.
     """
     display_name = "Bug Checks"
@@ -843,8 +844,8 @@ class FishChecks(CritterChecks):
     """
     With Museumsanity, what sends a check for each fish.
     Off: no fish checks.
-    Journal: catching it for the first time. Blathers never takes fish.
-    Museum: donating it. Blathers takes it while its check isn't sent.
+    Journal: catching it for the first time. With the Museum goal, Blathers never takes fish.
+    Museum: donating it. With the Museum goal, Blathers takes it while its check isn't sent.
     Both: catching and donating are separate checks.
     """
     display_name = "Fish Checks"

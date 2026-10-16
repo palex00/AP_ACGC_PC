@@ -123,6 +123,8 @@ int pc_ap_loans_paid_from(int stage, u32 loan, int renew);
 // Museumsanity hooks (pc_ap_museumsanity.h). Each one leaves anything that isn't a
 // museum thing of an AP category to vanilla. The tick syncs the museum display bits.
 
+// Museum hooks: only with the Museum goal (donation items run the display); without it
+// they return 0 (vanilla) and pc_ap_tick sends the donate checks of what's on display.
 // mMmd_GetDisplayInfo (Blathers' pocket filter, mail to the museum): 1 = handled, *info =
 // can donate while its donate check is unsent, else already donated
 int pc_ap_museum_display_info(mActor_name_t item, int* info);

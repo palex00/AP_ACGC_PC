@@ -236,9 +236,11 @@ static void apo_append_museum(char* out, size_t size) {
   if(total == 0) {
     return; // museumsanity off
   }
-  int received = pc_ap_museum_received(counts);
+  // Donation items only exist with the Museum goal
   int goal = pc_ap_museum_goal();
-  apo_append(out, size, "\nMuseum: %d / %d", received, goal > 0 ? goal : total);
+  if(goal > 0) {
+    apo_append(out, size, "\nMuseum: %d / %d", pc_ap_museum_received(counts), goal);
+  }
   for(int i = 0; i < (int)(sizeof(cats) / sizeof(cats[0])); i++) {
     int checks;
     int checked = pc_ap_museum_checked(cats[i].cat, &checks);

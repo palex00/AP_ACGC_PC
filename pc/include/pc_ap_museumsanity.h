@@ -1,5 +1,6 @@
-// Museumsanity: museum donations are AP items, the museum shows the received
-// ones; donating (Blathers or mail) and finding things are checks.
+// Museumsanity: donating (Blathers or mail) and finding things are checks. With
+// the Museum goal, museum donations are also AP items and the museum shows the
+// received ones; without it the museum display is vanilla.
 // Reads AP state (received items, checked locations), never writes to the DLL;
 // the only game state it changes is the museum bits passed in. The
 // pc_ap_logic.c facade sends the ids these return.
@@ -51,6 +52,7 @@ extern "C" {
 typedef struct {
   // Config (slot_data); all 0 when museumsanity is off or offline
   int checks[mMmd_CATEGORY_NUM]; // AP_MUSEUM_* bits per category, 0 = vanilla
+  int items;                     // Museum goal: donation items exist and run the display
   int goal_count;                // Museum goal: donation items to receive
   // Spawns: set even when museumsanity is off and offline
   int critter_odds;                      // AP_CRITTER_ODDS_* (Settings > AP)
@@ -74,8 +76,12 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd);
 int pc_ap_museumsanity_slot_of(mActor_name_t item, int* cat, int* idx);
 // Nonzero if the category is run by AP (has checks); 0 = vanilla
 int pc_ap_museumsanity_active(const pc_ap_museumsanity* m, int cat);
+// Nonzero if the category's display shows received donation items (active, with
+// items); 0 = vanilla display (donating fills it)
+int pc_ap_museumsanity_owns_display(const pc_ap_museumsanity* m, int cat);
 
-// Donation items received for active categories, each species once
+// Donation items received for active categories, each species once (0 without
+// the Museum goal: no items)
 int pc_ap_museumsanity_received(const pc_ap_museumsanity* m);
 // Same, also split per category (counts[cat], 0 for inactive ones)
 int pc_ap_museumsanity_received_per_category(const pc_ap_museumsanity* m, int counts[mMmd_CATEGORY_NUM]);
@@ -83,19 +89,22 @@ int pc_ap_museumsanity_received_per_category(const pc_ap_museumsanity* m, int co
 int pc_ap_museumsanity_checked(const pc_ap_museumsanity* m, int cat, int* total);
 // Things in a category (museum display size)
 int pc_ap_museumsanity_size(int cat);
-// Make the bits of every active category match the received items: received =
-// donated by player 1 (a real player code, so plaques name the donator; see
-// pc_ap_museumsanity_sender), everything else cleared. Inactive categories are
-// untouched. Returns pc_ap_museumsanity_received.
+// Make the bits of every category with pc_ap_museumsanity_owns_display match the
+// received items: received = donated by player 1 (a real player code, so plaques
+// name the donator; see pc_ap_museumsanity_sender), everything else cleared.
+// Other categories are untouched. Returns pc_ap_museumsanity_received.
 int pc_ap_museumsanity_sync(const pc_ap_museumsanity* m, mMmd_info_c* info);
+// Vanilla display with donate checks: the donate location of the next thing on
+// display (sent or not; the DLL drops repeats), -1 when done. *it starts at 0.
+int64_t pc_ap_museumsanity_next_donated(const pc_ap_museumsanity* m, const mMmd_info_c* info, int* it);
 
-// Donate location id if the museum should take it now (category has donate
-// checks, not checked yet), else -1 (refuse)
+// Donate location id if the category has donate checks and it isn't checked
+// yet, else -1. With pc_ap_museumsanity_owns_display: the museum takes it only then
 int64_t pc_ap_museumsanity_donate_check(const pc_ap_museumsanity* m, int cat, int idx);
 // Catch / dig up location id if the category has find checks and it isn't
 // checked yet, else -1
 int64_t pc_ap_museumsanity_find_check(const pc_ap_museumsanity* m, int cat, int idx);
-// Slot (player) that sent the donation item, -1 if not received or inactive
+// Slot (player) that sent the donation item, -1 if not received or the display is vanilla
 int pc_ap_museumsanity_sender(const pc_ap_museumsanity* m, int cat, int idx);
 
 // Nonzero if dug-up fossils come out appraised (fossils have find checks)

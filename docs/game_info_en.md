@@ -17,9 +17,10 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   need the rod or net. The axe works as usual.
 - **House upgrades (Loansanity):** each upgrade needs a Progressive House item. Paying off loans
   sends checks. Loans are much smaller than in vanilla by default.
-- **Museum (Museumsanity):** donation items fill the museum, not your own donations, and each
-  exhibit shows who sent it. Catching bugs and fish, digging up fossils and/or donating them sends
-  checks (set per category). Blathers only takes a donation while its check is unsent. With
+- **Museum (Museumsanity):** catching bugs and fish, digging up fossils and/or donating them sends
+  checks (set per category). With the Museum goal, donation items fill the museum, not your own
+  donations, each exhibit shows who sent it, and Blathers only takes a donation while its check is
+  unsent. Without the Museum goal the museum works as in vanilla. With
   Instant fossil checks, fossils come out of the ground already appraised. By default bugs, fish and
   fossils are gated by items:
   - Fish: "Small/Medium/Large River Fish" (river fish by shadow size), "Pond Fish" (ponds and the
@@ -51,7 +52,8 @@ arrive between an upgrade and Nook's next loan are held, and once every loan is 
 Choose one or more (all chosen goals are required):
 
 - **Statue:** pay off every house loan so Tom Nook builds your statue.
-- **Museum:** receive a percentage of the museum donation items.
+- **Museum:** receive a percentage of the museum donation items (needs Museumsanity; the donation
+  items only exist with this goal).
 - **Froggy Chair:** get the froggy chair into your catalog, any way you can.
 - **Catalog:** get a percentage of the Catalogsanity items into your catalog.
 

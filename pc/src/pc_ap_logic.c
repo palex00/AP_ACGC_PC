@@ -981,11 +981,19 @@ void pc_ap_tick(GAME_PLAY* play) {
   pc_ap_tools_mail();
   pc_ap_goal_letter();
   pc_ap_museumsanity_sync(&g_ap.museum, &Save_Get(museum_display));
+  // Vanilla display (no Museum goal): everything on display is donated. Also covers donations made
+  // while the check couldn't be sent, and other players' donations
+  if(pc_ap_accepting()) {
+    it = 0;
+    while((id = pc_ap_museumsanity_next_donated(&g_ap.museum, &Save_Get(museum_display), &it)) >= 0) {
+      ap_send_location(id);
+    }
+  }
 }
 
 int pc_ap_museum_display_info(mActor_name_t item, int* info) {
   int cat, idx;
-  if(!pc_ap_museumsanity_slot_of(item, &cat, &idx) || !pc_ap_museumsanity_active(&g_ap.museum, cat)) {
+  if(!pc_ap_museumsanity_slot_of(item, &cat, &idx) || !pc_ap_museumsanity_owns_display(&g_ap.museum, cat)) {
     return 0;
   }
   *info = pc_ap_museumsanity_donate_check(&g_ap.museum, cat, idx) >= 0 ? mMmd_DISPLAY_CAN_DONATE
@@ -995,7 +1003,7 @@ int pc_ap_museum_display_info(mActor_name_t item, int* info) {
 
 int pc_ap_museum_request_display(mActor_name_t item, int* taken) {
   int cat, idx;
-  if(!pc_ap_museumsanity_slot_of(item, &cat, &idx) || !pc_ap_museumsanity_active(&g_ap.museum, cat)) {
+  if(!pc_ap_museumsanity_slot_of(item, &cat, &idx) || !pc_ap_museumsanity_owns_display(&g_ap.museum, cat)) {
     return 0;
   }
   int64_t id = pc_ap_museumsanity_donate_check(&g_ap.museum, cat, idx);
@@ -1012,7 +1020,7 @@ int pc_ap_museum_donator(mActor_name_t item) {
   if(!pc_ap_museumsanity_slot_of(item, &cat, &idx)) {
     return mMmd_DONATOR_NONE;
   }
-  if(!pc_ap_museumsanity_active(&g_ap.museum, cat)) {
+  if(!pc_ap_museumsanity_owns_display(&g_ap.museum, cat)) {
     switch(cat) {
       case mMmd_CATEGORY_FOSSIL: return mMmd_FossilInfo(idx);
       case mMmd_CATEGORY_ART: return mMmd_ArtInfo(idx);

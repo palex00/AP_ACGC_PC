@@ -30,7 +30,9 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
     m->checks[mMmd_CATEGORY_ART] = sd->painting_checks;
     m->checks[mMmd_CATEGORY_INSECT] = sd->bug_checks;
     m->checks[mMmd_CATEGORY_FISH] = sd->fish_checks;
-    m->goal_count = sd->museum_goal_count;
+    // The donation items only exist with the Museum goal
+    m->items = (sd->goal & AP_GOAL_MUSEUM) != 0;
+    m->goal_count = m->items ? sd->museum_goal_count : 0;
   }
   // Bug passes: the items only exist with bug checks (also not offline)
   if(m->bug_availability == AP_BUG_AVAIL_PROGRESSIVE && !pc_ap_museumsanity_active(m, mMmd_CATEGORY_INSECT)) {
@@ -78,10 +80,14 @@ int pc_ap_museumsanity_active(const pc_ap_museumsanity* m, int cat) {
   return cat >= 0 && cat < mMmd_CATEGORY_NUM && m->checks[cat] != 0;
 }
 
-// Museum slot of a received item id, -1 if not a donation item of an active category
+int pc_ap_museumsanity_owns_display(const pc_ap_museumsanity* m, int cat) {
+  return m->items && pc_ap_museumsanity_active(m, cat);
+}
+
+// Museum slot of a received item id, -1 if not a donation item of a category that has them
 static int pc_ap_museum_item_slot(const pc_ap_museumsanity* m, int64_t id) {
   int64_t slot = id - PC_AP_ITEM_MUSEUM_BASE;
-  if(slot < 0 || slot >= PC_AP_MUSEUM_SLOT_NUM) {
+  if(!m->items || slot < 0 || slot >= PC_AP_MUSEUM_SLOT_NUM) {
     return -1;
   }
   int cat = (int)slot / 0x40;
@@ -176,7 +182,7 @@ int pc_ap_museumsanity_sync(const pc_ap_museumsanity* m, mMmd_info_c* info) {
   u8 got[PC_AP_MUSEUM_SLOT_NUM];
   int count = pc_ap_museum_received_slots(m, got);
   for(int cat = 0; cat < mMmd_CATEGORY_NUM; cat++) {
-    if(!pc_ap_museumsanity_active(m, cat)) {
+    if(!pc_ap_museumsanity_owns_display(m, cat)) {
       continue;
     }
     u8* bits = pc_ap_museum_bits(info, cat);
@@ -188,6 +194,23 @@ int pc_ap_museumsanity_sync(const pc_ap_museumsanity* m, mMmd_info_c* info) {
     }
   }
   return count;
+}
+
+int64_t pc_ap_museumsanity_next_donated(const pc_ap_museumsanity* m, const mMmd_info_c* info, int* it) {
+  for(int slot = *it > 0 ? *it : 0; slot < PC_AP_MUSEUM_SLOT_NUM; slot++) {
+    int cat = slot / 0x40;
+    int idx = slot % 0x40;
+    if(pc_ap_museumsanity_owns_display(m, cat) || !(m->checks[cat] & AP_MUSEUM_DONATE) ||
+       idx >= pc_ap_museum_count[cat]) {
+      continue;
+    }
+    if(mMmd_IS_DONATED(pc_ap_museum_donator_of(info, cat, idx))) {
+      *it = slot + 1;
+      return PC_AP_LOC_DONATE_BASE + slot;
+    }
+  }
+  *it = PC_AP_MUSEUM_SLOT_NUM;
+  return -1;
 }
 
 int64_t pc_ap_museumsanity_donate_check(const pc_ap_museumsanity* m, int cat, int idx) {
@@ -207,7 +230,7 @@ int64_t pc_ap_museumsanity_find_check(const pc_ap_museumsanity* m, int cat, int 
 }
 
 int pc_ap_museumsanity_sender(const pc_ap_museumsanity* m, int cat, int idx) {
-  if(!pc_ap_museumsanity_active(m, cat)) {
+  if(!pc_ap_museumsanity_owns_display(m, cat)) {
     return -1;
   }
   int64_t id = PC_AP_ITEM_MUSEUM_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
