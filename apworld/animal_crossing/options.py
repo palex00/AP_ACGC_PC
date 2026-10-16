@@ -354,16 +354,29 @@ class TotalLoanChecks(Range):
     default = 15
 
 
-class FillerBellsPercent(Range):
+class LoanCreditPercent(Range):
     """
-    Filler bell total = this percentage of total debt. Filler bells go directly
-    towards loan or savings. With few Bells per filler item, the bigger Bell Credits
-    are left out (no credit is worth less than 100 Bells while that helps).
+    Bell Credits are the filler: they pay your loan down directly (to 100 owed), then go to savings. They never
+    reach your pocket. All credits together are worth this percentage of the total debt. With few filler items,
+    the bigger credits are left out (no credit is worth less than 100 Bells while that helps).
+    Extra Bells take filler slots first, so a high Extra Bells can leave no room for Bell Credits at all.
     """
-    display_name = "Filler Bells Percent"
+    display_name = "Loan Credit Percent"
     range_start = 1
     range_end = 200
     default = 70
+
+
+class ExtraBells(Range):
+    """
+    Extra Bells in the pool, in steps of 10,000 Bells, on top of the Bell Credits. Mailed to you as 10,000 and
+    30,000 Bell bags (10,000 three times as likely). Best fit: takes filler slots before Bell Credits (can leave
+    none), and when there aren't enough slots you get as close as fits.
+    """
+    display_name = "Extra Bells (x10,000)"
+    range_start = 0
+    range_end = 100
+    default = 0
 
 
 class Favorsanity(DefaultOnToggle):
@@ -1022,7 +1035,8 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     basement_loan: BasementLoan
     large_loan: LargeLoan
     upper_loan: UpperLoan
-    filler_bells_percent: FillerBellsPercent
+    loan_credit_percent: LoanCreditPercent
+    extra_bells: ExtraBells
     favorsanity: Favorsanity
     favor_pools: FavorPools
     favors_per_pool: FavorsPerPool

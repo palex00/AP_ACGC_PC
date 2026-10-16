@@ -332,6 +332,7 @@ set(PC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_weather.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_museumsanity.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_tools.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_money.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_store.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_ap_catalogsanity.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_text_draw.c

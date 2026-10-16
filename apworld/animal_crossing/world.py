@@ -1,8 +1,8 @@
 # The Archipelago world: calls each feature at each generation step, in a fixed order. Everything about a feature
 # (its items, locations, rules, slot_data, ids) is in its own file, named after its option:
-#   goal, intro, town_generation, loansanity, bell_credits, timesanity, favor_pools, shellsanity, museumsanity,
-#   fossil_availability, fish_availability, bug_availability, tools_in_pool, catalogsanity, nook_store_upgrades,
-#   quality_of_life
+#   goal, intro, town_generation, loansanity, bell_credits, extra_bells, timesanity, favor_pools, shellsanity,
+#   museumsanity, fossil_availability, fish_availability, bug_availability, tools_in_pool, catalogsanity,
+#   nook_store_upgrades, quality_of_life
 # Generated data: game_items, museum_data, catalog_data, villager_data. Options: options.py.
 #
 # A feature file has whichever of these it needs (plain functions taking the world):
@@ -25,9 +25,9 @@ from BaseClasses import CollectionState, Item, ItemClassification, Location, Reg
 from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
 
-from . import (bell_credits, bug_availability, catalogsanity, favor_pools, fish_availability, fossil_availability,
-               goal, intro, loansanity, museumsanity, nook_store_upgrades, options, quality_of_life, shellsanity,
-               timesanity, tools_in_pool, town_generation)
+from . import (bell_credits, bug_availability, catalogsanity, extra_bells, favor_pools, fish_availability,
+               fossil_availability, goal, intro, loansanity, museumsanity, nook_store_upgrades, options,
+               quality_of_life, shellsanity, timesanity, tools_in_pool, town_generation)
 from .game_items import ITEM_NAME_TO_ID as GAME_ITEMS
 from .options import AnimalCrossingOptions
 
@@ -99,7 +99,8 @@ class AnimalCrossingWeb(WebWorld):
             options.BasementLoan,
             options.LargeLoan,
             options.UpperLoan,
-            options.FillerBellsPercent,
+            options.LoanCreditPercent,
+            options.ExtraBells,
         ]),
         OptionGroup("Favorsanity", [
             options.Favorsanity,
@@ -262,6 +263,9 @@ class AnimalCrossingWorld(World):
         # Everything else is filler. Bell credit amounts are set in fill_slot_data from what was actually placed,
         # so adding other items to the pool later doesn't break the total.
         free = len(self.multiworld.get_unfilled_locations(self.player)) - len(pool)
+        money = [self.create_item(name) for name in extra_bells.items(self, free)]
+        pool += money
+        free -= len(money)
         self.filler_tiers = tuple(bell_credits.tiers(self, free))
         pool += [self.create_filler() for _ in range(free)]
         self.multiworld.itempool += pool

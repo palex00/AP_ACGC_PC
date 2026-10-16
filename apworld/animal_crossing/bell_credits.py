@@ -1,5 +1,5 @@
 # Bell Credits: the filler. Each credit pays the loan down (to 100 owed), is held between loans, then goes to
-# savings. All credits together are worth Filler Bells Percent of the total debt; the amounts are set after the
+# savings. All credits together are worth Loan Credit Percent of the total debt; the amounts are set after the
 # fill from what was actually placed. Few fillers per Bell drop the Large, then the Modest tier.
 # WARN: the client mirrors the ids (PC_AP_ITEM_BELL_CREDIT in pc_ap_credit.h, small = base, then modest, large)!
 # Reads: world.loans (loansanity.setup), world.filler_tiers (set in world.create_items from tiers()).
@@ -18,7 +18,7 @@ BELLS_ROUND = 100  # amounts are rounded to this
 
 
 def _total_bells(world) -> float:
-    return sum(world.loans) * world.options.filler_bells_percent.value / 100
+    return sum(world.loans) * world.options.loan_credit_percent.value / 100
 
 
 def tiers(world, fillers: int) -> list[str]:
@@ -41,7 +41,7 @@ def filler_name(world) -> str:
 
 def amounts(world) -> dict[str, int]:
     # Count the credits this player will actually receive (placed anywhere, plus start inventory), then size them
-    # so they add up to filler_bells_percent of the total debt.
+    # so they add up to loan_credit_percent of the total debt.
     counts = {name: 0 for name in BELL_CREDITS}
     placed = [loc.item for loc in world.multiworld.get_locations() if loc.item]
     placed += world.multiworld.precollected_items[world.player]
