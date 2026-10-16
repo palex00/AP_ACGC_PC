@@ -366,15 +366,21 @@ class FillerBellsPercent(Range):
     default = 70
 
 
+class Favorsanity(DefaultOnToggle):
+    """
+    Villager favors (errands and contests) send checks, in pools of Favors per Pool. Any favor from any
+    villager counts. The first pool is open from the start; each Progressive Favor Pool opens the next.
+    Favors done while every open pool is used up still count: their checks are sent once the next pool opens.
+    """
+    display_name = "Favorsanity"
+
+
 class FavorPools(Range):
     """
-    Favorsanity: villager favors (errands and contests) send checks, in pools of Favors per Pool. Any favor
-    from any villager counts. The first pool is open from the start; each Progressive Favor Pool opens the next.
-    Favors done while every open pool is used up still count: their checks are sent once the next pool opens.
-    0 turns Favorsanity off. Favor Pools x Favors per Pool is at most 100.
+    With Favorsanity, the number of favor pools. Favor Pools x Favors per Pool is at most 100.
     """
     display_name = "Favor Pools"
-    range_start = 0
+    range_start = 1
     range_end = 100
     default = 5
 
@@ -975,8 +981,6 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     goal: Goal
     museum_goal_percent: MuseumGoalPercent
     catalog_goal_percent: CatalogGoalPercent
-    favor_pools: FavorPools
-    favors_per_pool: FavorsPerPool
     shellsanity: Shellsanity
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
@@ -998,14 +1002,17 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     loan_letter_text: LoanLetterText
     villager_blacklist: VillagerBlacklist
     starting_villagers: StartingVillagers
-    loansanity: Loansanity
-    total_loan_checks: TotalLoanChecks
     starting_loan: StartingLoan
     medium_loan: MediumLoan
     basement_loan: BasementLoan
     large_loan: LargeLoan
     upper_loan: UpperLoan
     filler_bells_percent: FillerBellsPercent
+    favorsanity: Favorsanity
+    favor_pools: FavorPools
+    favors_per_pool: FavorsPerPool
+    loansanity: Loansanity
+    total_loan_checks: TotalLoanChecks
     timesanity: Timesanity
     starting_month: StartingMonth
     starting_time: StartingTime

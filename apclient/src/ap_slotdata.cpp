@@ -139,8 +139,10 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->loansanity = slot_data.value("loansanity", 1) % 2;
   read_int_array(slot_data, "loans", sd->loans, default_loans, AP_LOAN_NUM);
   read_int_array(slot_data, "loan_checks", sd->loan_checks, default_loan_checks, AP_LOAN_NUM);
-  sd->favorsanity = slot_data.value("favorsanity", 0);
+  // Favor checks in total: Favor Pools x Favors per Pool, 0 with Favorsanity off
+  int favor_pools = slot_data.value("favorsanity", 0) % 2 ? slot_data.value("favor_pools", 0) : 0;
   sd->favors_per_pool = slot_data.value("favors_per_pool", 0); // 0: one pool, all open
+  sd->favorsanity = favor_pools * sd->favors_per_pool;
   sd->tools_in_pool = slot_data.value("tools_in_pool", 0) % 2;
   sd->store_upgrades = slot_data.value("nook_store_upgrades", AP_STORE_VANILLA) % 4;
   static const int no_thresholds[AP_STORE_LEVELS] = { 0, 0, 0 };

@@ -92,15 +92,23 @@ class AnimalCrossingWeb(WebWorld):
             options.VillagerBlacklist,
             options.StartingVillagers,
         ]),
-        OptionGroup("Loansanity", [
-            options.Loansanity,
-            options.TotalLoanChecks,
+        # Apply with Loansanity off too
+        OptionGroup("Matters of Money", [
             options.StartingLoan,
             options.MediumLoan,
             options.BasementLoan,
             options.LargeLoan,
             options.UpperLoan,
             options.FillerBellsPercent,
+        ]),
+        OptionGroup("Favorsanity", [
+            options.Favorsanity,
+            options.FavorPools,
+            options.FavorsPerPool,
+        ]),
+        OptionGroup("Loansanity", [
+            options.Loansanity,
+            options.TotalLoanChecks,
         ]),
         OptionGroup("Timesanity", [
             options.Timesanity,
@@ -220,7 +228,7 @@ class AnimalCrossingWorld(World):
 
         locations, items = len(self.seed_locations()), len(self.seed_pool_items())
         if not locations:
-            raise self.option_error("Without Loansanity, Favor Pools must be at least 1.")
+            raise self.option_error("Turn on Loansanity or Favorsanity.")
         # Every non-filler item needs a location
         if locations < items:
             raise self.option_error(f"Total checks at {locations}, it must be at least {items} with these options. "

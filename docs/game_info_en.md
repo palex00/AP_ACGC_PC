@@ -120,7 +120,7 @@ Animal Crossing:
   museum_goal_percent: 50
   loansanity: false
   catalogsanity: false
-  favor_pools: 0
+  favorsanity: false
   timesanity: false
   bug_checks: both
 ```
@@ -133,7 +133,7 @@ Animal Crossing:
   timesanity: false
   museumsanity: false
   catalogsanity: false
-  favor_pools: 0
+  favorsanity: false
   shellsanity: 0
   total_loan_checks: 30
 ```

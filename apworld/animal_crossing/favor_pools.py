@@ -1,5 +1,5 @@
-# Favor Pools (Favorsanity): villager favors send checks, in pools of Favors per Pool. The first pool is open
-# from the start; each Progressive Favor Pool opens the next. Favors done past the open pools are banked.
+# Favorsanity: villager favors send checks, in Favor Pools pools of Favors per Pool. The first pool is open from
+# the start; each Progressive Favor Pool opens the next. Favors done past the open pools are banked.
 # WARN: the client mirrors the ids and the max (pc_ap_favorsanity.h)!
 from BaseClasses import ItemClassification
 from worlds.generic.Rules import add_rule
@@ -19,7 +19,9 @@ LOCATIONS = {favor_location_name(n): FAVOR_BASE_ID + n for n in range(1, FAVORS_
 
 
 def setup(world) -> None:
-    world.favor_count = world.options.favor_pools.value * world.options.favors_per_pool.value
+    o = world.options
+    world.favor_pools = o.favor_pools.value if o.favorsanity else 0
+    world.favor_count = world.favor_pools * o.favors_per_pool.value
     if world.favor_count > FAVORS_MAX:
         raise world.option_error(f"Favor Pools x Favors per Pool is {world.favor_count}, at most {FAVORS_MAX}.")
 
@@ -29,7 +31,7 @@ def locations(world) -> list[str]:
 
 
 def items(world) -> list[str]:
-    return [PROGRESSIVE_FAVOR_POOL] * max(world.options.favor_pools.value - 1, 0)
+    return [PROGRESSIVE_FAVOR_POOL] * max(world.favor_pools - 1, 0)
 
 
 def classify(world, name: str):
@@ -46,8 +48,7 @@ def rules(world) -> None:
 
 def slot_data(world) -> dict:
     return {
+        "favorsanity": world.options.favorsanity.value,
         "favor_pools": world.options.favor_pools.value,
         "favors_per_pool": world.options.favors_per_pool.value,
-        # Favor checks in total (favor_pools x favors_per_pool)
-        "favorsanity": world.favor_count,
     }
