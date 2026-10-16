@@ -77,6 +77,9 @@ float pc_ap_qol_bug_stress_scale(void);
 // Nonzero when running near a fish (110 units) scares it, 0 when Easier Critter Catch is on;
 // hooked in aGTT_player_near and aGKK_player_near. Tool hits and the bobber still scare it.
 int pc_ap_qol_fish_run_scare(void);
+// Multiplier on a chasing bee's speed, 1 when off; hooked in aBEE_fly_move_common. The sting
+// distance is unchanged.
+float pc_ap_qol_bee_speed_scale(void);
 
 // Nonzero when hidden bugs give hints: a dirt clod over a buried mole cricket (aIKR_hide) or in
 // front of a pill bug's rock (aIDG_hide), a small wiggle of the tree a bagworm or spider hides in

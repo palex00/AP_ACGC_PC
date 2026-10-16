@@ -636,7 +636,7 @@ class EasierCritterCatch(DefaultOnToggle):
     Fish give you one more second to press A once the bobber goes under, and
     running near them no longer scares them (tools and the bobber still do).
     Bugs take twice as long to notice you moving near them. Shaking a tree or
-    swinging the net next to a bug still scares it.
+    swinging the net next to a bug still scares it. Bees chase you at half speed.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Easier Critter Catch"

@@ -7,6 +7,9 @@
 #include "m_player_lib.h"
 #include "m_common_data.h"
 #include "ac_set_ovl_insect.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#endif
 
 enum {
     aBEE_ACT_APPEAR,
@@ -113,6 +116,9 @@ static void aBEE_fly_move_common(BEE_ACTOR* bee, GAME* game) {
 
     bee->speed = 2.9f;
     bee->speed += fabsf((f32)((DEG2SHORT_ANGLE2(180.0f) - abs_speed_angle) / DEG2SHORT_ANGLE2(30.0f)));
+#ifdef TARGET_PC
+    bee->speed *= pc_ap_qol_bee_speed_scale(); /* Easier Critter Catch */
+#endif
     add_calc(&bee->actor_class.speed, bee->speed, CALC_EASE(0.3f), 0.15f, 0.0f);
 
     bee->bobbing_counter += (s16)(0x900 * game->graph->dt_num_60fps_frames);

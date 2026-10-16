@@ -67,9 +67,11 @@ int pc_ap_qol_take_shop_follow_up(void) {
   return follow_up;
 }
 
-// Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast, running doesn't scare fish
+// Easier Critter Catch: +1 s to hook a fish, bugs notice you half as fast, running doesn't scare fish,
+// bees chase at half speed
 #define PC_AP_QOL_BITE_WINDOW_BONUS 60
 #define PC_AP_QOL_BUG_STRESS_SCALE 0.5f
+#define PC_AP_QOL_BEE_SPEED_SCALE 0.5f
 
 static int pc_ap_qol_easier_critter_catch(void) {
   return pc_ap_setting(PC_AP_SET_EASIER_CRITTER_CATCH);
@@ -85,6 +87,10 @@ float pc_ap_qol_bug_stress_scale(void) {
 
 int pc_ap_qol_fish_run_scare(void) {
   return !pc_ap_qol_easier_critter_catch();
+}
+
+float pc_ap_qol_bee_speed_scale(void) {
+  return pc_ap_qol_easier_critter_catch() ? PC_AP_QOL_BEE_SPEED_SCALE : 1.0f;
 }
 
 int pc_ap_qol_shops_always_open(void) {
