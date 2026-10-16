@@ -3241,7 +3241,7 @@ static void bIT_actor_pit_draw(GAME* game, bg_item_common_info_c* common_info, b
 // Hidden Bug Hints: a hive in every bee tree, at vanilla's shake drop spot (left side) but behind the leaves
 static void bIT_pc_bee_hint_draw(GAME* game, bg_item_common_c* common) {
     static xyz_t hive_ofs = { -37.5f, 65.0f, -17.5f };
-    static xyz_t scale = { 0.01f, 0.01f, 0.01f };
+    static xyz_t scale = { 0.007f, 0.007f, 0.007f }; // 70% of the shaken-down hive
     bg_item_draw_table_c* draw_table = common->draw_table;
     int i;
 

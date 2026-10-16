@@ -66,7 +66,8 @@ struct actor_animal_logo_s {
   int pc_options_open;     /* options sub-menu visible */
   int pc_options_sel;      /* highlighted option (unused for now) */
   float pc_cursor_cooldown;  /* stick debounce timer */
-  int pc_unused[2];
+  float pc_menu_fade;        // 0 -> 1 as the menu fades in; no input until 1
+  int pc_unused[1];
 #else
   int unused_56C[6];
 #endif

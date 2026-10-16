@@ -326,7 +326,13 @@ static void aAL_start_key_chk_start_wait_init(ANIMAL_LOGO_ACTOR* actor, GAME* ga
 
   actor->copyright_opacity = 255;
   actor->back_opacity = aAL_BACK_FADEIN_MAX;
+#ifdef PC_ENHANCEMENTS
+  // No 1 s wait: the menu (pad + NES archive checks kept) fades in instead, see aAL_pc_game_start_wait
+  actor->title_timer = 0;
+  actor->pc_menu_fade = 0.0f;
+#else
   actor->title_timer = aAL_TIMER;
+#endif
 }
 
 static void aAL_fade_out_start_wait_init(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
@@ -336,6 +342,8 @@ static void aAL_fade_out_start_wait_init(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
 }
 
 #ifdef PC_ENHANCEMENTS
+#define aAL_PC_MENU_FADE_FRAMES 12.0f // 200 ms
+
 // 0 = not seen yet, 1 = seen waiting on AP, 2 = ready. Per boot, not per title visit
 static int aAL_pc_ap_ready_state = 0;
 
@@ -362,6 +370,15 @@ static void aAL_pc_game_start_wait(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
 
   if (play->fb_fade_type == FADE_TYPE_SELECT_END) {
     aAL_setupAction(actor, game, aAL_ACTION_6);
+    return;
+  }
+
+  // Menu fades in over 200 ms (12 frames at 60 Hz); no input until it's done
+  if (actor->pc_menu_fade < 1.0f) {
+    actor->pc_menu_fade += dt / aAL_PC_MENU_FADE_FRAMES;
+    if (actor->pc_menu_fade > 1.0f) {
+      actor->pc_menu_fade = 1.0f;
+    }
     return;
   }
 
@@ -832,15 +849,16 @@ static void aAL_pc_menu_draw(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
     int widest = pc_text_width(labels[0]);
     if (pc_text_width(wait_label) > widest) widest = pc_text_width(wait_label);
     f32 box_w = (f32)widest * PC_MENU_SCALE_SELECTED + 16.0f;
+    f32 fade = actor->pc_menu_fade;
     pc_menu_dim_box(graph, (SCREEN_WIDTH_F - box_w) * 0.5f, y_base - 6.0f,
-                    box_w, 3 * line_h + 10.0f, 6.0f, aAL_PC_MENU_BOX_ALPHA);
+                    box_w, 3 * line_h + 10.0f, 6.0f, (int)(aAL_PC_MENU_BOX_ALPHA * fade));
 
     for (int i = 0; i < 3; i++) {
       int on = (sel == i);
       if (i == 0 && !ap_ready) {
         // Subdued while waiting on AP: muted orange when selected, gray otherwise
         pc_menu_draw_centered(game, wait_label, y_base + i * line_h,
-          on ? 200 : 150, on ? 145 : 145, on ? 90 : 140, on ? 230 : 180,
+          on ? 200 : 150, on ? 145 : 145, on ? 90 : 140, (int)((on ? 230 : 180) * fade),
           on ? PC_MENU_SCALE_SELECTED : 1.0f);
         continue;
       }
@@ -848,7 +866,7 @@ static void aAL_pc_menu_draw(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
         on ? sel_r[td] : dim_r[td],
         on ? sel_g[td] : dim_g[td],
         on ? sel_b[td] : dim_b[td],
-        on ? 255 : 220,
+        (int)((on ? 255 : 220) * fade),
         on ? PC_MENU_SCALE_SELECTED : 1.0f);
     }
   }
