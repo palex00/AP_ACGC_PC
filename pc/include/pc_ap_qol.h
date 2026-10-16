@@ -77,6 +77,9 @@ int pc_ap_qol_fish_run_scare(void);
 // (aIMN_hide).
 int pc_ap_qol_hidden_bug_hints(void);
 
+// Hidden Bug Hints: frames between dirt clods (mole cricket, pill bug)
+#define PC_AP_QOL_CLOD_PERIOD 75
+
 #ifdef __cplusplus
 }
 #endif

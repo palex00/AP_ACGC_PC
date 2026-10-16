@@ -282,19 +282,23 @@ static void aIKR_let_escape(ACTOR* actorx, GAME* game) {
  * @param game Pointer to the current game state.
  */
 #ifdef TARGET_PC
-/* Hidden Bug Hints: a small dirt puff over the buried cricket every few seconds, when the
- * player is near. Spread over frames by its unit (no per-cricket state). */
+/* Hidden Bug Hints: a small dirt puff over the buried cricket every second or so, when the
+ * player is near. Spread over frames by its unit (no per-cricket state). The hidden cricket
+ * stays at the spawn's y = 0 (no gravity or bg check until dug up), so the puff goes on the
+ * ground above it. */
 static void aIKR_pc_hint(ACTOR* actorx, GAME* game) {
     aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actorx;
+    xyz_t pos;
 
     if (!pc_ap_qol_hidden_bug_hints() || actorx->player_distance_xz > 400.0f) {
         return;
     }
-    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % 150 != 0) {
+    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % PC_AP_QOL_CLOD_PERIOD != 0) {
         return;
     }
-    eEC_CLIP->effect_make_proc(eEC_EFFECT_DIG_MUD, actorx->world.position, 2, actorx->shape_info.rotation.y, game,
-                               RSV_NO, 0, 0x4000 | 3);
+    pos = actorx->world.position;
+    pos.y = mCoBG_GetBgY_OnlyCenter_FromWpos2(pos, 0.0f);
+    eEC_CLIP->effect_make_proc(eEC_EFFECT_DIG_MUD, pos, 2, 0, game, RSV_NO, 0, 0x4000 | 3);
 }
 #endif
 

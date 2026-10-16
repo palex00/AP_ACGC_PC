@@ -260,7 +260,7 @@ static void aIDG_stop(ACTOR* actor, GAME* game) {
 }
 
 #ifdef TARGET_PC
-/* Hidden Bug Hints: the mole cricket's small dirt clod pops up at the front of the rock (toward
+/* Hidden Bug Hints: the pill bug's small dirt clod pops up at the front of the rock (toward
  * the camera, a rock hides its own center) every few seconds, when the player is near. Spread
  * over frames by its unit (no per-bug state). */
 static void aIDG_pc_hint(ACTOR* actor, GAME* game) {
@@ -270,7 +270,7 @@ static void aIDG_pc_hint(ACTOR* actor, GAME* game) {
     if (!pc_ap_qol_hidden_bug_hints() || actor->player_distance_xz > 400.0f) {
         return;
     }
-    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % 150 != 0) {
+    if ((((GAME_PLAY*)game)->game_frame + insect->ut_x * 7 + insect->ut_z * 13) % PC_AP_QOL_CLOD_PERIOD != 0) {
         return;
     }
     pos = actor->world.position;
