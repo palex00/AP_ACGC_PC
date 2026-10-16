@@ -445,7 +445,8 @@ class ToolsInPool(DefaultOnToggle):
     """
     The net, fishing rod and shovel are items. The tool is unobtainable through
     normal means (store, lost and found, etc) until you receive it.
-    Tools and other items are mailed to you. Axe stays vanilla.
+    Tools and other items are mailed to you. Axe stays vanilla. The mole cricket and pill bug
+    need the shovel as well as the net.
     """
     display_name = "Tools in Pool"
 

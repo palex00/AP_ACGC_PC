@@ -11,6 +11,8 @@ NET, FISHING_ROD, SHOVEL = "net", "fishing rod", "shovel"
 TOOLS = [NET, FISHING_ROD, SHOVEL]  # StartingTool option values 1-3, in order
 # The tool each museum category needs
 CATEGORY_TOOLS = {MUSEUM_BUG: NET, MUSEUM_FISH: FISHING_ROD, MUSEUM_FOSSIL: SHOVEL}
+# Bugs that also need the shovel: the mole cricket is dug up, the pill bug hides under a rock (hit it)
+SHOVEL_BUGS = ["Mole Cricket", "Pill Bug"]
 
 
 def setup(world) -> None:
@@ -37,9 +39,9 @@ def precollected(world) -> list[str]:
 def classify(world, name: str):
     if name not in TOOLS:
         return None
-    # Progression when a museum category with checks needs it (only with Tools in Pool)
-    needed = world.options.tools_in_pool and any(world.museum_modes.get(c) for c, tool in CATEGORY_TOOLS.items()
-                                                 if tool == name)
+    # Progression when a museum category with checks needs it (only with Tools in Pool); bugs need the shovel too
+    categories = [c for c, tool in CATEGORY_TOOLS.items() if tool == name] + ([MUSEUM_BUG] if name == SHOVEL else [])
+    needed = world.options.tools_in_pool and any(world.museum_modes.get(c) for c in categories)
     return ItemClassification.progression if needed else ItemClassification.useful
 
 
@@ -49,6 +51,8 @@ def rules(world) -> None:
         for c, tool in CATEGORY_TOOLS.items():
             for name in MUSEUM_NAMES[c]:
                 add_museum_rule(world, c, name, lambda state, tool=tool: state.has(tool, world.player))
+        for name in SHOVEL_BUGS:
+            add_museum_rule(world, MUSEUM_BUG, name, lambda state: state.has(SHOVEL, world.player))
 
 
 def slot_data(world) -> dict:
