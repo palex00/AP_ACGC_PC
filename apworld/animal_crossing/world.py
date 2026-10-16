@@ -157,6 +157,7 @@ class AnimalCrossingWeb(WebWorld):
             options.HiddenBugHints,
             options.SkipHRATalk,
             options.ShortShopTalk,
+            options.ShopNeverSellsOut,
             options.CoconutsWashUp,
             options.NormalizedTimeTravel,
             options.CritterOdds,

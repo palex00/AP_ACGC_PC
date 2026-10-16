@@ -2,6 +2,9 @@
 
 #include "m_common_data.h"
 #include "m_name_table.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#endif
 
 static void Shop_Design_Actor_ct(ACTOR* actorx, GAME* game);
 static void Shop_Design_Actor_dt(ACTOR* actorx, GAME* game);
@@ -366,6 +369,16 @@ static int aSD_ReportGoodsSales(int ux, int uz) {
         SHOP_DESIGN_ACTOR* shop_design = Common_Get(clip).shop_design_clip->design_actor;
 
         mSP_PlusSales(price);
+#ifdef TARGET_PC
+        // QoL Shop Never Sells Out: the item stays on the shelf (like stationery); grab bags stay limited
+        if (pc_ap_qol_shop_never_sells_out() && item != ITM_HUKUBUKURO_BAG) {
+            if (item >= ITM_CLOTH_START && item <= ITM_CLOTH_END && Common_Get(clip).shop_manekin_clip != NULL) {
+                // a try-on left the mannequin naked (vanilla only re-dresses it when the sale fails)
+                Common_Get(clip).shop_manekin_clip->naked2cloth_proc(ux, uz);
+            }
+            return TRUE;
+        }
+#endif
         if (item == ITM_HUKUBUKURO_BAG) {
             mSP_ShopSaleReport(item, shop_design->goods_list, shop_design->goods_list_max, RSV_SHOP_SOLD_PLANT);
             mFI_UtNumtoFGSet_common(RSV_SHOP_SOLD_PLANT, ux, uz, FALSE);

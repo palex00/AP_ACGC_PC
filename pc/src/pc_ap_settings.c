@@ -20,6 +20,7 @@ static const pc_ap_setting_info l_settings[PC_AP_SET_NUM] = {
   [PC_AP_SET_HIDDEN_BUG_HINTS] = { "hidden_bug_hints", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_SKIP_HRA_TALK] = { "skip_hra_talk", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_SHORT_SHOP_TALK] = { "short_shop_talk", PC_AP_SET_KIND_TOGGLE },
+  [PC_AP_SET_SHOP_NEVER_SELLS_OUT] = { "shop_never_sells_out", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_COCONUTS_WASH_UP] = { "coconuts_wash_up", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_NORMALIZED_TIME_TRAVEL] = { "normalized_time_travel", PC_AP_SET_KIND_TOGGLE },
   [PC_AP_SET_CRITTER_ODDS] = { "critter_odds", PC_AP_SET_KIND_ODDS },
@@ -66,6 +67,7 @@ void pc_ap_settings_init(pc_ap_settings* s, const ap_slotdata* sd) {
   v[PC_AP_SET_HIDDEN_BUG_HINTS] = sd->hidden_bug_hints;
   v[PC_AP_SET_SKIP_HRA_TALK] = sd->skip_hra_talk;
   v[PC_AP_SET_SHORT_SHOP_TALK] = sd->short_shop_talk;
+  v[PC_AP_SET_SHOP_NEVER_SELLS_OUT] = sd->shop_never_sells_out;
   v[PC_AP_SET_COCONUTS_WASH_UP] = sd->coconuts_wash_up;
   v[PC_AP_SET_NORMALIZED_TIME_TRAVEL] = sd->normalized_time_travel;
   v[PC_AP_SET_CRITTER_ODDS] = sd->critter_odds;

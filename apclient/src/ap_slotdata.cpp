@@ -128,6 +128,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->hidden_bug_hints = slot_data.value("hidden_bug_hints", 1) % 2;
   sd->skip_hra_talk = slot_data.value("skip_hra_talk", 1) % 2;
   sd->short_shop_talk = slot_data.value("short_shop_talk", 0) % 2;
+  sd->shop_never_sells_out = slot_data.value("shop_never_sells_out", 0) % 2;
   sd->coconuts_wash_up = slot_data.value("coconuts_wash_up", 1) % 2;
   sd->normalized_time_travel = slot_data.value("normalized_time_travel", 1) % 2;
 

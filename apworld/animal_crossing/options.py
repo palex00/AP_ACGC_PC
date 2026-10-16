@@ -648,6 +648,15 @@ class ShortShopTalk(Toggle):
     display_name = "Short Shop Talk"
 
 
+class ShopNeverSellsOut(Toggle):
+    """
+    Things you buy in Tom Nook's shop stay on the shelf, so you can buy them again
+    (stationery already works like this). Grab bags still sell out.
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
+    display_name = "Shop Never Sells Out"
+
+
 class EasierCritterCatch(DefaultOnToggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
@@ -1054,6 +1063,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     hidden_bug_hints: HiddenBugHints
     skip_hra_talk: SkipHRATalk
     short_shop_talk: ShortShopTalk
+    shop_never_sells_out: ShopNeverSellsOut
     coconuts_wash_up: CoconutsWashUp
     normalized_time_travel: NormalizedTimeTravel
     critter_odds: CritterOdds

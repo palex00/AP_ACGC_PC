@@ -62,6 +62,10 @@ int pc_ap_qol_skip_hra_talk(void);
 // follow-ups become the plain price offer) and pc_ap_msg_patch (filler lines trimmed).
 int pc_ap_qol_short_shop_talk(void);
 
+// Nonzero when bought shop items stay on the shelf (not grab bags). Hooked in
+// aSD_ReportGoodsSales (ac_shop_design.c), after the sale counts toward store upgrades.
+int pc_ap_qol_shop_never_sells_out(void);
+
 // Short Shop Talk: the next price offer is a follow-up (after trying on / seeing an item, or not),
 // so pc_ap_msg_patch drops its "That's <item>." line. Set by ac_npc_shop_common.c, taken (and
 // cleared) by the message patch.

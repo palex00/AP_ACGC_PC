@@ -55,6 +55,10 @@ int pc_ap_qol_short_shop_talk(void) {
   return pc_ap_setting(PC_AP_SET_SHORT_SHOP_TALK);
 }
 
+int pc_ap_qol_shop_never_sells_out(void) {
+  return pc_ap_setting(PC_AP_SET_SHOP_NEVER_SELLS_OUT);
+}
+
 static int pc_ap_qol_shop_follow_up;
 
 void pc_ap_qol_set_shop_follow_up(void) {

@@ -93,6 +93,7 @@ typedef struct {
   int hidden_bug_hints;       // dirt pops up over mole crickets / by pill bug rocks, bagworm/spider trees wiggle
   int skip_hra_talk;          // Nook never gives the Happy Room Academy talk
   int short_shop_talk;        // Nook's buy talk shortened (no filler, no raffle ticket talk)
+  int shop_never_sells_out;   // bought shop items stay on the shelf (not grab bags)
   int coconuts_wash_up;       // town shells are sometimes coconuts
   int normalized_time_travel; // date changes count as one day passing
   // Goal / checks

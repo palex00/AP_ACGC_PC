@@ -17,6 +17,7 @@ def slot_data(world) -> dict:
         "hidden_bug_hints": o.hidden_bug_hints.value,
         "skip_hra_talk": o.skip_hra_talk.value,
         "short_shop_talk": o.short_shop_talk.value,
+        "shop_never_sells_out": o.shop_never_sells_out.value,
         "coconuts_wash_up": o.coconuts_wash_up.value,
         "normalized_time_travel": o.normalized_time_travel.value,
         "critter_odds": o.critter_odds.value,
