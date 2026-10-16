@@ -121,7 +121,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->more_favors = slot_data.value("more_favors", 1) % 2;
   sd->villagers_dont_leave = slot_data.value("villagers_dont_leave", 0) % 2;
   sd->villagers_never_sleep = slot_data.value("villagers_never_sleep", 0) % 2;
-  sd->turnips_never_spoil = slot_data.value("turnips_never_spoil", 0) % 2;
+  sd->turnips_never_spoil = slot_data.value("turnips_never_spoil", 1) % 2;
   sd->no_falling_stalks = slot_data.value("no_falling_stalks", 0) % 2;
   sd->no_fishing_trash = slot_data.value("no_fishing_trash", 1) % 2;
   sd->easier_critter_catch = slot_data.value("easier_critter_catch", 1) % 2;

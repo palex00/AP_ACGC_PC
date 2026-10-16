@@ -585,7 +585,7 @@ class VillagersNeverSleep(Toggle):
     display_name = "Villagers Never Sleep"
 
 
-class TurnipsNeverSpoil(Toggle):
+class TurnipsNeverSpoil(DefaultOnToggle):
     """
     Turnips never spoil, not when the week ends and not when you go back in time.
     Ants only appear on spoiled turnips or candy, so with Timesanity the ant

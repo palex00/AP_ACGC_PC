@@ -35,7 +35,7 @@
   "more_favors": 1,
   "villagers_dont_leave": 0,
   "villagers_never_sleep": 0,
-  "turnips_never_spoil": 0,
+  "turnips_never_spoil": 1,
   "no_falling_stalks": 0,
   "no_fishing_trash": 1,
   "easier_critter_catch": 1,
