@@ -48,6 +48,9 @@ void pc_menu_row_colors(int selected, int* r, int* g, int* b, int* a);
 void pc_menu_draw_centered(struct game_s* game, const char* s, f32 y,
                            int r, int g, int b, int a, f32 scale);
 
+// The game font's star symbol, left-aligned at x
+void pc_menu_draw_star(struct game_s* game, f32 x, f32 y, int r, int g, int b, int a, f32 scale);
+
 void pc_menu_draw_left(struct game_s* game, const char* s, f32 x, f32 y,
                        int r, int g, int b, int a, f32 scale);
 

@@ -48,14 +48,9 @@
 #include <dolphin/os.h>  /* OSReport */
 
 /* --- Path constants --- */
-//#define PC_CARD_A_DIR     "save/card_a"
-//#define PC_CARD_B_DIR     "save/card_b"
 #define PC_GCI_FILENAME     "DobutsunomoriP_MURA.gci"
 #define PC_GCI_TMP_FILENAME PC_GCI_FILENAME ".tmp"
 #define PC_GCI_ALT_FILENAME "8P-GAFE-DobutsunomoriP_MURA.gci"
-//#define PC_GCI_PATH       PC_CARD_A_DIR "/" PC_GCI_FILENAME
-//#define PC_GCI_TMP_PATH   PC_CARD_A_DIR "/" PC_GCI_FILENAME ".tmp"
-// #define PC_SAVE_DIR       "save"
 
 #define GCI_HEADER_SIZE      sizeof(CARDDir)        /* 64 bytes */
 #define GCI_FILE_DATA_SIZE   mCD_LAND_SAVE_SIZE     /* 0x72000 */

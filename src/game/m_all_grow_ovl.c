@@ -3184,8 +3184,6 @@ extern void mAGrw_RenewalFgItem_ovl(lbRTC_time_c* now_time, int* deposit_haniwa)
                     mPB_force_set_keep_item();
 #ifdef TARGET_PC
                     pc_ap_catalog_source(PC_AP_CATALOG_SOURCE_NONE);
-#endif
-#ifdef TARGET_PC
                     /* AP Catalogsanity: the daily dump items */
                     pc_ap_catalog_source(AP_CATALOG_SOURCE_DUMP);
 #endif

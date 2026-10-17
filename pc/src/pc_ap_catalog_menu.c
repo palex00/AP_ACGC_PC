@@ -57,8 +57,7 @@ static void pc_ap_catalog_menu_item(const pc_ap_catalog_menu* m, struct game_s* 
   f32 star_w = 12.0f;
   f32 scale = 0.9f;
   if(mSP_CollectCheck(m->items[i])) {
-    char star[2] = { (char)CHAR_SYMBOL_STAR, 0 };
-    pc_menu_draw_left(game, star, x, y, 255, 255, 255, 255, scale);
+    pc_menu_draw_star(game, x, y, 255, 255, 255, 255, scale);
     pc_menu_draw_left(game, m->names[i], x + star_w, y, 255, 255, 255, 255, scale);
   } else {
     pc_menu_draw_left(game, m->names[i], x + star_w, y, 150, 150, 150, 200, scale);

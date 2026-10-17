@@ -78,7 +78,6 @@ static void card_slot_free(CARDFileInfo_PC* fi) {
     }
 }
 
-//static const char* card_dir[2] = { "save/card_a", "save/card_b" };
 static int card_mounted[2] = {0, 0};
 
 /* reject path traversal */

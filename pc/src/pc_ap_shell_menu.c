@@ -2,7 +2,6 @@
 #include "pc_ap_logic.h"
 #include "pc_menu_util.h"
 
-#include "m_font.h"
 #include "game.h"
 
 #include <stdio.h>
@@ -44,9 +43,8 @@ void pc_ap_shell_menu_draw(const pc_ap_shell_menu* m, struct game_s* game) {
     int r = 150, g = 150, b = 150, a = 200;
     int locked = pc_ap_time_frozen() && !(pc_ap_time_owned_months() & (1 << month));
     if(!locked && found[month] >= per_month) {
-      char star[2] = { (char)CHAR_SYMBOL_STAR, 0 };
       r = g = b = a = 255;
-      pc_menu_draw_left(game, star, x_star, y, r, g, b, a, scale);
+      pc_menu_draw_star(game, x_star, y, r, g, b, a, scale);
     }
     snprintf(text, sizeof(text), "%s", locked ? "(Locked)" : l_month_names[month]);
     pc_menu_fixtext(text);

@@ -141,6 +141,11 @@ void pc_menu_draw_left(struct game_s* game, const char* s, f32 x, f32 y,
     pc_text_draw(game, s, x, y, r, g, b, a, scale);
 }
 
+void pc_menu_draw_star(struct game_s* game, f32 x, f32 y, int r, int g, int b, int a, f32 scale) {
+    char star[2] = { (char)CHAR_SYMBOL_STAR, 0 };
+    pc_menu_draw_left(game, star, x, y, r, g, b, a, scale);
+}
+
 void pc_menu_draw_two_choice(struct game_s* game, const char* left,
                              const char* right, int sel, f32 y) {
     int r, g, b, a;

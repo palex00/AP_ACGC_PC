@@ -132,19 +132,25 @@ int pc_ap_museumsanity_received_per_category(const pc_ap_museumsanity* m, int co
   return total;
 }
 
+// checked[idx] = the find check of the first n things of cat is sent, checked[n + idx] = its donate check.
+// One ap_locations_checked call for the whole category.
+static void pc_ap_museum_sent(int cat, int n, u8 checked[2 * 0x40]) {
+  int64_t ids[2 * 0x40] = { 0 }; // find ids, then donate ids
+  for(int idx = 0; idx < n; idx++) {
+    ids[idx] = PC_AP_LOC_FIND_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
+    ids[n + idx] = PC_AP_LOC_DONATE_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
+  }
+  ap_locations_checked(ids, 2 * n, checked);
+}
+
 int pc_ap_museumsanity_checked(const pc_ap_museumsanity* m, int cat, int* total) {
   *total = 0;
   if(!pc_ap_museumsanity_active(m, cat)) {
     return 0;
   }
   int n = pc_ap_museum_count[cat];
-  int64_t ids[2 * 0x40] = { 0 }; // find ids, then donate ids
   u8 checked[2 * 0x40];
-  for(int idx = 0; idx < n; idx++) {
-    ids[idx] = PC_AP_LOC_FIND_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
-    ids[n + idx] = PC_AP_LOC_DONATE_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
-  }
-  ap_locations_checked(ids, 2 * n, checked);
+  pc_ap_museum_sent(cat, n, checked);
   int count = 0;
   for(int idx = 0; idx < n; idx++) {
     if(m->checks[cat] & AP_MUSEUM_FIND) {
@@ -252,13 +258,8 @@ int pc_ap_museumsanity_instant_fossils(const pc_ap_museumsanity* m) {
 // category is unsent. Same answers as find_check / donate_check, but one
 // ap_locations_checked call for the whole category (spawns run this often).
 static void pc_ap_museum_unsent(const pc_ap_museumsanity* m, int cat, int n, u8* wanted) {
-  int64_t ids[2 * 0x40] = { 0 }; // find ids, then donate ids
   u8 checked[2 * 0x40];
-  for(int idx = 0; idx < n; idx++) {
-    ids[idx] = PC_AP_LOC_FIND_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
-    ids[n + idx] = PC_AP_LOC_DONATE_BASE + PC_AP_MUSEUM_SLOT(cat, idx);
-  }
-  ap_locations_checked(ids, 2 * n, checked);
+  pc_ap_museum_sent(cat, n, checked);
   for(int idx = 0; idx < n; idx++) {
     int find = (m->checks[cat] & AP_MUSEUM_FIND) && !checked[idx];
     int donate = (m->checks[cat] & AP_MUSEUM_DONATE) && !checked[n + idx];

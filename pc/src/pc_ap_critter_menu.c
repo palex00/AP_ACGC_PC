@@ -187,8 +187,7 @@ static void pc_ap_critter_menu_line(const pc_ap_critter_menu* m, struct game_s* 
   char text[16];
 
   if(status > 0) {
-    char star[2] = { (char)CHAR_SYMBOL_STAR, 0 };
-    pc_menu_draw_left(game, star, x_star, y, r, g, b, a, scale);
+    pc_menu_draw_star(game, x_star, y, r, g, b, a, scale);
   }
   pc_menu_draw_left(game, m->names[idx], x_name, y, r, g, b, a, scale);
 
