@@ -38,6 +38,11 @@ static u16 get_demo_header(int titledemo_no, int key) {
 }
 
 extern int mTD_demono_get() {
+#ifdef TARGET_PC
+    // TEMP (flying actors debug): always the rain demo. Remove before release.
+    S_now_demono = mEv_TITLEDEMO_START2;
+    return S_now_demono;
+#endif
     if (S_now_demono == mEv_TITLEDEMO_LOGO) {
         S_now_demono = mEv_TITLEDEMO_START1;
     } else {
