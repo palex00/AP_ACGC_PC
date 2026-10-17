@@ -343,6 +343,9 @@ int main(int argc, char* argv[]) {
             printf("  --uber-shader       Disable shader specialization (single uber shader)\n");
             printf("  --crash-test        Crash on purpose after startup, to check the crash report\n");
             printf("  --actor-probe       Log actors that jump far in one frame to actor_probe.txt\n");
+            printf("  --dump-frames N     Save the first N frames as frames/NNNNN.ppm (half size)\n");
+            printf("  --fixed-clock       Game time advances exactly 1/60 s per frame (repeatable runs)\n");
+            printf("  --jitter-clock      Like --fixed-clock, frames 0.8x-1.2x long (repeatable)\n");
             printf("  --help, -h          Show this help message\n");
             return 0;
         } else if (strcmp(argv[i], "--framelimit") == 0) {
@@ -397,6 +400,15 @@ int main(int argc, char* argv[]) {
             crash_test = 1;
         } else if (strcmp(argv[i], "--actor-probe") == 0) {
             g_pc_actor_probe = 1;
+        } else if (strcmp(argv[i], "--fixed-clock") == 0) {
+            extern int g_pc_fixed_clock;
+            g_pc_fixed_clock = 1;
+        } else if (strcmp(argv[i], "--jitter-clock") == 0) {
+            extern int g_pc_fixed_clock;
+            g_pc_fixed_clock = 2;
+        } else if (strcmp(argv[i], "--dump-frames") == 0 && i + 1 < argc) {
+            g_pc_dump_frames = atoi(argv[i + 1]);
+            i++;
         } else if (strcmp(argv[i], "--rain") == 0) {
             g_pc_weather_override = mEnv_WEATHER_RAIN;
             g_pc_weather_intensity_override = mEnv_WEATHER_INTENSITY_HEAVY;

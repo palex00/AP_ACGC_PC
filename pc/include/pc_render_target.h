@@ -14,6 +14,8 @@ extern "C" {
 
 extern int g_pc_render_w;
 extern int g_pc_render_h;
+// --dump-frames N: first N presented frames to frames/NNNNN.ppm, half size (debugging)
+extern int g_pc_dump_frames;
 
 // Render size for a window and render_scale setting; max_dim = GPU's largest buffer side
 void pc_render_target_size(int win_w, int win_h, int scale, int max_dim, int* out_w, int* out_h);

@@ -59,6 +59,11 @@ void VIWaitForRetrace(void) {
         pc_profiler_add_time(PC_PROF_TIMER_GX_FLUSH, t_drain);
     }
 
+    {
+        extern void pc_os_fixed_clock_frame(void);
+        pc_os_fixed_clock_frame();
+    }
+
     Uint64 t_before_swap = SDL_GetPerformanceCounter();
     Uint64 t_before_swap_prof = pc_profiler_begin_timer();
     pc_platform_swap_buffers();

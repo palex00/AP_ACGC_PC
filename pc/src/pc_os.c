@@ -23,7 +23,23 @@ static s64 gc_epoch_offset_ticks = 0; /* Ticks from GC epoch to program start */
 /* GC epoch: Jan 1, 2000 (946684800 seconds after Unix epoch) */
 #define GC_UNIX_EPOCH_DIFF 946684800LL
 
+// --fixed-clock (debugging): time advances exactly 1/60 s per retrace, so runs are frame-for-frame repeatable
+// 2 = jittered: each frame 0.8x-1.2x of 1/60 s from a fixed-seed generator (still repeatable)
+int g_pc_fixed_clock = 0;
+static s64 s_fixed_ticks = 0;
+
+void pc_os_fixed_clock_frame(void) {
+    static u32 seed = 12345;
+    s64 frame = GC_TIMER_CLOCK / 60;
+    if (g_pc_fixed_clock == 2) {
+        seed = seed * 1664525u + 1013904223u;
+        frame = frame * (80 + (s64)((seed >> 16) % 41)) / 100;
+    }
+    s_fixed_ticks += frame;
+}
+
 s64 osGetTime(void) {
+    if (g_pc_fixed_clock) return gc_epoch_offset_ticks + s_fixed_ticks;
     u64 now = SDL_GetPerformanceCounter();
     u64 freq = SDL_GetPerformanceFrequency();
     u64 d = now - time_base_start;

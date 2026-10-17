@@ -455,6 +455,23 @@ if(WIN32)
     set(RC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/app.rc")
 endif()
 
+# TEMP (flying actors debug): sources matching a regex line in pc/o0_files.txt build at -O0
+set(PC_O0_LIST "${CMAKE_CURRENT_SOURCE_DIR}/o0_files.txt")
+if(EXISTS "${PC_O0_LIST}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${PC_O0_LIST}")
+    file(STRINGS "${PC_O0_LIST}" PC_O0_REGEXES)
+    foreach(re IN LISTS PC_O0_REGEXES)
+        if(re AND NOT re MATCHES "^#")
+            set(matched ${PC_SOURCES} ${GAME_C_SOURCES} ${GAME_CXX_SOURCES})
+            list(FILTER matched INCLUDE REGEX "${re}")
+            foreach(f IN LISTS matched)
+                set_property(SOURCE "${f}" APPEND PROPERTY COMPILE_OPTIONS -O0)
+                message(STATUS "O0: ${f}")
+            endforeach()
+        endif()
+    endforeach()
+endif()
+
 # =============================================================================
 # Build executable
 # =============================================================================

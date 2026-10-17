@@ -5,8 +5,11 @@
 #include "pc_platform.h"
 #include "pc_settings.h"
 
+#include <sys/stat.h>
+
 int g_pc_render_w = PC_SCREEN_WIDTH;
 int g_pc_render_h = PC_SCREEN_HEIGHT;
+int g_pc_dump_frames = 0;
 
 static GLuint s_fbo;          // what the game draws into (multisampled when s_samples > 0)
 static GLuint s_color_rb;
@@ -162,11 +165,49 @@ static GLuint resolved_source(int x, int y, int w, int h) {
     return s_resolve_fbo;
 }
 
+// Every 2nd pixel of every 2nd row, top row first
+static void dump_frame(GLuint src) {
+    static int frame = 0;
+    static unsigned char* rgb;
+    static unsigned char* out;
+    int w = g_pc_render_w, h = g_pc_render_h;
+    char path[64];
+    FILE* f;
+
+    if (frame >= g_pc_dump_frames) return;
+    if (frame == 0) {
+        rgb = (unsigned char*)malloc((size_t)w * h * 3);
+        out = (unsigned char*)malloc((size_t)(w / 2) * (h / 2) * 3);
+#ifdef _WIN32
+        mkdir("frames");
+#else
+        mkdir("frames", 0755);
+#endif
+    }
+    if (!rgb || !out) return;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, src);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+    for (int y = 0; y < h / 2; y++) {
+        const unsigned char* row = rgb + (size_t)(h - 1 - y * 2) * w * 3;
+        for (int x = 0; x < w / 2; x++) memcpy(out + ((size_t)y * (w / 2) + x) * 3, row + (size_t)x * 2 * 3, 3);
+    }
+    snprintf(path, sizeof(path), "frames/%05d.ppm", frame);
+    f = fopen(path, "wb");
+    if (f) {
+        fprintf(f, "P6\n%d %d\n255\n", w / 2, h / 2);
+        fwrite(out, 3, (size_t)(w / 2) * (h / 2), f);
+        fclose(f);
+    }
+    frame++;
+}
+
 void pc_render_target_present(void) {
     if (!s_fbo) return;
 
     int scissor = scissor_off();
     GLuint src = resolved_source(0, 0, g_pc_render_w, g_pc_render_h);
+    if (g_pc_dump_frames > 0) dump_frame(src);
     int same = g_pc_render_w == g_pc_window_w && g_pc_render_h == g_pc_window_h;
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src);

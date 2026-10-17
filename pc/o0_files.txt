@@ -1,0 +1,11 @@
+# TEMP (flying actors debug, Linux -O2 only): sources matching a regex line below build at -O0, the rest at -O2.
+# Lines starting with # are ignored. Edit, rebuild (build_podman.sh --linux), watch the rain title demo.
+# Round 1: the audio thread's code
+jaudio_NES/
+pc_audio
+# Round 2 if round 1 still flies (comment out round 1):
+# emu64/emu64\.c$
+# pc_gx
+# pc_mtx
+# sys_matrix
+# c_keyframe
