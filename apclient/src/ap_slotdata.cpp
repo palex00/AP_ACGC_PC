@@ -2,6 +2,7 @@
 #include "ap_log.h"
 
 #include <nlohmann/json.hpp>
+#include <climits>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -26,6 +27,23 @@ int ap_slotdata_upgrade(nlohmann::json& slot_data) {
   }
   // Steps go here, oldest first: if (version < 2) { ...v1 -> v2... }
   return 1;
+}
+
+// An int key in [min, max]; missing = def, anything else (wrong type, out of range) = def + a warning.
+// json true/false count as 1/0 (hand-written offline json)
+static int read_int(const nlohmann::json& slot_data, const char * key, int def, int min, int max) {
+  auto it = slot_data.find(key);
+  if (it == slot_data.end()) { return def; }
+  long long v = min - 1LL;
+  if (it->is_boolean()) { v = it->get<bool>() ? 1 : 0; }
+  if (it->is_number_integer()) { v = it->get<long long>(); }
+  if (v >= min && v <= max) { return (int)v; }
+  APLOG_WARN("%s: %s is not in %d..%d, using %d", key, it->dump().c_str(), min, max, def);
+  return def;
+}
+
+static int read_bool(const nlohmann::json& slot_data, const char * key, int def) {
+  return read_int(slot_data, key, def, 0, 1);
 }
 
 // Fills out[0..n) from a json int array; missing key or bad entries keep the defaults
@@ -131,69 +149,70 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
       slot_data.value("town_name", "pelago").c_str());
   snprintf(sd->player_name, sizeof(sd->player_name), "%s",
       slot_data.value("player_name", "archi").c_str());
-  sd->skip_intro = slot_data.value("skip_intro", 2) % 3;
-  sd->gender = slot_data.value("gender", 0) % 2;
-  sd->face = slot_data.value("face", 0) % 8;
-  sd->starting_shirt = slot_data.value("starting_shirt", 16);
-  sd->house = slot_data.value("house", 0) % 4;
-  sd->town_fruit = slot_data.value("town_fruit", 0) % 5;
-  sd->grass_shape = slot_data.value("grass_shape", 0) % 3;
-  sd->train_station = slot_data.value("train_station", -1);
-  sd->town_day = slot_data.value("town_day", 0) % 32;
-  sd->letter_paper = slot_data.value("letter_paper", 0) % 64;
+  sd->skip_intro = read_int(slot_data, "skip_intro", 2, 0, 2);
+  sd->gender = read_int(slot_data, "gender", 0, 0, 1);
+  sd->face = read_int(slot_data, "face", 0, 0, 7);
+  sd->starting_shirt = read_int(slot_data, "starting_shirt", 16, 0, 16);
+  sd->house = read_int(slot_data, "house", 0, 0, 3);
+  sd->town_fruit = read_int(slot_data, "town_fruit", 0, 0, 4);
+  sd->grass_shape = read_int(slot_data, "grass_shape", 0, 0, 2);
+  sd->train_station = read_int(slot_data, "train_station", -1, -1, 14);
+  sd->town_day = read_int(slot_data, "town_day", 0, 0, 31);
+  sd->letter_paper = read_int(slot_data, "letter_paper", 0, 0, 63);
   snprintf(sd->letter_sender, sizeof(sd->letter_sender), "%s",
       slot_data.value("letter_sender", "Archipelago").c_str());
   snprintf(sd->loan_letter_text, sizeof(sd->loan_letter_text), "%s",
       slot_data.value("loan_letter_text", "Your loan is ready for\npayoff at the post office!").c_str());
   read_npc_list(slot_data, "villager_blacklist", sd->villager_blacklist);
   read_npc_list(slot_data, "starting_villagers", sd->starting_villagers);
-  sd->no_cockroaches = slot_data.value("no_cockroaches", 1) % 2;
-  sd->shops_always_open = slot_data.value("shops_always_open", 1) % 2;
-  sd->no_weeds = slot_data.value("no_weeds", 1) % 2;
-  sd->more_favors = slot_data.value("more_favors", 1) % 2;
-  sd->villagers_dont_leave = slot_data.value("villagers_dont_leave", 0) % 2;
-  sd->villagers_never_sleep = slot_data.value("villagers_never_sleep", 0) % 2;
-  sd->turnips_never_spoil = slot_data.value("turnips_never_spoil", 1) % 2;
-  sd->no_falling_stalks = slot_data.value("no_falling_stalks", 0) % 2;
-  sd->no_fishing_trash = slot_data.value("no_fishing_trash", 1) % 2;
-  sd->easier_critter_catch = slot_data.value("easier_critter_catch", 1) % 2;
-  sd->hidden_bug_hints = slot_data.value("hidden_bug_hints", 1) % 2;
-  sd->skip_hra_talk = slot_data.value("skip_hra_talk", 1) % 2;
-  sd->short_shop_talk = slot_data.value("short_shop_talk", 0) % 2;
-  sd->shop_never_sells_out = slot_data.value("shop_never_sells_out", 0) % 2;
-  sd->coconuts_wash_up = slot_data.value("coconuts_wash_up", 1) % 2;
-  sd->normalized_time_travel = slot_data.value("normalized_time_travel", 1) % 2;
+  sd->no_cockroaches = read_bool(slot_data, "no_cockroaches", 1);
+  sd->shops_always_open = read_bool(slot_data, "shops_always_open", 1);
+  sd->no_weeds = read_bool(slot_data, "no_weeds", 1);
+  sd->more_favors = read_bool(slot_data, "more_favors", 1);
+  sd->villagers_dont_leave = read_bool(slot_data, "villagers_dont_leave", 0);
+  sd->villagers_never_sleep = read_bool(slot_data, "villagers_never_sleep", 0);
+  sd->turnips_never_spoil = read_bool(slot_data, "turnips_never_spoil", 1);
+  sd->no_falling_stalks = read_bool(slot_data, "no_falling_stalks", 0);
+  sd->no_fishing_trash = read_bool(slot_data, "no_fishing_trash", 1);
+  sd->easier_critter_catch = read_bool(slot_data, "easier_critter_catch", 1);
+  sd->hidden_bug_hints = read_bool(slot_data, "hidden_bug_hints", 1);
+  sd->skip_hra_talk = read_bool(slot_data, "skip_hra_talk", 1);
+  sd->short_shop_talk = read_bool(slot_data, "short_shop_talk", 0);
+  sd->shop_never_sells_out = read_bool(slot_data, "shop_never_sells_out", 0);
+  sd->coconuts_wash_up = read_bool(slot_data, "coconuts_wash_up", 1);
+  sd->normalized_time_travel = read_bool(slot_data, "normalized_time_travel", 1);
 
   // Missing keys: offline-relevant ones default to the apworld defaults, AP-only ones to off
   static const int default_loans[AP_LOAN_NUM] = { 15000, 45000, 30000, 60000, 80000 };
   // the apworld always sends the real split; missing = no loan checks
   static const int default_loan_checks[AP_LOAN_NUM] = { 0, 0, 0, 0, 0 };
   sd->goal = read_goal(slot_data);
-  sd->loansanity = slot_data.value("loansanity", 1) % 2;
+  sd->loansanity = read_bool(slot_data, "loansanity", 1);
   read_int_array(slot_data, "loans", sd->loans, default_loans, AP_LOAN_NUM);
   read_int_array(slot_data, "loan_checks", sd->loan_checks, default_loan_checks, AP_LOAN_NUM);
   // Favor checks in total: Favor Pools x Favors per Pool, 0 with Favorsanity off
-  int favor_pools = slot_data.value("favorsanity", 0) % 2 ? slot_data.value("favor_pools", 0) : 0;
-  sd->favors_per_pool = slot_data.value("favors_per_pool", 0); // 0: one pool, all open
+  int favor_pools = read_bool(slot_data, "favorsanity", 0) ? read_int(slot_data, "favor_pools", 0, 0, 100) : 0;
+  sd->favors_per_pool = read_int(slot_data, "favors_per_pool", 0, 0, 100); // 0: one pool, all open
   sd->favorsanity = favor_pools * sd->favors_per_pool;
-  sd->tools_in_pool = slot_data.value("tools_in_pool", 0) % 2;
-  sd->store_upgrades = slot_data.value("nook_store_upgrades", AP_STORE_VANILLA) % 4;
+  sd->tools_in_pool = read_bool(slot_data, "tools_in_pool", 0);
+  sd->store_upgrades = read_int(slot_data, "nook_store_upgrades", AP_STORE_VANILLA, AP_STORE_VANILLA, AP_STORE_CATALOG);
   static const int no_thresholds[AP_STORE_LEVELS] = { 0, 0, 0 };
   read_int_array(slot_data, "nook_store_thresholds", sd->store_thresholds, no_thresholds, AP_STORE_LEVELS);
-  sd->museumsanity = slot_data.value("museumsanity", 0) % 2;
-  sd->bug_checks = slot_data.value("bug_checks", 0) % 4;
-  sd->fish_checks = slot_data.value("fish_checks", 0) % 4;
-  sd->fossil_checks = slot_data.value("fossil_checks", 0) % 4;
-  sd->painting_checks = slot_data.value("painting_checks", 0) % 4;
-  sd->museum_goal_count = slot_data.value("museum_goal_count", 0);
-  sd->critter_odds = slot_data.value("critter_odds", 2) % 3;
+  sd->museumsanity = read_bool(slot_data, "museumsanity", 0);
+  sd->bug_checks = read_int(slot_data, "bug_checks", 0, 0, AP_MUSEUM_FIND | AP_MUSEUM_DONATE);
+  sd->fish_checks = read_int(slot_data, "fish_checks", 0, 0, AP_MUSEUM_FIND | AP_MUSEUM_DONATE);
+  sd->fossil_checks = read_int(slot_data, "fossil_checks", 0, 0, AP_MUSEUM_FIND | AP_MUSEUM_DONATE);
+  sd->painting_checks = read_int(slot_data, "painting_checks", 0, 0, AP_MUSEUM_FIND | AP_MUSEUM_DONATE);
+  sd->museum_goal_count = read_int(slot_data, "museum_goal_count", 0, 0, INT_MAX); // too high: goal never done
+  sd->critter_odds = read_int(slot_data, "critter_odds", AP_CRITTER_ODDS_DYNAMIC, AP_CRITTER_ODDS_VANILLA, AP_CRITTER_ODDS_DYNAMIC);
   // Missing = all (older seeds have no bug pass items)
-  sd->bug_availability = slot_data.value("bug_availability", 0) % 2;
+  sd->bug_availability = read_int(slot_data, "bug_availability", AP_BUG_AVAIL_ALL, AP_BUG_AVAIL_ALL, AP_BUG_AVAIL_PROGRESSIVE);
   // Missing = all (older seeds have no fish pass items)
-  sd->fish_availability = slot_data.value("fish_availability", 0) % 2;
+  sd->fish_availability = read_int(slot_data, "fish_availability", AP_FISH_AVAIL_ALL, AP_FISH_AVAIL_ALL, AP_FISH_AVAIL_PROGRESSIVE);
   // Missing = all (0.3 seeds have no series items, progressive would never spawn dinosaurs)
-  sd->fossil_availability = slot_data.value("fossil_availability", 0) % 3;
-  sd->fossil_odds = slot_data.value("fossil_odds", 2) % 3;
+  sd->fossil_availability = read_int(slot_data, "fossil_availability", AP_FOSSIL_AVAIL_ALL, AP_FOSSIL_AVAIL_ALL,
+      AP_FOSSIL_AVAIL_PROGRESSIVE);
+  sd->fossil_odds = read_int(slot_data, "fossil_odds", AP_FOSSIL_ODDS_DYNAMIC, AP_FOSSIL_ODDS_VANILLA, AP_FOSSIL_ODDS_DYNAMIC);
   // WARN: copy of the apworld's FOSSIL_SEASONS (fossil_availability.py), the default for offline play
   static const int default_fossil_seasons[AP_FOSSIL_NUM] = {
     2, 2, 2, 2, 2, 2, // Tricera, T-rex: autumn
@@ -205,23 +224,20 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   };
   read_int_array(slot_data, "fossil_seasons", sd->fossil_seasons, default_fossil_seasons, AP_FOSSIL_NUM);
   for (int i = 0; i < AP_FOSSIL_NUM; i++) { sd->fossil_seasons[i] &= 3; }
-  sd->timesanity = slot_data.value("timesanity", 0) % 2;
-  sd->starting_month = slot_data.value("starting_month", 0) % 12;
-  sd->starting_time = slot_data.value("starting_time", 0) % 4;
+  sd->timesanity = read_bool(slot_data, "timesanity", 0);
+  sd->starting_month = read_int(slot_data, "starting_month", 0, 0, 11);
+  sd->starting_time = read_int(slot_data, "starting_time", 0, 0, 3);
   // Same range as the game (mTM_MIN_YEAR / mTM_MAX_YEAR on PC)
-  sd->start_year = slot_data.value("start_year", 2001);
-  if (sd->start_year < 2001 || sd->start_year > 2100) { sd->start_year = 2001; }
-  sd->catalogsanity = slot_data.value("catalogsanity", 0) % 2;
+  sd->start_year = read_int(slot_data, "start_year", 2001, 2001, 2100);
+  sd->catalogsanity = read_bool(slot_data, "catalogsanity", 0);
   read_catalog_pools(slot_data, sd);
-  sd->new_item_chance = slot_data.value("new_item_chance", 0);
-  if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
+  sd->new_item_chance = read_int(slot_data, "new_item_chance", 0, 0, 100);
   sd->catalog_sources = read_catalog_sources(slot_data);
-  sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
+  sd->catalog_goal_count = read_int(slot_data, "catalog_goal_count", 0, 0, AP_CATALOG_MAX);
   read_furniture_set(slot_data, sd);
-  sd->beach_per_month = slot_data.value("shellsanity", 0) % 2 ? slot_data.value("beach_checks_per_month", 0) : 0;
-  if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
-  sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 20);
-  if (sd->shellsanity_item_chance < 0 || sd->shellsanity_item_chance > 100) { sd->shellsanity_item_chance = 20; }
+  sd->beach_per_month = read_bool(slot_data, "shellsanity", 0) ?
+      read_int(slot_data, "beach_checks_per_month", 0, 0, AP_BEACH_PER_MONTH_MAX) : 0;
+  sd->shellsanity_item_chance = read_int(slot_data, "shellsanity_item_chance", 20, 0, 100);
 
   // Keyed by item name in the apworld (Small/Modest/Large Bell Credit)
   static const char * credit_names[AP_BELLCREDIT_NUM] = { "Small Bell Credit", "Modest Bell Credit", "Large Bell Credit" };
