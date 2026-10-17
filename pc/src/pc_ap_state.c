@@ -34,8 +34,18 @@ void pc_ap_ini_set_int(ini_t * ini, const char * section, const char * key, int 
   ini_property_add(ini, s, key, 0, num, 0);
 }
 
+// The only code that knows sidecar versions. Add a step only for a version that removed a key or changed
+// what one means; a new key needs none (missing key = its default = the old behaviour).
+int pc_ap_state_upgrade(ini_t * ini) {
+  int version = pc_ap_ini_get_int(ini, NULL, PC_AP_STATE_KEY_VERSION, 1);
+  if(version > PC_AP_STATE_VERSION) { return 0; }
+  // Steps go here, oldest first: if (version < 2) { ...v1 -> v2... }
+  return 1;
+}
+
 int pc_ap_state_write(const char * filename, ini_t * ini) {
   char buf[PCAP_MAXFILE];
+  pc_ap_ini_set_int(ini, NULL, PC_AP_STATE_KEY_VERSION, PC_AP_STATE_VERSION);
   int size = ini_save(ini, buf, sizeof(buf));
 
   // Oops, too big!

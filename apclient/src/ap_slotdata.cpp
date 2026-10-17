@@ -1,7 +1,10 @@
 #include "ap_slotdata.h"
 #include "ap_log.h"
 
-#include <apclient.hpp>
+#include <nlohmann/json.hpp>
+#include <cstdio>
+#include <cstring>
+#include <string>
 
 static ap_slotdata g_slotdata;
 
@@ -11,6 +14,18 @@ ap_slotdata * ap_getslotdata(void) {
 
 void ap_slotdata_init(ap_slotdata * sd) {
   memset(sd, 0, sizeof(ap_slotdata));
+}
+
+// The only code that knows slot_data versions: old seeds are translated up to the current format here, so the
+// parser and the game only ever see the current one. Add a step only for a version that removed a key or changed
+// what one means; a new key needs none (missing key = its default = the old behaviour).
+int ap_slotdata_upgrade(nlohmann::json& slot_data) {
+  int version = slot_data.value("slot_data_version", 1);
+  if (version > AP_SLOTDATA_VERSION) {
+    return 0;
+  }
+  // Steps go here, oldest first: if (version < 2) { ...v1 -> v2... }
+  return 1;
 }
 
 // Fills out[0..n) from a json int array; missing key or bad entries keep the defaults

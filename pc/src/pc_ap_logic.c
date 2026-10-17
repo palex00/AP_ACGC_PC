@@ -174,6 +174,17 @@ static void pc_ap_settings_path(char* out, size_t size) {
   pc_save_root_file_out(out, size, PC_AP_SETTINGS_FILENAME);
 }
 
+// A sidecar from a newer client: stop before anything reads or overwrites it
+static void pc_ap_state_check(ini_t* ini, const char* filename) {
+  char msg[PC_PATHSIZE + 160];
+  if(pc_ap_state_upgrade(ini)) {
+    return;
+  }
+  snprintf(msg, sizeof(msg), "This save was made by a newer version of the game:\n%s\n\n"
+           "Update the game to keep playing it.", filename);
+  pc_fatal_error("Animal Crossing - Save from a newer version", msg);
+}
+
 // Rewritten whole: also adds keys a newer client has that the file doesn't
 static int pc_ap_settings_write(void) {
   char path[PC_PATHSIZE];
@@ -195,6 +206,7 @@ void pc_ap_settings_open(void) {
   pc_ap_settings_init(&g_ap.settings, ap_getslotdata());
   pc_ap_settings_path(path, sizeof(path));
   ini = pc_ap_state_read(path); // NULL (first load): keeps the slot_data values
+  pc_ap_state_check(ini, path);
   pc_ap_settings_load(&g_ap.settings, ini);
   if(ini != NULL) {
     ini_destroy(ini);
@@ -233,6 +245,7 @@ void pc_ap_update(void) {
 
 void pc_ap_load(const char* filename) {
   ini_t* ini = pc_ap_state_read(filename); // NULL (missing) loads the defaults
+  pc_ap_state_check(ini, filename);
   pc_ap_loansanity_load(&g_ap.loans, ini);
   pc_ap_credit_load(&g_ap.credit, ini);
   pc_ap_favorsanity_load(&g_ap.favors, ini);

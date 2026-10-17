@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+// slot_data format this client reads (apworld SLOT_DATA_VERSION). Bump rules: ignore/docs/reference.md "Versions"
+#define AP_SLOTDATA_VERSION 1
+
 #define AP_LOAN_NUM     5 // starting, medium, basement, large, upper (upgrade order)
 #define AP_BELLCREDIT_NUM 3 // small, modest, large
 #define AP_NPC_NUM      236 // NPC_NUM in the game (villager npc indices)
@@ -157,6 +160,8 @@ AP_API void ap_slotdata_init(ap_slotdata *);
 
 #ifdef __cplusplus
 #include <nlohmann/json_fwd.hpp>
+// Old slot_data -> the current format, before ap_slotdata_fill. 0 = the seed needs a newer client.
+int ap_slotdata_upgrade(nlohmann::json& slot_data);
 void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data);
 #endif
 

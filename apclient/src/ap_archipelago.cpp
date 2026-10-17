@@ -225,6 +225,12 @@ static int ap_start_offline(const char * path) {
   try {
     rp->team = data.value("team", 0);
     rp->player = data.value("player", 1);
+    if (!ap_slotdata_upgrade(data)) {
+      APLOG_WARN("Offline file at %s is for a newer client (slot_data_version %d, client reads up to %d)", path,
+          data.value("slot_data_version", 1), AP_SLOTDATA_VERSION);
+      ap_roomplayer_init(rp);
+      return 1;
+    }
     ap_slotdata_fill(sd, data);
   } catch (const nlohmann::json::exception& e) {
     APLOG_WARN("Malformed offline file at %s: %s", path, e.what());
@@ -289,7 +295,17 @@ int ap_start(void) {
     // and we'd sit on CONNECTED with Start blocked, so refuse with a reason instead.
     ap_slotdata * sd = ap_getslotdata();
     try {
-      ap_slotdata_fill(sd, slot_data);
+      nlohmann::json upgraded = slot_data;
+      if (!ap_slotdata_upgrade(upgraded)) {
+        int version = upgraded.value("slot_data_version", 1);
+        ap_slotdata_init(sd);
+        g_ap_connectstate.state = AP_CSTATE_SLOTREFUSED;
+        snprintf(g_ap_connectstate.last_refuse_reason, sizeof(g_ap_connectstate.last_refuse_reason),
+            "Seed needs a newer client (slot_data v%d, client v%d)", version, AP_SLOTDATA_VERSION);
+        APLOG_ERROR("SEED TOO NEW: slot_data v%d, client reads up to v%d", version, AP_SLOTDATA_VERSION);
+        return;
+      }
+      ap_slotdata_fill(sd, upgraded);
     } catch (const nlohmann::json::exception& e) {
       ap_slotdata_init(sd);
       g_ap_connectstate.state = AP_CSTATE_SLOTREFUSED;

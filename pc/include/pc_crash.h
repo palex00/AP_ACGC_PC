@@ -15,5 +15,7 @@ void pc_crash_init_info(void);
 void pc_crash_note_frame(struct game_play_s* play);
 // --crash-test: crashes on purpose to check the report
 void pc_crash_test(void);
+// Not a crash: an error box with msg, then exit(1). For states the game must not continue from.
+void pc_fatal_error(const char* title, const char* msg);
 
 #endif

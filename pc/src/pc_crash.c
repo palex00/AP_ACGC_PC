@@ -10,6 +10,8 @@
 #include "m_kankyo.h"
 #include "game.h"
 
+#include <stdlib.h>
+
 #ifdef _WIN32
 #include <tlhelp32.h>
 #else
@@ -626,4 +628,10 @@ void pc_crash_note_frame(GAME_PLAY* play) {
 void pc_crash_test(void) {
   volatile int* p = NULL;
   *p = 1;
+}
+
+void pc_fatal_error(const char* title, const char* msg) {
+  fprintf(stderr, "%s\n", msg);
+  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, msg, g_pc_window);
+  exit(1);
 }

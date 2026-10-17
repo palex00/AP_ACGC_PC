@@ -32,6 +32,9 @@ from .game_items import ITEM_NAME_TO_ID as GAME_ITEMS
 from .options import AnimalCrossingOptions
 
 GAME_NAME = "Animal Crossing"
+# slot_data format (the client's AP_SLOTDATA_VERSION). Bump on any change the client reads (new key, new ids,
+# removed/renamed key, changed meaning); not for apworld-only changes. Rules: ignore/docs/reference.md "Versions"
+SLOT_DATA_VERSION = 1
 # Universal Tracker: slot_data keys named like an option but holding something else (villager indices, the pools,
 # a tool name), so they're not restored as options
 UT_NOT_OPTIONS = {"villager_blacklist", "starting_villagers", "catalog_pools", "starting_tool"}
@@ -332,4 +335,5 @@ class AnimalCrossingWorld(World):
             **furniture_sets.slot_data(self),
             # From archipelago.json; the client compares it with its own build
             "world_version": ".".join(str(n) for n in self.world_version),
+            "slot_data_version": SLOT_DATA_VERSION,
         }
