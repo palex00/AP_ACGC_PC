@@ -6,6 +6,7 @@
 // nothing when off. Checks:
 //   pos    actor's world.position moved far in one frame
 //   draw   actor's first draw matrix moved far in one frame (render side, incl. skeleton root)
+//   joint  another draw matrix (skeleton joint, held item, ...; by draw order) moved far while the first didn't
 //   fix    a draw matrix's fixed-point copy doesn't decode to the float matrix it came from
 //   gpu    a draw matrix changed between the game building it and emu64 using it
 //   camera camera eye/center moved far in one frame

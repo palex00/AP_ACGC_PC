@@ -17,6 +17,7 @@
 #define PROBE_SEARCH 32
 #define PROBE_LINES_PER_ACTOR 20
 #define PROBE_LINES_MAX 5000
+#define PROBE_JOINTS 64      // draw matrices remembered per actor (skeleton joints, held items, ...)
 
 int g_pc_actor_probe = 0;
 
@@ -28,6 +29,12 @@ typedef struct {
     xyz_t draw_pos; // translation of the actor's first draw matrix that frame
     s16 id;
     int lines;
+    u32 joint_frame;            // frame of joints[]
+    int joint_n;
+    xyz_t joints[PROBE_JOINTS]; // translation of each draw matrix, in draw order
+    u32 cur_frame;              // frame of cur[] (being filled)
+    int cur_n;
+    xyz_t cur[PROBE_JOINTS];
 } ProbeActor;
 
 typedef struct {
@@ -144,6 +151,12 @@ void pc_actor_probe_begin(ACTOR* actor, GAME_PLAY* play) {
         return;
     }
     if (frame != s_frame || play != s_play) {
+        // new play or its frame counter restarted: old entries would look alive and block slots
+        if (play != s_play || frame < s_frame) {
+            memset(s_actors, 0, sizeof(s_actors));
+            memset(s_mtxs, 0, sizeof(s_mtxs));
+            s_cam_frame = 0;
+        }
         s_frame = frame;
         s_play = play;
         check_camera(play);
@@ -167,8 +180,42 @@ void pc_actor_probe_begin(ACTOR* actor, GAME_PLAY* play) {
     a->pos_frame = s_frame;
 }
 
+// Same draw matrix (by draw order) moved far while the first one didn't: a joint or held item flew.
+// Only when the actor drew as many matrices as last frame, so the order lines up.
+static void check_joints(ProbeActor* a) {
+    int worst = -1;
+    f32 worst_d = PROBE_JUMP;
+    int i;
+
+    if (a->joint_frame + 1 == s_frame && a->joint_n == a->cur_n && a->cur_n > 1 &&
+        dist(&a->cur[0], &a->joints[0]) <= PROBE_JUMP) { // root jumps are "draw" lines
+        for (i = 1; i < a->cur_n; i++) {
+            f32 d = dist(&a->cur[i], &a->joints[i]);
+            if (d > worst_d) {
+                worst_d = d;
+                worst = i;
+            }
+        }
+        if (worst >= 0 && log_line(a, "joint")) {
+            fprintf(s_log, " mtx %d of %d moved %.1f (%.1f %.1f %.1f)->(%.1f %.1f %.1f) pos (%.1f %.1f %.1f)", worst,
+                    a->cur_n, worst_d, a->joints[worst].x, a->joints[worst].y, a->joints[worst].z, a->cur[worst].x,
+                    a->cur[worst].y, a->cur[worst].z, a->actor->world.position.x, a->actor->world.position.y,
+                    a->actor->world.position.z);
+            log_end();
+        }
+    }
+    memcpy(a->joints, a->cur, sizeof(a->joints));
+    a->joint_n = a->cur_n;
+    a->joint_frame = s_frame;
+}
+
 void pc_actor_probe_end(void) {
+    ProbeActor* a = s_cur;
+
     s_cur = NULL;
+    if (a != NULL && s_log != NULL && a->cur_frame == s_frame) {
+        check_joints(a);
+    }
 }
 
 // Inverse of guMtxF2L: element k (row-major) of an N64 s15.16 matrix.
@@ -225,12 +272,22 @@ void pc_actor_probe_mtx(float mf[4][4], const void* mtx) {
         }
     }
 
+    xyz_t t;
+    t.x = mf[3][0];
+    t.y = mf[3][1];
+    t.z = mf[3][2];
+
+    // every matrix, in draw order, for check_joints
+    if (a->cur_frame != s_frame) {
+        a->cur_frame = s_frame;
+        a->cur_n = 0;
+    }
+    if (a->cur_n < PROBE_JOINTS) {
+        a->cur[a->cur_n++] = t;
+    }
+
     // first matrix of the actor this frame: compare with last frame's
     if (!s_cur_has_mtx) {
-        xyz_t t;
-        t.x = mf[3][0];
-        t.y = mf[3][1];
-        t.z = mf[3][2];
         s_cur_has_mtx = 1;
         if (a->draw_frame + 1 == s_frame) {
             f32 d = dist(&t, &a->draw_pos);
