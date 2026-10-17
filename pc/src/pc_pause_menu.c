@@ -7,6 +7,7 @@
 #include "pc_ap_catalog_menu.h"
 #include "pc_ap_critter_menu.h"
 #include "pc_ap_shell_menu.h"
+#include "pc_ap_ftr_menu.h"
 #include "pc_ap_logic.h"
 #include "pc_ap_overlay.h"
 
@@ -39,6 +40,7 @@ typedef enum {
     PAGE_CRITTERS = 5, /* Bugs or Fish */
     PAGE_SHELLS = 6,
     PAGE_AP = 7, // list of the AP pages below
+    PAGE_FTR = 8, // Furniture Set or Chess Set
 } PauseMenuPage;
 
 // Entries of the main and AP list pages; which ones show is decided by lists_update
@@ -53,6 +55,8 @@ typedef enum {
     MAIN_BUGS,    // AP page
     MAIN_FISH,    // AP page
     MAIN_SHELLS,  // AP page, Shellsanity only
+    MAIN_FTR_SET, // AP page, Furniture Set goal only
+    MAIN_CHESS,   // AP page, Chess Set goal only
     MAIN_MAX,
 } MainItem;
 
@@ -74,6 +78,7 @@ static pc_ap_time_menu time_menu;
 static pc_ap_catalog_menu catalog_menu;
 static pc_ap_critter_menu critter_menu; // Bugs or Fish
 static pc_ap_shell_menu shell_menu;
+static pc_ap_ftr_menu ftr_menu; // Furniture Set or Chess Set
 
 // Index of item in the list, 0 if it isn't shown
 static int list_find(const MenuList* list, MainItem item) {
@@ -111,6 +116,12 @@ static void lists_update(void) {
     if (pc_ap_shells_per_month() > 0) {
         list_add(&ap_list, MAIN_SHELLS);
     }
+    if (pc_ap_ftr_set_count() > 0) {
+        list_add(&ap_list, MAIN_FTR_SET);
+    }
+    if (pc_ap_ftr_chess_on()) {
+        list_add(&ap_list, MAIN_CHESS);
+    }
     ap_list.sel = list_find(&ap_list, prev_ap);
 }
 
@@ -124,6 +135,8 @@ static const char* main_label(MainItem item) {
         case MAIN_BUGS:     return "Bugs";
         case MAIN_FISH:     return "Fish";
         case MAIN_SHELLS:   return "Shells";
+        case MAIN_FTR_SET:  return "Furniture Set";
+        case MAIN_CHESS:    return "Chess Set";
         case MAIN_SETTINGS: return "Settings";
         case MAIN_QUIT:     return "Quit Game";
         default:            return "";
@@ -133,7 +146,8 @@ static const char* main_label(MainItem item) {
 // Greyed out where it can't open
 static int main_disabled(MainItem item) {
     if (item == MAIN_TIME || item == MAIN_SAVE) return !pc_ap_time_change_allowed_now();
-    if (item == MAIN_AP || item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS) {
+    if (item == MAIN_AP || item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS ||
+        item == MAIN_FTR_SET || item == MAIN_CHESS) {
         return !pc_ap_accepting();
     }
     return 0;
@@ -213,6 +227,16 @@ static void list_activate(MainItem item) {
                 pc_ap_overlay_toast("Shells: load your save first");
             }
             break;
+        case MAIN_FTR_SET: /* the house is the player's */
+        case MAIN_CHESS:
+            if (pc_ap_accepting()) {
+                cur_page = PAGE_FTR;
+                pc_ap_ftr_menu_enter(&ftr_menu, item == MAIN_CHESS);
+            } else {
+                pc_ap_overlay_toast(item == MAIN_CHESS ? "Chess Set: load your save first"
+                                                       : "Furniture Set: load your save first");
+            }
+            break;
         case MAIN_SETTINGS:
             cur_page = PAGE_SETTINGS;
             pc_settings_menu_enter();
@@ -256,12 +280,14 @@ static void handle_action(pc_menu_action act) {
         return;
     }
 
-    /* Date & Time, Catalog, Bugs/Fish, Shells: each page handles its own input. */
-    if (cur_page == PAGE_TIME || cur_page == PAGE_CATALOG || cur_page == PAGE_CRITTERS || cur_page == PAGE_SHELLS) {
+    /* Date & Time, Catalog, Bugs/Fish, Shells, Furniture/Chess Set: each page handles its own input. */
+    if (cur_page == PAGE_TIME || cur_page == PAGE_CATALOG || cur_page == PAGE_CRITTERS || cur_page == PAGE_SHELLS ||
+        cur_page == PAGE_FTR) {
         int result;
         if (cur_page == PAGE_TIME)         result = pc_ap_time_menu_input(&time_menu, act);
         else if (cur_page == PAGE_CATALOG) result = pc_ap_catalog_menu_input(&catalog_menu, act);
         else if (cur_page == PAGE_SHELLS)  result = pc_ap_shell_menu_input(&shell_menu, act);
+        else if (cur_page == PAGE_FTR)     result = pc_ap_ftr_menu_input(&ftr_menu, act);
         else                               result = pc_ap_critter_menu_input(&critter_menu, act);
         if (result == PC_MENU_BACK) {
             // Back to the list the page was opened from
@@ -440,6 +466,8 @@ void pc_pause_menu_draw(struct game_s* game) {
         pc_ap_critter_menu_draw(&critter_menu, game);
     } else if (cur_page == PAGE_SHELLS) {
         pc_ap_shell_menu_draw(&shell_menu, game);
+    } else if (cur_page == PAGE_FTR) {
+        pc_ap_ftr_menu_draw(&ftr_menu, game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
         if (cur_page == PAGE_MAIN)              draw_list_page(game, "- Paused -", &main_list);

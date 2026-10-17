@@ -578,6 +578,22 @@ int pc_ap_ftr_blocking(void) {
   return g_ap.furniture.set_count > 0 || g_ap.furniture.chess;
 }
 
+int pc_ap_ftr_set_count(void) {
+  return g_ap.furniture.set_count;
+}
+
+mActor_name_t pc_ap_ftr_set_piece(int i) {
+  return g_ap.furniture.set[i];
+}
+
+int pc_ap_ftr_chess_on(void) {
+  return g_ap.furniture.chess;
+}
+
+int pc_ap_ftr_received(mActor_name_t piece) {
+  return ap_item_count(piece) > 0;
+}
+
 int pc_ap_ftr_count_select(const mActor_name_t* list, int* selected_idx, int uncollected_only) {
   int count = 0;
   for(const mActor_name_t* p = list; *p != EMPTY_NO; p++) {

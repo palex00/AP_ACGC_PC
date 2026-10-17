@@ -232,6 +232,12 @@ int pc_ap_ftr_blocking(void);
 // left out (pc_ap_ftr_blocking only): returns how many candidates, *selected_idx = a
 // random one's index in list. Without uncollected_only every unblocked item counts.
 int pc_ap_ftr_count_select(const mActor_name_t* list, int* selected_idx, int uncollected_only);
+// Furniture Set / Chess Set pages: the set's pieces (0 = goal off), the piece at i, chess goal on,
+// and 1 once the piece's AP item has arrived
+int pc_ap_ftr_set_count(void);
+mActor_name_t pc_ap_ftr_set_piece(int i);
+int pc_ap_ftr_chess_on(void);
+int pc_ap_ftr_received(mActor_name_t piece);
 // Villager hand-overs (favor rewards, trade offers): item if allowed, else a roll of
 // the same shop category as source (AP_CATALOG_SOURCE_*); a starter shirt if that's empty
 mActor_name_t pc_ap_catalog_safe_item(mActor_name_t item, int source);

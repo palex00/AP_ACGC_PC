@@ -1,0 +1,107 @@
+#include "pc_ap_ftr_menu.h"
+#include "pc_ap_logic.h"
+#include "pc_menu_util.h"
+
+#include "m_font.h"
+#include "m_home_h.h"
+#include "game.h"
+
+#include <stdio.h>
+
+#define PC_AP_FTR_MENU_ROWS 12 // all chess kinds fit
+
+void pc_ap_ftr_menu_enter(pc_ap_ftr_menu* m, int chess) {
+  m->chess = chess;
+  if(chess) {
+    m->count = PC_AP_CHESS_KINDS;
+    for(int i = 0; i < m->count; i++) {
+      m->items[i] = pc_ap_chess_pieces[i];
+      m->needed[i] = pc_ap_chess_needed[i];
+    }
+  } else {
+    m->count = pc_ap_ftr_set_count();
+    for(int i = 0; i < m->count; i++) {
+      m->items[i] = pc_ap_ftr_set_piece(i);
+      m->needed[i] = 1;
+    }
+  }
+  for(int i = 0; i < m->count; i++) {
+    char* name = m->names[i];
+    mIN_copy_name_str((u8*)name, m->items[i]);
+    int len = mIN_ITEM_NAME_LEN;
+    while(len > 0 && name[len - 1] == CHAR_SPACE) {
+      len--;
+    }
+    name[len] = 0;
+  }
+  pc_menu_list_set(&m->list, m->count, 1, PC_AP_FTR_MENU_ROWS);
+}
+
+int pc_ap_ftr_menu_input(pc_ap_ftr_menu* m, pc_menu_action act) {
+  switch(act) {
+    case PC_MENU_UP:     pc_menu_list_up(&m->list); break;
+    case PC_MENU_DOWN:   pc_menu_list_down(&m->list); break;
+    case PC_MENU_CANCEL: return PC_MENU_BACK;
+    default: break;
+  }
+  return PC_MENU_STAY;
+}
+
+// [star or key] name, chess "in house / needed"; colours as on the Bugs / Fish pages
+static void pc_ap_ftr_menu_line(const pc_ap_ftr_menu* m, struct game_s* game, int i, int in_house) {
+  f32 x_star = 14.0f;
+  f32 x_name = 26.0f;
+  f32 x_count = 234.0f;
+  f32 scale = 0.9f;
+  f32 y = pc_menu_list_y(&m->list, i);
+  int received = pc_ap_ftr_received(m->items[i]);
+  int done = in_house >= m->needed[i];
+  int r = 150, g = 150, b = 150, a = 200;
+  if(done) {
+    r = 255, g = 215, b = 0, a = 255;
+  } else if(received) {
+    r = g = b = a = 255;
+  }
+  char text[16];
+
+  if(done || received) {
+    char sym[2] = { (char)(done ? CHAR_SYMBOL_KEY : CHAR_SYMBOL_STAR), 0 };
+    pc_menu_draw_left(game, sym, x_star, y, r, g, b, a, scale);
+  }
+  pc_menu_draw_left(game, m->names[i], x_name, y, r, g, b, a, scale);
+
+  if(m->chess) {
+    snprintf(text, sizeof(text), "%d / %d", in_house, m->needed[i]);
+    pc_menu_fixtext(text);
+    pc_menu_draw_left(game, text, x_count, y, r, g, b, a, scale);
+  }
+}
+
+void pc_ap_ftr_menu_draw(const pc_ap_ftr_menu* m, struct game_s* game) {
+  struct home_s* home = pc_ap_my_home();
+  int in_house[PC_AP_FTR_MENU_MAX];
+  int found = 0;
+  int all_in = 1;
+  char header[16];
+  char status[40];
+
+  for(int i = 0; i < m->count; i++) {
+    in_house[i] = home != NULL ? pc_ap_furniture_count(home, m->items[i]) : 0;
+    found += pc_ap_ftr_received(m->items[i]);
+    all_in &= in_house[i] >= m->needed[i];
+  }
+  if(all_in && home != NULL && home->flags.has_basement) {
+    snprintf(status, sizeof(status), "All pieces are in your house!");
+  } else if(all_in) {
+    snprintf(status, sizeof(status), "All in! Now build the basement");
+  } else {
+    snprintf(status, sizeof(status), "%d / %d found", found, m->count);
+  }
+  snprintf(header, sizeof(header), "%s", m->chess ? "Chess Set" : "Furniture Set");
+  pc_menu_fixtext(header);
+  pc_menu_fixtext(status);
+  pc_menu_list_draw(game, &m->list, header, status, 0);
+  for(int i = pc_menu_list_first(&m->list); i < pc_menu_list_end(&m->list); i++) {
+    pc_ap_ftr_menu_line(m, game, i, in_house[i]);
+  }
+}
