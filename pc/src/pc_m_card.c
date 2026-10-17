@@ -200,8 +200,6 @@ static void put_be16(u8* dst, u16 val) {
     dst[1] = (u8)(val);
 }
 
-static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path);
-
 // AP state sidecar, next to the home town GCI (card_a). It's rotated with the
 // GCI, so backup n is the one that goes with GCI .bak<n> (0 = the main file).
 static void pc_ap_state_path(char* out, size_t size, int backup) {
@@ -267,7 +265,9 @@ static void pc_save_pre_write_side_effects(int save_mode) {
     Save_Set(travel_hard_time, lbRTC_HardTime());
 }
 
-static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path) {
+// with_ap_state: the home town's AP sidecar goes through the same steps (written before anything is rotated,
+// then committed together), so GCI .bakN and sidecar .bakN stay a pair. Callers: pc_save_write_home / _card_b.
+static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path, int with_ap_state) {
     FILE* fp;
     u8* file_data;
     CARDDir dir_hdr;
@@ -399,9 +399,7 @@ static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path) {
     fclose(fp);
     free(file_data);
 
-    // Home town: the AP sidecar goes through the same steps (written before anything is rotated, then
-    // committed together), so GCI .bakN and sidecar .bakN stay a pair. Card B saves belong to another town.
-    if (strcmp(gci_path, l_card_b_gci_path) != 0) {
+    if (with_ap_state) {
         char ap_path[PC_PATHSIZE];
         char ap_tmp[PC_PATHSIZE + 8];
         pc_ap_state_path(ap_path, sizeof(ap_path), 0);
@@ -422,6 +420,22 @@ static int pc_save_write_gci_to(const char* gci_path, const char* tmp_path) {
 
     OSReport("[PC] GCI save: written successfully to %s (backups rotated)\n", gci_path);
     return TRUE;
+}
+
+// Home town (card A): GCI + AP sidecar
+static int pc_save_write_home(void) {
+    char gci_path[PC_PATHSIZE];
+    char tmp_path[PC_PATHSIZE];
+    pc_card_file_out(0, gci_path, sizeof(gci_path), PC_GCI_FILENAME);
+    pc_card_file_out(0, tmp_path, sizeof(tmp_path), PC_GCI_TMP_FILENAME);
+    return pc_save_write_gci_to(gci_path, tmp_path, 1);
+}
+
+// Visited town (card B, path from the scan): GCI only, the sidecar belongs to the home town
+static int pc_save_write_card_b(void) {
+    char tmp_path[sizeof(l_card_b_gci_path) + 8];
+    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", l_card_b_gci_path);
+    return pc_save_write_gci_to(l_card_b_gci_path, tmp_path, 0);
 }
 
 /* Read a GCI file into common_data (for home town / Card A) */
@@ -795,11 +809,7 @@ int mCD_InitGameStart_bg(int player_no, int card_private_idx, int start_cond, s3
                     Common_Set(copy_protect, copy_protect);
                     Save_Set(copy_protect, copy_protect);
                     Save_Set(travel_hard_time, lbRTC_HardTime());
-                    char gci_path[PC_PATHSIZE];
-                    char gci_tmp_path[PC_PATHSIZE];
-                    pc_card_file_out(0, gci_path, sizeof(gci_path), PC_GCI_FILENAME);
-                    pc_card_file_out(0, gci_tmp_path, sizeof(gci_tmp_path), PC_GCI_TMP_FILENAME);
-                    if (!pc_save_write_gci_to(gci_path, gci_tmp_path)) {
+                    if (!pc_save_write_home()) {
                         OSReport("[PC] InitGameStart: reset-code persist failed\n");
                     }
                 }
@@ -829,11 +839,7 @@ int mCD_InitGameStart_bg(int player_no, int card_private_idx, int start_cond, s3
                     Common_Set(copy_protect, copy_protect);
                     Save_Set(copy_protect, copy_protect);
                     Save_Set(travel_hard_time, lbRTC_HardTime());
-                    char gci_path[PC_PATHSIZE];
-                    char gci_tmp_path[PC_PATHSIZE];
-                    pc_card_file_out(0, gci_path, sizeof(gci_path), PC_GCI_FILENAME);
-                    pc_card_file_out(0, gci_tmp_path, sizeof(gci_tmp_path), PC_GCI_TMP_FILENAME);
-                    if (!pc_save_write_gci_to(gci_path, gci_tmp_path)) {
+                    if (!pc_save_write_home()) {
                         OSReport("[PC] InitGameStart: return-home persist failed\n");
                         if (mounted_chan) *mounted_chan = mCD_SLOT_A;
                         return mCD_TRANS_ERR_IOERROR;
@@ -900,16 +906,10 @@ int mCD_SaveHome_bg(int param_1, int* chan) {
 
     if (slot == mCD_SLOT_B && l_card_b_gci_path[0] != '\0') {
         /* Visiting Card B's town — save to Card B GCI */
-        char tmp_path[PC_PATHSIZE + 256 + 8];
-        snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", l_card_b_gci_path);
-        result = pc_save_write_gci_to(l_card_b_gci_path, tmp_path);
+        result = pc_save_write_card_b();
         if (chan) *chan = mCD_SLOT_B;
     } else {
-        char gci_path[PC_PATHSIZE];
-        char gci_tmp_path[PC_PATHSIZE];
-        pc_card_file_out(0, gci_path, sizeof(gci_path), PC_GCI_FILENAME);
-        pc_card_file_out(0, gci_tmp_path, sizeof(gci_tmp_path), PC_GCI_TMP_FILENAME);
-        result = pc_save_write_gci_to(gci_path, gci_tmp_path);
+        result = pc_save_write_home();
         if (chan) *chan = mCD_SLOT_A;
     }
 
@@ -1031,9 +1031,7 @@ int mCD_SaveStation_NextLand_bg(s32* chan) {
 
         /* Persist visited-town state to its Card B GCI. */
         if (l_card_b_gci_path[0] != '\0') {
-            char tmp_path[PC_PATHSIZE + 256 + 8];
-            snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", l_card_b_gci_path);
-            if (!pc_save_write_gci_to(l_card_b_gci_path, tmp_path)) {
+            if (!pc_save_write_card_b()) {
                 OSReport("[PC] SaveStation_NextLand(return): failed to save visited town\n");
                 if (chan) *chan = mCD_SLOT_B;
                 return mCD_TRANS_ERR_IOERROR;
@@ -1102,11 +1100,7 @@ int mCD_SaveStation_NextLand_bg(s32* chan) {
     }
 
     /* 3. Save home town to Card A (with player marked as away) */
-    char gci_path[PC_PATHSIZE];
-    char gci_tmp_path[PC_PATHSIZE];
-    pc_card_file_out(0, gci_path, sizeof(gci_path), PC_GCI_FILENAME);
-    pc_card_file_out(0, gci_tmp_path, sizeof(gci_tmp_path), PC_GCI_TMP_FILENAME);
-    if (!pc_save_write_gci_to(gci_path, gci_tmp_path)) {
+    if (!pc_save_write_home()) {
         /* Restore player state on failure */
         if (Now_Private != NULL) Now_Private->exists = TRUE;
         OSReport("[PC] SaveStation_NextLand: failed to save home town\n");
