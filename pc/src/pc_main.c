@@ -3,6 +3,7 @@
 #include "pc_gx_internal.h"
 #include "pc_texture_pack.h"
 #include "pc_settings.h"
+#include "pc_render_target.h"
 #include "pc_keybindings.h"
 #include "pc_assets.h"
 #include "pc_disc.h"
@@ -71,12 +72,7 @@ void pc_platform_init(void) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-#ifdef PC_ENHANCEMENTS
-    if (g_pc_settings.msaa > 0) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, g_pc_settings.msaa);
-    }
-#endif
+    // No MSAA on the window: it lives in the render target (pc_render_target.c)
 
     {
         Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
@@ -123,9 +119,8 @@ void pc_platform_init(void) {
     pc_platform_update_window_size();
 
 #ifdef PC_ENHANCEMENTS
-    if (g_pc_settings.msaa > 0) {
-        glEnable(GL_MULTISAMPLE);
-    }
+    // GL's default, but MSAA can be turned on live (render target)
+    glEnable(GL_MULTISAMPLE);
 #endif
 
     pc_gx_init();
@@ -165,6 +160,9 @@ void pc_platform_shutdown(void) {
     PADCleanup();
     pc_texture_pack_shutdown();
     pc_gx_shutdown();
+#ifdef PC_ENHANCEMENTS
+    pc_render_target_shutdown();
+#endif
 
     if (g_pc_gl_context) {
         SDL_GL_DeleteContext(g_pc_gl_context);
@@ -188,6 +186,11 @@ void pc_platform_swap_buffers(void) {
     if (!g_pc_gx_frame_begun) {
         pc_gx_clear_black();
     }
+#ifdef PC_ENHANCEMENTS
+    else {
+        pc_render_target_present();
+    }
+#endif
     SDL_GL_SwapWindow(g_pc_window);
 }
 

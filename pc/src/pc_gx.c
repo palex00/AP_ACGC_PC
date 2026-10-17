@@ -1,6 +1,7 @@
 /* pc_gx.c - GX API → OpenGL 3.3: state management, vertex submission, draw dispatch */
 #include "pc_gx_internal.h"
 #include "pc_profiler.h"
+#include "pc_render_target.h"
 #include <stddef.h>
 static GLushort quad_index_buf[(PC_GX_MAX_VERTS / 4) * 6];
 #include <math.h>
@@ -59,7 +60,7 @@ static int   g_aspect_active = 0;
 
 static void pc_gx_update_aspect(void) {
     float gc_aspect = (float)PC_GC_WIDTH / (float)PC_GC_HEIGHT;
-    float win_aspect = (float)g_pc_window_w / (float)g_pc_window_h;
+    float win_aspect = (float)g_pc_render_w / (float)g_pc_render_h;
     if (win_aspect > gc_aspect + 0.01f) {
         g_aspect_factor = gc_aspect / win_aspect;
         g_aspect_offset = (1.0f - g_aspect_factor) / 2.0f * (float)PC_GC_WIDTH;
@@ -409,9 +410,10 @@ void pc_gx_begin_frame(void) {
     /* Masks were changed behind the dirty system; reapply at first flush */
     DIRTY(PC_GX_DIRTY_DEPTH | PC_GX_DIRTY_COLOR_MASK);
 #ifdef PC_ENHANCEMENTS
+    pc_render_target_begin_frame();
     pc_gx_update_aspect();
     glDisable(GL_SCISSOR_TEST);
-    glViewport(0, 0, g_pc_window_w, g_pc_window_h);
+    glViewport(0, 0, g_pc_render_w, g_pc_render_h);
     pc_gx_viewport_state_invalidate();
 #endif
     glClearDepth(g_gx.clear_depth);
@@ -1338,8 +1340,8 @@ void GXSetViewport(f32 left, f32 top, f32 wd, f32 ht, f32 nearz, f32 farz) {
     g_gx.viewport[5] = farz;
 #ifdef PC_ENHANCEMENTS
     {
-        float sx = (float)g_pc_window_w / (float)PC_GC_WIDTH;
-        float sy = (float)g_pc_window_h / (float)PC_GC_HEIGHT;
+        float sx = (float)g_pc_render_w / (float)PC_GC_WIDTH;
+        float sy = (float)g_pc_render_h / (float)PC_GC_HEIGHT;
         float adj_left = left;
         float adj_wd = wd;
 
@@ -1357,7 +1359,7 @@ void GXSetViewport(f32 left, f32 top, f32 wd, f32 ht, f32 nearz, f32 farz) {
         gl_x = (int)(adj_left * sx);
         gl_w = (int)(adj_wd * sx);
         gl_h = (int)(ht * sy);
-        gl_y = g_pc_window_h - (int)(top * sy) - gl_h;
+        gl_y = g_pc_render_h - (int)(top * sy) - gl_h;
     }
 #else
     /* GX is Y-down, GL is Y-up */
@@ -1397,12 +1399,12 @@ void GXSetScissor(u32 left, u32 top, u32 wd, u32 ht) {
     g_gx.scissor[3] = ht;
 #ifdef PC_ENHANCEMENTS
     {
-        float sx = (float)g_pc_window_w / (float)PC_GC_WIDTH;
-        float sy = (float)g_pc_window_h / (float)PC_GC_HEIGHT;
+        float sx = (float)g_pc_render_w / (float)PC_GC_WIDTH;
+        float sy = (float)g_pc_render_h / (float)PC_GC_HEIGHT;
         gl_x = (int)(left * sx);
         gl_w = (int)(wd * sx);
         gl_h = (int)(ht * sy);
-        gl_y = g_pc_window_h - (int)(top * sy) - gl_h;
+        gl_y = g_pc_render_h - (int)(top * sy) - gl_h;
     }
 #else
     /* GX is Y-down, GL is Y-up */
@@ -2050,7 +2052,7 @@ void GXAdjustForOverscan(void* rmin, void* rmout, u16 hor, u16 ver) {
 
 static void pc_gx_copy_tex_execute_impl(void* dest, GXBool clear) {
     pc_gx_commit_pending_and_flush();
-    pc_gx_draw_pending(); /* everything must hit the framebuffer before glReadPixels */
+    pc_gx_draw_pending(); /* everything must hit the framebuffer before the copy */
 
     if (!dest) return;
 
@@ -2060,14 +2062,18 @@ static void pc_gx_copy_tex_execute_impl(void* dest, GXBool clear) {
     if (out_wd > 4096 || out_ht > 4096) return;
 
 #ifdef PC_ENHANCEMENTS
-    /* Scale readback coordinates from GC coords to window resolution */
-    float sx = (float)g_pc_window_w / (float)PC_GC_WIDTH;
-    float sy = (float)g_pc_window_h / (float)PC_GC_HEIGHT;
+    /* Scale copy coordinates from GC coords to render resolution */
+    int fb_w = g_pc_render_w;
+    int fb_h = g_pc_render_h;
+    float sx = (float)fb_w / (float)PC_GC_WIDTH;
+    float sy = (float)fb_h / (float)PC_GC_HEIGHT;
     int read_left = (int)(g_gx.tex_copy_src[0] * sx);
     int read_top  = (int)(g_gx.tex_copy_src[1] * sy);
     int read_wd   = (int)(out_wd * sx);
     int read_ht   = (int)(out_ht * sy);
 #else
+    int fb_w = g_pc_window_w;
+    int fb_h = g_pc_window_h;
     int read_left = g_gx.tex_copy_src[0];
     int read_top  = g_gx.tex_copy_src[1];
     int read_wd   = out_wd;
@@ -2076,13 +2082,37 @@ static void pc_gx_copy_tex_execute_impl(void* dest, GXBool clear) {
 
     if (read_left < 0) { read_wd += read_left; read_left = 0; }
     if (read_top < 0)  { read_ht += read_top;  read_top = 0; }
-    if (read_left + read_wd > g_pc_window_w) read_wd = g_pc_window_w - read_left;
-    if (read_top + read_ht > g_pc_window_h)  read_ht = g_pc_window_h - read_top;
+    if (read_left + read_wd > fb_w) read_wd = fb_w - read_left;
+    if (read_top + read_ht > fb_h)  read_ht = fb_h - read_top;
     if (read_wd <= 0 || read_ht <= 0) return;
 
-    int gl_y = g_pc_window_h - (read_top + read_ht);
+    int gl_y = fb_h - (read_top + read_ht);
     if (gl_y < 0) return;
 
+#ifdef PC_ENHANCEMENTS
+    // GPU copy into a full-res GL texture; GXLoadTexObj will substitute it for the RGB565 buffer.
+    // RGB8: the game copies to RGB565, so alpha samples as 1 like on the GC
+    {
+        GLuint efb_tex;
+        glGenTextures(1, &efb_tex);
+        glBindTexture(GL_TEXTURE_2D, efb_tex);
+        pc_profiler_add_count_texture_bind();
+        pc_gx_texture_bind_cache_invalidate();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, read_wd, read_ht, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        pc_profiler_add_count_texture_bind();
+        pc_gx_texture_bind_cache_invalidate();
+        /* Unit 0 binding was clobbered; force rebind at next flush */
+        DIRTY(PC_GX_DIRTY_TEXTURES);
+
+        pc_render_target_copy_to_texture(read_left, gl_y, read_wd, read_ht, efb_tex);
+        pc_gx_efb_capture_store((u32)(uintptr_t)dest, efb_tex);
+    }
+#else
     size_t rgba_size = (size_t)read_wd * (size_t)read_ht * 4;
     u8* rgba = (u8*)malloc(rgba_size);
     if (!rgba) return;
@@ -2090,41 +2120,6 @@ static void pc_gx_copy_tex_execute_impl(void* dest, GXBool clear) {
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(read_left, gl_y, read_wd, read_ht, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 
-#ifdef PC_ENHANCEMENTS
-    /* Store as full-res GL texture; GXLoadTexObj will substitute it for the RGB565 buffer */
-    {
-        /* Flip: glReadPixels is bottom-up, textures are top-down */
-        int row_bytes = read_wd * 4;
-        for (int y = 0; y < read_ht / 2; y++) {
-            u8* top_row = &rgba[y * row_bytes];
-            u8* bot_row = &rgba[(read_ht - 1 - y) * row_bytes];
-            for (int b = 0; b < row_bytes; b++) {
-                u8 tmp = top_row[b];
-                top_row[b] = bot_row[b];
-                bot_row[b] = tmp;
-            }
-        }
-
-        GLuint efb_tex;
-        glGenTextures(1, &efb_tex);
-        glBindTexture(GL_TEXTURE_2D, efb_tex);
-        pc_profiler_add_count_texture_bind();
-        pc_gx_texture_bind_cache_invalidate();
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, read_wd, read_ht, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, rgba);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        pc_gx_efb_capture_store((u32)(uintptr_t)dest, efb_tex);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        pc_profiler_add_count_texture_bind();
-        pc_gx_texture_bind_cache_invalidate();
-        /* Unit 0 binding was clobbered; force rebind at next flush */
-        DIRTY(PC_GX_DIRTY_TEXTURES);
-    }
-#else
     if (g_gx.tex_copy_fmt == 0x4) {
         u8* out = (u8*)dest;
         int bw = (out_wd + 3) / 4;
@@ -2154,13 +2149,13 @@ static void pc_gx_copy_tex_execute_impl(void* dest, GXBool clear) {
             }
         }
     }
-#endif
 
     free(rgba);
+#endif
     (void)clear;
 }
 
-/* Times the synchronous glReadPixels stall (called via GXCopyDisp and DL replay) */
+/* Times the screen-to-texture copy (called via GXCopyTex and DL replay) */
 static void pc_gx_copy_tex_execute(void* dest, GXBool clear) {
     Uint64 prof_start = pc_profiler_begin_timer();
     pc_gx_copy_tex_execute_impl(dest, clear);

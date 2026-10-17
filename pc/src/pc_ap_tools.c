@@ -84,7 +84,7 @@ void pc_ap_tools_letter(char* buf, size_t len, mActor_name_t item, const char* s
   if(own) {
     snprintf(buf, len, "You found your\n%s!", tool);
   } else if(sender != NULL) {
-    snprintf(buf, len, "%s sent your\n%s!", sender, tool);
+    snprintf(buf, len, "%s\nsent your %s!", sender, tool);
   } else {
     snprintf(buf, len, "Here's your\n%s!", tool);
   }

@@ -1,6 +1,7 @@
 /* pc_settings.c - runtime settings loaded from settings.ini */
 #include "pc_settings.h"
 #include "pc_platform.h"
+#include "pc_render_target.h"
 #include "m_player_lib.h"
 #include "ac_birth_control.h"
 
@@ -10,7 +11,8 @@ PCSettings g_pc_settings = {
     .fullscreen    = 0,
     .vsync         = 0,
     .max_fps       = 60,
-    .msaa          = 4,
+    .msaa          = 0,
+    .render_scale  = PC_RENDER_SCALE_AUTO,
     .texture_filtering = 1,
     .preload_textures = 0,
     .disable_resetti = 0,
@@ -44,7 +46,11 @@ static const char* DEFAULT_SETTINGS =
     "max_fps = 60\n"
     "\n"
     "# Anti-aliasing samples: 0 = off, 2, 4, or 8\n"
-    "msaa = 4\n"
+    "msaa = 0\n"
+    "\n"
+    "# Render scale: 0 = auto (smallest multiple of 480 lines at least the window height, scaled down),\n"
+    "# 1-6 = 480 lines times that, -1 = exactly the window size\n"
+    "render_scale = 0\n"
     "\n"
     "# Texture filtering: 0 = nearest-neighbor, 1 = use the game's filtering\n"
     "texture_filtering = 1\n"
@@ -119,6 +125,8 @@ static void apply_setting(const char* key, const char* value) {
     } else if (strcmp(key, "msaa") == 0) {
         if (val == 0 || val == 2 || val == 4 || val == 8)
             g_pc_settings.msaa = val;
+    } else if (strcmp(key, "render_scale") == 0) {
+        if (val >= PC_RENDER_SCALE_WINDOW && val <= PC_RENDER_SCALE_MAX) g_pc_settings.render_scale = val;
     } else if (strcmp(key, "texture_filtering") == 0) {
         if (val == 0 || val == 1) g_pc_settings.texture_filtering = val;
     } else if (strcmp(key, "preload_textures") == 0) {
@@ -204,6 +212,10 @@ void pc_settings_save(void) {
     fprintf(f, "\n");
     fprintf(f, "# Anti-aliasing samples: 0 = off, 2, 4, or 8\n");
     fprintf(f, "msaa = %d\n", g_pc_settings.msaa);
+    fprintf(f, "\n");
+    fprintf(f, "# Render scale: 0 = auto (smallest multiple of 480 lines at least the window height, scaled down),\n");
+    fprintf(f, "# 1-6 = 480 lines times that, -1 = exactly the window size\n");
+    fprintf(f, "render_scale = %d\n", g_pc_settings.render_scale);
     fprintf(f, "\n");
     fprintf(f, "# Texture filtering: 0 = nearest-neighbor, 1 = use the game's filtering\n");
     fprintf(f, "texture_filtering = %d\n", g_pc_settings.texture_filtering);

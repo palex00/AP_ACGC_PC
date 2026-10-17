@@ -1,5 +1,6 @@
 #include "pc_settings_menu.h"
 #include "pc_settings.h"
+#include "pc_render_target.h"
 #include "pc_keybindings.h"
 #include "pc_menu_util.h"
 #include "pc_text_draw.h"
@@ -22,6 +23,7 @@ enum {
     ITEM_VSYNC,
     ITEM_MAX_FPS,
     ITEM_MSAA,
+    ITEM_RENDER_SCALE,
     ITEM_TEXTURE_FILTERING,
     ITEM_RES,
     ITEM_TEXTURES,
@@ -50,7 +52,8 @@ static const Item tab_video_items[] = {
     { "Display",    ITEM_DISPLAY,  0 },
     { "VSync",      ITEM_VSYNC,    0 },
     { "Max FPS",    ITEM_MAX_FPS,  0 },
-    { "MSAA",       ITEM_MSAA,     1 },
+    { "MSAA",       ITEM_MSAA,     0 },
+    { "Render scale", ITEM_RENDER_SCALE, 0 },
     { "Texture filter", ITEM_TEXTURE_FILTERING, 0 },
     { "Resolution", ITEM_RES,      0 },
     { "Textures",   ITEM_TEXTURES, 1 },
@@ -299,7 +302,7 @@ static void sanitize_glyphs(char* s) {
     }
 }
 
-/* Startup snapshot + restart-required flag. Some settings (MSAA, texture
+/* Startup snapshot + restart-required flag. Some settings (texture
  * pack preload mode) only take effect on process restart. More might appear.*/
 static PCSettings s_startup;
 static int        s_startup_captured = 0;
@@ -317,6 +320,7 @@ static int pc_dirty(void) {
         (s_pending.vsync            != g_pc_settings.vsync) ||
         (s_pending.max_fps          != g_pc_settings.max_fps) ||
         (s_pending.msaa             != g_pc_settings.msaa) ||
+        (s_pending.render_scale     != g_pc_settings.render_scale) ||
         (s_pending.texture_filtering != g_pc_settings.texture_filtering) ||
         (s_pending.window_width     != g_pc_settings.window_width) ||
         (s_pending.window_height    != g_pc_settings.window_height) ||
@@ -373,6 +377,14 @@ static void item_cycle(int id, int dir) {
             for (int i = 0; i < 4; i++) if (s_pending.msaa == steps[i]) { idx = i; break; }
             idx = (idx + (dir > 0 ? 1 : 3)) % 4;
             s_pending.msaa = steps[idx];
+        } break;
+        case ITEM_RENDER_SCALE: {
+            static const int steps[] = { PC_RENDER_SCALE_AUTO, 1, 2, 3, 4, 5, 6, PC_RENDER_SCALE_WINDOW };
+            int idx = 0;
+            int count = sizeof(steps) / sizeof(steps[0]);
+            for (int i = 0; i < count; i++) if (s_pending.render_scale == steps[i]) { idx = i; break; }
+            idx = (idx + (dir > 0 ? 1 : count - 1)) % count;
+            s_pending.render_scale = steps[idx];
         } break;
         case ITEM_TEXTURE_FILTERING:
             s_pending.texture_filtering = !s_pending.texture_filtering;
@@ -467,6 +479,11 @@ static void item_format(int id, char* buf, size_t n) {
             if (s_pending.msaa > 0) snprintf(buf, n, "< %dx >", s_pending.msaa);
             else                    snprintf(buf, n, "< Off >");
             break;
+        case ITEM_RENDER_SCALE:
+            if (s_pending.render_scale == PC_RENDER_SCALE_AUTO)        snprintf(buf, n, "< Auto >");
+            else if (s_pending.render_scale == PC_RENDER_SCALE_WINDOW) snprintf(buf, n, "< Window >");
+            else snprintf(buf, n, "< %dx >", s_pending.render_scale);
+            break;
         case ITEM_TEXTURE_FILTERING:
             snprintf(buf, n, "%s", s_pending.texture_filtering ? "< On >" : "< Off >");
             break;
@@ -521,6 +538,7 @@ static int item_changed(int id) {
         case ITEM_VSYNC:      return s_pending.vsync            != g_pc_settings.vsync;
         case ITEM_MAX_FPS:    return s_pending.max_fps          != g_pc_settings.max_fps;
         case ITEM_MSAA:       return s_pending.msaa             != g_pc_settings.msaa;
+        case ITEM_RENDER_SCALE: return s_pending.render_scale   != g_pc_settings.render_scale;
         case ITEM_TEXTURE_FILTERING:
             return s_pending.texture_filtering != g_pc_settings.texture_filtering;
         case ITEM_RES:        return (s_pending.window_width  != g_pc_settings.window_width) ||
@@ -543,7 +561,6 @@ static int item_changed(int id) {
  * the "restart required" banner should show. */
 static int item_differs_from_startup(int id) {
     switch (id) {
-        case ITEM_MSAA:     return g_pc_settings.msaa             != s_startup.msaa;
         case ITEM_TEXTURES: return g_pc_settings.preload_textures != s_startup.preload_textures;
     }
     return 0;
