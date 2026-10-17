@@ -79,6 +79,12 @@ void pc_platform_init(void) {
         int win_w = g_pc_settings.window_width;
         int win_h = g_pc_settings.window_height;
         if (g_pc_settings.fullscreen == 1) {
+            // Exclusive fullscreen at the desktop's mode (SDL picks the mode closest to the window size)
+            SDL_DisplayMode mode;
+            if (SDL_GetDesktopDisplayMode(0, &mode) == 0) {
+                win_w = mode.w;
+                win_h = mode.h;
+            }
             flags |= SDL_WINDOW_FULLSCREEN;
         } else if (g_pc_settings.fullscreen == 2) {
             flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -154,6 +160,7 @@ void pc_platform_shutdown(void) {
     // NEW: PROBABLY safe to shutdown archipelago first... it's 
     // probably the least important system?
     ap_stop();
+    pc_settings_save_window_size();
 
     pc_audio_shutdown();
     pc_audio_mq_shutdown();
@@ -210,6 +217,7 @@ int pc_platform_poll_events(void) {
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     pc_platform_update_window_size();
+                    pc_settings_note_window_size();
                 }
                 break;
             case SDL_KEYDOWN:

@@ -25,7 +25,6 @@ enum {
     ITEM_MSAA,
     ITEM_RENDER_SCALE,
     ITEM_TEXTURE_FILTERING,
-    ITEM_RES,
     ITEM_TEXTURES,
     ITEM_RESETTI,
     ITEM_SHOP_VISITOR,
@@ -55,7 +54,6 @@ static const Item tab_video_items[] = {
     { "MSAA",       ITEM_MSAA,     0 },
     { "Render scale", ITEM_RENDER_SCALE, 0 },
     { "Texture filter", ITEM_TEXTURE_FILTERING, 0 },
-    { "Resolution", ITEM_RES,      0 },
     { "Textures",   ITEM_TEXTURES, 1 },
 };
 
@@ -148,7 +146,6 @@ static int tab_count(void) {
 /* --- Sub-pages --- */
 typedef enum {
     SUB_SETTINGS = 0,
-    SUB_CONFIRM_RES = 1,
     SUB_CONFIRM_BACK = 2,
     SUB_BINDINGS = 3,
 } SubPage;
@@ -167,13 +164,6 @@ static pc_ap_settings s_ap_current;
 
 /* The current tab's rows (scrolls when it has more than SETTINGS_VISIBLE) */
 static pc_menu_list s_list;
-
-/* Resolution-change confirmation state. */
-#define RES_CONFIRM_MS 15000u
-static int    s_res_old_w = 0;
-static int    s_res_old_h = 0;
-static Uint32 s_res_deadline = 0;
-static int    s_res_sel = 1;
 
 /* Back-confirm state (Discard vs Keep editing when Back hit while dirty). */
 static int    s_back_sel = 0; /* 0 = Keep editing (safe default), 1 = Discard */
@@ -322,8 +312,6 @@ static int pc_dirty(void) {
         (s_pending.msaa             != g_pc_settings.msaa) ||
         (s_pending.render_scale     != g_pc_settings.render_scale) ||
         (s_pending.texture_filtering != g_pc_settings.texture_filtering) ||
-        (s_pending.window_width     != g_pc_settings.window_width) ||
-        (s_pending.window_height    != g_pc_settings.window_height) ||
         (s_pending.preload_textures != g_pc_settings.preload_textures) ||
         (s_pending.disable_resetti  != g_pc_settings.disable_resetti) ||
         (s_pending.disable_shop_visitor_req != g_pc_settings.disable_shop_visitor_req) ||
@@ -388,9 +376,6 @@ static void item_cycle(int id, int dir) {
         } break;
         case ITEM_TEXTURE_FILTERING:
             s_pending.texture_filtering = !s_pending.texture_filtering;
-            break;
-        case ITEM_RES:
-            pc_settings_cycle_resolution(&s_pending.window_width, &s_pending.window_height, dir);
             break;
         case ITEM_TEXTURES: {
             int v = s_pending.preload_textures + (dir > 0 ? 1 : -1);
@@ -487,9 +472,6 @@ static void item_format(int id, char* buf, size_t n) {
         case ITEM_TEXTURE_FILTERING:
             snprintf(buf, n, "%s", s_pending.texture_filtering ? "< On >" : "< Off >");
             break;
-        case ITEM_RES:
-            snprintf(buf, n, "< %dx%d >", s_pending.window_width, s_pending.window_height);
-            break;
         case ITEM_TEXTURES:
             snprintf(buf, n, "%s",
                 s_pending.preload_textures == 0 ? "< On Demand >" :
@@ -541,8 +523,6 @@ static int item_changed(int id) {
         case ITEM_RENDER_SCALE: return s_pending.render_scale   != g_pc_settings.render_scale;
         case ITEM_TEXTURE_FILTERING:
             return s_pending.texture_filtering != g_pc_settings.texture_filtering;
-        case ITEM_RES:        return (s_pending.window_width  != g_pc_settings.window_width) ||
-                                     (s_pending.window_height != g_pc_settings.window_height);
         case ITEM_TEXTURES:   return s_pending.preload_textures != g_pc_settings.preload_textures;
         case ITEM_RESETTI:    return s_pending.disable_resetti  != g_pc_settings.disable_resetti;
         case ITEM_SHOP_VISITOR: return s_pending.disable_shop_visitor_req != g_pc_settings.disable_shop_visitor_req;
@@ -595,32 +575,6 @@ static void list_follow(void) {
 static int idx_apply(void)      { return cur_item_count(); }
 static int idx_back(void)       { return cur_item_count() + 1; }
 
-/* --- Apply / res-confirm finalisers --- */
-
-static void res_confirm_keep(void) {
-    pc_settings_save();
-    printf("[SETTINGS] resolution kept: %dx%d\n",
-           g_pc_settings.window_width, g_pc_settings.window_height);
-}
-
-static void res_confirm_revert(void) {
-    g_pc_settings.window_width  = s_res_old_w;
-    g_pc_settings.window_height = s_res_old_h;
-    s_pending.window_width      = s_res_old_w;
-    s_pending.window_height     = s_res_old_h;
-    pc_settings_apply();
-    pc_settings_save();
-    recompute_dirty();
-    printf("[SETTINGS] resolution reverted to %dx%d\n", s_res_old_w, s_res_old_h);
-}
-
-static void res_confirm_finish(void) {
-    if (s_res_sel == 0) res_confirm_keep();
-    else                res_confirm_revert();
-    s_res_deadline = 0;
-    s_sub = SUB_SETTINGS;
-}
-
 static void apply_pending(void) {
     if (!s_pending_dirty) return;
 
@@ -634,27 +588,15 @@ static void apply_pending(void) {
         return;
     }
 
-    int res_changed = (s_pending.window_width  != g_pc_settings.window_width) ||
-                      (s_pending.window_height != g_pc_settings.window_height);
-    if (res_changed) {
-        s_res_old_w = g_pc_settings.window_width;
-        s_res_old_h = g_pc_settings.window_height;
-    }
-
+    // The windowed size follows the window (resizing), not the menu
+    s_pending.window_width  = g_pc_settings.window_width;
+    s_pending.window_height = g_pc_settings.window_height;
     g_pc_settings = s_pending;
     pc_settings_apply();
     s_pending_dirty = 0;
     recompute_restart_needed();
-
-    if (res_changed) {
-        s_sub = SUB_CONFIRM_RES;
-        s_res_sel = 1;
-        s_res_deadline = SDL_GetTicks() + RES_CONFIRM_MS;
-        printf("[SETTINGS] resolution changed, awaiting confirmation (15s)\n");
-    } else {
-        pc_settings_save();
-        printf("[SETTINGS] applied\n");
-    }
+    pc_settings_save();
+    printf("[SETTINGS] applied\n");
 }
 
 /* =========================================================================
@@ -674,7 +616,6 @@ void pc_settings_menu_enter(void) {
     s_sel = -1;           /* start cursor on the tab row */
     list_reset();
     s_sub = SUB_SETTINGS;
-    s_res_deadline = 0;
     s_capture = 0;
     s_capture_grace = 0;
     s_active = 1;
@@ -730,10 +671,6 @@ static int nav_horizontal(int dir) {
         }
         return 1;
     }
-    if (s_sub == SUB_CONFIRM_RES) {
-        s_res_sel = (s_res_sel + 1) % 2;
-        return 1;
-    }
     if (s_sub == SUB_CONFIRM_BACK) {
         s_back_sel = (s_back_sel + 1) % 2;
         return 1;
@@ -764,10 +701,6 @@ int pc_settings_menu_confirm(void) {
         } else { /* Back */
             s_sub = SUB_SETTINGS;
         }
-        return 1;
-    }
-    if (s_sub == SUB_CONFIRM_RES) {
-        res_confirm_finish();
         return 1;
     }
     if (s_sub == SUB_CONFIRM_BACK) {
@@ -808,11 +741,6 @@ int pc_settings_menu_cancel(void) {
         s_sub = SUB_SETTINGS;
         return 1;
     }
-    if (s_sub == SUB_CONFIRM_RES) {
-        s_res_sel = 1; /* safer default on Esc/B */
-        res_confirm_finish();
-        return 1;
-    }
     if (s_sub == SUB_CONFIRM_BACK) {
         /* Esc = cancel the confirm - snap back to the settings page. */
         s_sub = SUB_SETTINGS;
@@ -830,12 +758,6 @@ int pc_settings_menu_cancel(void) {
 void pc_settings_menu_tick(void) {
     if (!s_active) return;
     if (s_capture_grace > 0) s_capture_grace--;
-    if (s_sub == SUB_CONFIRM_RES && s_res_deadline != 0) {
-        if (SDL_GetTicks() >= s_res_deadline) {
-            s_res_sel = 1;
-            res_confirm_finish();
-        }
-    }
 }
 
 /* --- Keybinding capture --- */
@@ -1036,24 +958,6 @@ static void draw_settings_page(struct game_s* game) {
     }
 }
 
-static void draw_res_confirm_page(struct game_s* game) {
-    char buf[48];
-
-    pc_menu_draw_centered(game, "- Keep this resolution? -", 70.0f, 255, 255, 255, 255, 1.0f);
-
-    snprintf(buf, sizeof(buf), "%dx%d",
-             g_pc_settings.window_width, g_pc_settings.window_height);
-    pc_menu_draw_centered(game, buf, 95.0f, 230, 230, 230, 255, 1.0f);
-
-    Uint32 now = SDL_GetTicks();
-    Uint32 ms_left = (now < s_res_deadline) ? s_res_deadline - now : 0;
-    int secs = (int)((ms_left + 999) / 1000);
-    snprintf(buf, sizeof(buf), "Reverting in %d...", secs);
-    pc_menu_draw_centered(game, buf, 125.0f, 230, 200, 110, 255, 1.0f);
-
-    pc_menu_draw_two_choice(game, "Keep", "Revert", s_res_sel, 160.0f);
-}
-
 /* Discard-changes confirmation shown when the user tries to Back out
  * while s_pending_dirty. No auto-timer (the user must pick). */
 static void draw_back_confirm_page(struct game_s* game) {
@@ -1159,7 +1063,6 @@ void pc_settings_menu_draw(struct game_s* game, int with_dim_backdrop) {
     if (!s_active || !game || !game->graph) return;
     if (with_dim_backdrop) pc_menu_dim_rect(game->graph, 180);
     if (s_sub == SUB_SETTINGS)          draw_settings_page(game);
-    else if (s_sub == SUB_CONFIRM_RES)  draw_res_confirm_page(game);
     else if (s_sub == SUB_BINDINGS)     draw_bindings_page(game);
     else                                draw_back_confirm_page(game);
 }

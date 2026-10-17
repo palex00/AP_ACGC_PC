@@ -128,7 +128,8 @@ void pc_render_target_begin_frame(void) {
                 printf("[PC] render target %dx%d failed, drawing to the window\n", w, h);
             }
         }
-        if (g_pc_verbose && s_fbo) printf("[PC] render target %dx%d msaa=%d\n", w, h, s_samples);
+        if (g_pc_verbose) printf("[PC] window %dx%d, render target %dx%d msaa=%d%s\n", g_pc_window_w, g_pc_window_h,
+                                 w, h, s_samples, s_fbo ? "" : " (failed)");
     }
 
     if (s_fbo) {

@@ -32,11 +32,11 @@ static const char* SETTINGS_FILE = "settings.ini";
 
 static const char* DEFAULT_SETTINGS =
     "[Graphics]\n"
-    "# Window size (ignored in fullscreen)\n"
+    "# Window size in windowed mode (remembered when you resize the window; fullscreen uses the desktop size)\n"
     "window_width = 640\n"
     "window_height = 480\n"
     "\n"
-    "# 0 = windowed, 1 = fullscreen, 2 = borderless fullscreen\n"
+    "# 0 = windowed, 1 = fullscreen (exclusive, desktop resolution), 2 = borderless fullscreen\n"
     "fullscreen = 0\n"
     "\n"
     "# Vertical sync: 0 = off, 1 = on\n"
@@ -182,6 +182,60 @@ static void apply_borderless_acres_setting(void) {
     g_mPlib_wade_disabled = enabled;
 }
 
+// Only on a mode change: re-applying would reset a resized window
+static void apply_display_mode(void) {
+    static int applied = -1; // the window starts in the mode from settings.ini (pc_platform_init)
+    if (applied < 0) applied = g_pc_settings.fullscreen;
+    if (g_pc_settings.fullscreen == applied) return;
+    applied = g_pc_settings.fullscreen;
+
+    switch (g_pc_settings.fullscreen) {
+        case 1: {
+            // Exclusive fullscreen at the desktop's own mode
+            SDL_DisplayMode mode;
+            int display_idx = SDL_GetWindowDisplayIndex(g_pc_window);
+            if (display_idx < 0) display_idx = 0;
+            if (SDL_GetDesktopDisplayMode(display_idx, &mode) == 0) {
+                SDL_SetWindowDisplayMode(g_pc_window, &mode);
+            }
+            SDL_SetWindowFullscreen(g_pc_window, SDL_WINDOW_FULLSCREEN);
+            break;
+        }
+        case 2:
+            SDL_SetWindowFullscreen(g_pc_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            break;
+        case 0:
+        default:
+            SDL_SetWindowFullscreen(g_pc_window, 0);
+            SDL_SetWindowSize(g_pc_window, g_pc_settings.window_width, g_pc_settings.window_height);
+            SDL_SetWindowPosition(g_pc_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            break;
+    }
+}
+
+// Windowed size follows the window; saved at exit if it changed
+static int s_window_size_changed = 0;
+
+void pc_settings_note_window_size(void) {
+    Uint32 flags;
+    int w, h;
+
+    if (!g_pc_window) return;
+    flags = SDL_GetWindowFlags(g_pc_window);
+    if (flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED)) return;
+    SDL_GetWindowSize(g_pc_window, &w, &h);
+    if (w < 1 || h < 1) return;
+    if (w == g_pc_settings.window_width && h == g_pc_settings.window_height) return;
+    g_pc_settings.window_width = w;
+    g_pc_settings.window_height = h;
+    s_window_size_changed = 1;
+}
+
+void pc_settings_save_window_size(void) {
+    if (s_window_size_changed) pc_settings_save();
+    s_window_size_changed = 0;
+}
+
 static void write_defaults(const char* path) {
     FILE* f = fopen(path, "w");
     if (f) {
@@ -197,11 +251,11 @@ void pc_settings_save(void) {
         return;
     }
     fprintf(f, "[Graphics]\n");
-    fprintf(f, "# Window size (ignored in fullscreen)\n");
+    fprintf(f, "# Window size in windowed mode (remembered when you resize the window; fullscreen uses the desktop size)\n");
     fprintf(f, "window_width = %d\n", g_pc_settings.window_width);
     fprintf(f, "window_height = %d\n", g_pc_settings.window_height);
     fprintf(f, "\n");
-    fprintf(f, "# 0 = windowed, 1 = fullscreen, 2 = borderless fullscreen\n");
+    fprintf(f, "# 0 = windowed, 1 = fullscreen (exclusive, desktop resolution), 2 = borderless fullscreen\n");
     fprintf(f, "fullscreen = %d\n", g_pc_settings.fullscreen);
     fprintf(f, "\n");
     fprintf(f, "# Vertical sync: 0 = off, 1 = on\n");
@@ -267,137 +321,12 @@ int pc_settings_get_nes_aspect(void) {
     return g_pc_settings.nes_aspect;
 }
 
-/* --- Resolution preset table (shared) ---
- * Ordered by width then height. The desktop's native size is injected at
- * first use (de-duplicated against the static list) so the user can snap
- * to whatever their monitor is running. Multiple presets share widths now
- * (e.g. 1280x720 vs 1280x960), so cycling is index-based rather than the
- * old width-comparison. */
-#define RES_MAX 32
-static int res_w_tbl[RES_MAX];
-static int res_h_tbl[RES_MAX];
-static int res_count = 0;
-
-static void add_preset(int w, int h) {
-    if (res_count >= RES_MAX) return;
-    for (int i = 0; i < res_count; i++) {
-        if (res_w_tbl[i] == w && res_h_tbl[i] == h) return; /* de-dupe */
-    }
-    int at = res_count;
-    for (int i = 0; i < res_count; i++) {
-        if (res_w_tbl[i] > w || (res_w_tbl[i] == w && res_h_tbl[i] > h)) {
-            at = i;
-            break;
-        }
-    }
-    for (int i = res_count; i > at; i--) {
-        res_w_tbl[i] = res_w_tbl[i - 1];
-        res_h_tbl[i] = res_h_tbl[i - 1];
-    }
-    res_w_tbl[at] = w;
-    res_h_tbl[at] = h;
-    res_count++;
-}
-
-static void ensure_presets(void) {
-    if (res_count > 0) return;
-    /* 4:3 */
-    add_preset(640,  480);
-    add_preset(800,  600);
-    add_preset(960,  720);
-    add_preset(1024, 768);
-    add_preset(1152, 864);
-    add_preset(1280, 960);
-    add_preset(1400, 1050);
-    add_preset(1600, 1200);
-    /* 16:9 */
-    add_preset(1280, 720);
-    add_preset(1366, 768);
-    add_preset(1600, 900);
-    add_preset(1920, 1080);
-    add_preset(2560, 1440);
-    add_preset(3840, 2160);
-    /* Desktop native (inserted sorted, de-duped against the list above). */
-    SDL_DisplayMode mode;
-    if (SDL_GetDesktopDisplayMode(0, &mode) == 0) {
-        add_preset(mode.w, mode.h);
-    }
-}
-
-/* Find the closest preset by total pixel count. Used when the caller's
- * current (w, h) isn't in the list (e.g. custom settings.ini value). */
-static int nearest_index(int w, int h) {
-    long long want = (long long)w * h;
-    int best = 0;
-    long long best_diff = (long long)1 << 62;
-    for (int i = 0; i < res_count; i++) {
-        long long diff = (long long)res_w_tbl[i] * res_h_tbl[i] - want;
-        if (diff < 0) diff = -diff;
-        if (diff < best_diff) { best_diff = diff; best = i; }
-    }
-    return best;
-}
-
-void pc_settings_cycle_resolution(int* width, int* height, int dir) {
-    ensure_presets();
-    int cur = -1;
-    for (int i = 0; i < res_count; i++) {
-        if (res_w_tbl[i] == *width && res_h_tbl[i] == *height) { cur = i; break; }
-    }
-    if (cur < 0) cur = nearest_index(*width, *height);
-
-    if (dir > 0 && cur < res_count - 1) cur++;
-    else if (dir < 0 && cur > 0) cur--;
-
-    *width  = res_w_tbl[cur];
-    *height = res_h_tbl[cur];
-}
-
 void pc_settings_apply(void) {
     apply_frame_limit_setting();
     apply_borderless_acres_setting();
 
     if (!g_pc_window) return;
-
-    int w = g_pc_settings.window_width;
-    int h = g_pc_settings.window_height;
-
-    switch (g_pc_settings.fullscreen) {
-        case 1: {
-            /* Exclusive fullscreen at the user's chosen resolution. SDL
-             * needs the display mode set before transitioning to
-             * SDL_WINDOW_FULLSCREEN or it'll just use the desktop mode. */
-            SDL_DisplayMode target = { 0 };
-            target.w = w;
-            target.h = h;
-            int display_idx = SDL_GetWindowDisplayIndex(g_pc_window);
-            if (display_idx < 0) display_idx = 0;
-            SDL_DisplayMode closest;
-            if (SDL_GetClosestDisplayMode(display_idx, &target, &closest)) {
-                SDL_SetWindowDisplayMode(g_pc_window, &closest);
-            }
-            SDL_SetWindowFullscreen(g_pc_window, SDL_WINDOW_FULLSCREEN);
-            break;
-        }
-        case 2: {
-            /* Borderless window at the user's chosen size, centred. Exit
-             * any fullscreen mode first (including FULLSCREEN_DESKTOP)
-             * so the resize sticks. */
-            SDL_SetWindowFullscreen(g_pc_window, 0);
-            SDL_SetWindowBordered(g_pc_window, SDL_FALSE);
-            SDL_SetWindowSize(g_pc_window, w, h);
-            SDL_SetWindowPosition(g_pc_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-            break;
-        }
-        case 0:
-        default: {
-            SDL_SetWindowFullscreen(g_pc_window, 0);
-            SDL_SetWindowBordered(g_pc_window, SDL_TRUE);
-            SDL_SetWindowSize(g_pc_window, w, h);
-            SDL_SetWindowPosition(g_pc_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-            break;
-        }
-    }
+    apply_display_mode();
 
     SDL_GL_SetSwapInterval(g_pc_settings.vsync);
     pc_platform_update_window_size();

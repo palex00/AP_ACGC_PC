@@ -8,7 +8,7 @@ extern "C" {
 typedef struct {
     int window_width;
     int window_height;
-    int fullscreen;       /* 0=windowed, 1=fullscreen, 2=borderless */
+    int fullscreen;       /* 0=windowed, 1=fullscreen (desktop mode), 2=borderless */
     int vsync;            /* 0=off, 1=on */
     int max_fps;          /* 0=uncapped, otherwise frame limiter target */
     int msaa;             /* 0=off, 2/4/8=samples */
@@ -35,7 +35,9 @@ extern PCSettings g_pc_settings;
 void pc_settings_load(void);
 void pc_settings_save(void);
 void pc_settings_apply(void);
-void pc_settings_cycle_resolution(int* width, int* height, int dir);
+// Windowed size tracking: call on window resize; saved to settings.ini at exit
+void pc_settings_note_window_size(void);
+void pc_settings_save_window_size(void);
 
 #ifdef __cplusplus
 }
