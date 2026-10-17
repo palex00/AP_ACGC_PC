@@ -12,7 +12,7 @@ TOOLS = [NET, FISHING_ROD, SHOVEL]  # StartingTool option values 1-3, in order
 # The tool each museum category needs
 CATEGORY_TOOLS = {MUSEUM_BUG: NET, MUSEUM_FISH: FISHING_ROD, MUSEUM_FOSSIL: SHOVEL}
 # Bugs that also need the shovel: the mole cricket is dug up, the pill bug hides under a rock (hit it)
-SHOVEL_BUGS = ["Mole Cricket", "Pill Bug"]
+SHOVEL_BUGS = ["mole cricket", "pill bug"]
 
 
 def setup(world) -> None:

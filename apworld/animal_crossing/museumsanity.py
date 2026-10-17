@@ -20,9 +20,9 @@ MUSEUM_NAMES = [FOSSILS, PAINTINGS, [name for name, _ in BUGS], [name for name, 
 # Museum slot = category * 0x40 + index: the same number for the item and both of its locations.
 MUSEUM_ITEM_BASE_ID = 0x10100    # "Museum: X"
 MUSEUM_DONATE_BASE_ID = 0x30000  # "Donate X"
-MUSEUM_FIND_BASE_ID = 0x30100    # "Catch X" / "Dig Up X"
+MUSEUM_FIND_BASE_ID = 0x30100    # "Catch X" / "Dig up X"
 # Categories with find locations. Paintings have none yet (room left for "Buy").
-FIND_VERBS = {MUSEUM_FOSSIL: "Dig Up", MUSEUM_BUG: "Catch", MUSEUM_FISH: "Catch"}
+FIND_VERBS = {MUSEUM_FOSSIL: "Dig up", MUSEUM_BUG: "Catch", MUSEUM_FISH: "Catch"}
 
 
 def museum_slot(category: int, index: int) -> int:
@@ -108,6 +108,7 @@ def classify(world, name: str):
 def add_museum_rule(world, category: int, name: str, rule) -> None:
     # On the find and donate locations of one museum thing, the ones that exist. Other features use it too
     # (availability, tools).
+    assert name in MUSEUM_NAMES[category], f"not a museum name: {name}"
     for location in (museum_find_name(category, name), museum_donate_name(name)):
         if location in world.museum_locations:
             add_rule(world.get_location(location), rule)
@@ -124,13 +125,13 @@ def rules(world) -> None:
     # Ants spawn on spoiled turnips or candy. With turnips never spoiling only candy is left, sold by Nook
     # Oct 16-30: needs October and a slot with an open shop
     if world.options.turnips_never_spoil:
-        add_museum_rule(world, MUSEUM_BUG, "Ant", timesanity.month_rule(world, ["October"]))
+        add_museum_rule(world, MUSEUM_BUG, "ant", timesanity.month_rule(world, ["October"]))
         if shop:
-            add_museum_rule(world, MUSEUM_BUG, "Ant", shop)
+            add_museum_rule(world, MUSEUM_BUG, "ant", shop)
     # Snails spawn on flowers (in the rain). New towns have none and only Nook sells seeds, so it needs a slot
     # with an open shop. Ladybugs and the Mantis only spawn in Day Hours: already covered.
     if shop:
-        add_museum_rule(world, MUSEUM_BUG, "Snail", shop)
+        add_museum_rule(world, MUSEUM_BUG, "snail", shop)
 
 
 def museum_goal(world):

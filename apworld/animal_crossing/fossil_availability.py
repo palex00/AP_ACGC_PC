@@ -15,14 +15,14 @@ from .timesanity import MONTHS
 SEASON_MONTHS = [(2, 3, 4), (5, 6, 7), (8, 9, 10), (11, 0, 1)]  # Spring, Summer, Autumn, Winter: months 0-11
 _SEASON_OF_FOSSIL = {
     # Spring: early life, hatching, flyers coming back
-    "Trilobite": 0, "Ammonite": 0, "Dinosaur Egg": 0, "Ptera Skull": 0, "Ptera Right Wing": 0, "Ptera Left Wing": 0,
+    "trilobite": 0, "ammonite": 0, "dinosaur egg": 0, "ptera skull": 0, "ptera right wing": 0, "ptera left wing": 0,
     # Summer: the Jurassic giants
-    "Apato Skull": 1, "Apato Tail": 1, "Apato Torso": 1, "Stego Skull": 1, "Stego Tail": 1, "Stego Torso": 1,
+    "apato skull": 1, "apato tail": 1, "apato torso": 1, "stego skull": 1, "stego tail": 1, "stego torso": 1,
     # Autumn: the Late Cretaceous, the dinosaurs' "fall"
-    "T-rex Skull": 2, "T-rex Tail": 2, "T-rex Torso": 2, "Tricera Skull": 2, "Tricera Tail": 2, "Tricera Torso": 2,
+    "T-rex skull": 2, "T-rex tail": 2, "T-rex torso": 2, "tricera skull": 2, "tricera tail": 2, "tricera torso": 2,
     # Winter: ice age, cold seas, tracks in the snow
-    "Mammoth Skull": 3, "Mammoth Torso": 3, "Plesio Skull": 3, "Plesio Neck": 3, "Plesio Torso": 3,
-    "Amber": 3, "Dinosaur Track": 3,
+    "mammoth skull": 3, "mammoth torso": 3, "plesio skull": 3, "plesio neck": 3, "plesio torso": 3,
+    "amber": 3, "dinosaur track": 3,
 }
 FOSSIL_SEASONS = [_SEASON_OF_FOSSIL[name] for name in FOSSILS]  # museum fossil index -> season
 
@@ -38,11 +38,12 @@ def fossil_series_item_name(series: str) -> str:
 
 FOSSIL_SERIES_ITEMS = [fossil_series_item_name(series) for series in FOSSIL_SERIES]
 ITEMS = {name: FOSSIL_SERIES_ID_BASE + s for s, name in enumerate(FOSSIL_SERIES_ITEMS)}
-# museum fossil index -> its series item name ("T-rex Skull" -> "T-rex Fossils", "Amber" -> "Single Fossils")
+# museum fossil index -> its series item name ("tricera skull" -> "Tricera Fossils", "amber" -> "Single Fossils")
 FOSSIL_SERIES_OF = []
 for _name in FOSSILS:
-    _series = _name.split(" ")[0]
-    FOSSIL_SERIES_OF.append(fossil_series_item_name(_series if _series in FOSSIL_SERIES else "Single"))
+    # Game names are lowercase ("tricera skull", but "T-rex skull"); the series items are capitalized
+    _series = [s for s in FOSSIL_SERIES if s.lower() == _name.split(" ")[0].lower()]
+    FOSSIL_SERIES_OF.append(fossil_series_item_name(_series[0] if _series else "Single"))
 
 
 def setup(world) -> None:

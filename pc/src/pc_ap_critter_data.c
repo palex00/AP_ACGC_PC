@@ -2,296 +2,296 @@
 #include "pc_ap_critter_data.h"
 
 const pc_ap_critter_data pc_ap_bug_data[PC_AP_CRITTER_NUM] = {
-  // Common Butterfly
+  // common butterfly
   { { { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Yellow Butterfly
+  // yellow butterfly
   { { { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Tiger Butterfly
+  // tiger butterfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Purple Butterfly
+  // purple butterfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Robust Cicada
+  // robust cicada
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Walker Cicada
+  // walker cicada
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Evening Cicada
+  // evening cicada
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Brown Cicada
+  // brown cicada
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Bee
+  // bee
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Common Dragonfly
+  // common dragonfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Red Dragonfly
+  // red dragonfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 6, 6 }, { 6, 6 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Darner Dragonfly
+  // darner dragonfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Banded Dragonfly
+  // banded dragonfly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Long Locust
+  // long locust
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 2, 2 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Migratory Locust
+  // migratory locust
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 6, 6 }, { 6, 6 }, { 2, 2 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Cricket
+  // cricket
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Grasshopper
+  // grasshopper
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Bell Cricket
+  // bell cricket
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Pine Cricket
+  // pine cricket
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Drone Beetle
+  // drone beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Dynastid Beetle
+  // dynastid beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Flat Stag Beetle
+  // flat stag beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Jewel Beetle
+  // jewel beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Longhorn Beetle
+  // longhorn beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Ladybug
+  // ladybug
   { { { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Spotted Ladybug
+  // spotted ladybug
   { { { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Mantis
+  // mantis
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Firefly
+  // firefly
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 12, 12 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_NO_RAIN },
-  // Cockroach
+  // cockroach
   { { { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Saw Stag Beetle
+  // saw stag beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Mountain Beetle
+  // mountain beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Giant Beetle
+  // giant beetle
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 9, 9 }, { 9, 9 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Snail
+  // snail
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_RAIN_ONLY },
-  // Mole Cricket
+  // mole cricket
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Pond Skater
+  // pond skater
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Bagworm
+  // bagworm
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Pill Bug
+  // pill bug
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Spider
+  // spider
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Ant
+  // ant
   { { { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 } }, PC_AP_WEATHER_NO_RAIN },
-  // Mosquito
+  // mosquito
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
 };
 
 const pc_ap_critter_data pc_ap_fish_data[PC_AP_CRITTER_NUM] = {
-  // Crucian Carp
+  // crucian carp
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Brook Trout
+  // brook trout
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Carp
+  // carp
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Koi
+  // koi
   { { { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 } }, PC_AP_WEATHER_ANY },
-  // Catfish
+  // catfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Small Bass
+  // small bass
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Bass
+  // bass
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Large Bass
+  // large bass
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Bluegill
+  // bluegill
   { { { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 } }, PC_AP_WEATHER_ANY },
-  // Giant Catfish
+  // giant catfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Giant Snakehead
+  // giant snakehead
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Barbel Steed
+  // barbel steed
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Dace
+  // dace
   { { { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 } }, PC_AP_WEATHER_ANY },
-  // Pale Chub
+  // pale chub
   { { { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 } }, PC_AP_WEATHER_ANY },
-  // Bitterling
+  // bitterling
   { { { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Loach
+  // loach
   { { { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Pond Smelt
+  // pond smelt
   { { { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Sweetfish
+  // sweetfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Cherry Salmon
+  // cherry salmon
   { { { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Large Char
+  // large char
   { { { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Rainbow Trout
+  // rainbow trout
   { { { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Stringfish
+  // stringfish
   { { { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 } }, PC_AP_WEATHER_ANY },
-  // Salmon
+  // salmon
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Goldfish
+  // goldfish
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Piranha
+  // piranha
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 10, 10 }, { 10, 10 }, { 10, 10 }, { 10, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Arowana
+  // arowana
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Eel
+  // eel
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Freshwater Goby
+  // freshwater goby
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Angelfish
+  // angelfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Guppy
+  // guppy
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Popeyed Goldfish
+  // popeyed goldfish
   { { { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 }, { 2, 2 } }, PC_AP_WEATHER_ANY },
-  // Coelacanth
+  // coelacanth
   { { { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 } }, PC_AP_WEATHER_RAIN_ONLY },
-  // Crawfish
+  // crawfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Frog
+  // frog
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Killifish
+  // killifish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Jellyfish
+  // jellyfish
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 15 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Sea Bass
+  // sea bass
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 0 }, { 0, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Red Snapper
+  // red snapper
   { { { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 } }, PC_AP_WEATHER_ANY },
-  // Barred Knifejaw
+  // barred knifejaw
   { { { 0, 0 }, { 0, 0 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 15, 15 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
-  // Arapaima
+  // arapaima
   { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 13, 13 }, { 13, 13 }, { 13, 13 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, PC_AP_WEATHER_ANY },
 };
 
 const u8 pc_ap_fish_passes[PC_AP_CRITTER_NUM] = {
-  0x02, // Crucian Carp
-  0x08, // Brook Trout
-  0x04, // Carp
-  0x04, // Koi
-  0x04, // Catfish
-  0x02, // Small Bass
-  0x04, // Bass
-  0x04, // Large Bass
-  0x02, // Bluegill
-  0x08, // Giant Catfish
-  0x08, // Giant Snakehead
-  0x04, // Barbel Steed
-  0x04, // Dace
-  0x02, // Pale Chub
-  0x01, // Bitterling
-  0x01, // Loach
-  0x01, // Pond Smelt
-  0x02, // Sweetfish
-  0x02, // Cherry Salmon
-  0x04, // Large Char
-  0x04, // Rainbow Trout
-  0x04, // Stringfish
-  0x04, // Salmon
-  0x01, // Goldfish
-  0x02, // Piranha
-  0x04, // Arowana
-  0x02, // Eel
-  0x02, // Freshwater Goby
-  0x02, // Angelfish
-  0x01, // Guppy
-  0x01, // Popeyed Goldfish
-  0x10, // Coelacanth
-  0x08, // Crawfish
-  0x08, // Frog
-  0x09, // Killifish
-  0x10, // Jellyfish
-  0x10, // Sea Bass
-  0x10, // Red Snapper
-  0x10, // Barred Knifejaw
-  0x04, // Arapaima
+  0x02, // crucian carp
+  0x08, // brook trout
+  0x04, // carp
+  0x04, // koi
+  0x04, // catfish
+  0x02, // small bass
+  0x04, // bass
+  0x04, // large bass
+  0x02, // bluegill
+  0x08, // giant catfish
+  0x08, // giant snakehead
+  0x04, // barbel steed
+  0x04, // dace
+  0x02, // pale chub
+  0x01, // bitterling
+  0x01, // loach
+  0x01, // pond smelt
+  0x02, // sweetfish
+  0x02, // cherry salmon
+  0x04, // large char
+  0x04, // rainbow trout
+  0x04, // stringfish
+  0x04, // salmon
+  0x01, // goldfish
+  0x02, // piranha
+  0x04, // arowana
+  0x02, // eel
+  0x02, // freshwater goby
+  0x02, // angelfish
+  0x01, // guppy
+  0x01, // popeyed goldfish
+  0x10, // coelacanth
+  0x08, // crawfish
+  0x08, // frog
+  0x09, // killifish
+  0x10, // jellyfish
+  0x10, // sea bass
+  0x10, // red snapper
+  0x10, // barred knifejaw
+  0x04, // arapaima
 };
 
 const u8 pc_ap_fish_river_pass[PC_AP_CRITTER_NUM] = {
-  1, // Crucian Carp
-  1, // Brook Trout
-  2, // Carp
-  2, // Koi
-  2, // Catfish
-  1, // Small Bass
-  2, // Bass
-  2, // Large Bass
-  1, // Bluegill
-  2, // Giant Catfish
-  2, // Giant Snakehead
-  2, // Barbel Steed
-  2, // Dace
-  1, // Pale Chub
-  0, // Bitterling
-  0, // Loach
-  0, // Pond Smelt
-  1, // Sweetfish
-  1, // Cherry Salmon
-  2, // Large Char
-  2, // Rainbow Trout
-  2, // Stringfish
-  2, // Salmon
-  0, // Goldfish
-  1, // Piranha
-  2, // Arowana
-  1, // Eel
-  1, // Freshwater Goby
-  1, // Angelfish
-  0, // Guppy
-  0, // Popeyed Goldfish
-  2, // Coelacanth
-  1, // Crawfish
-  0, // Frog
-  0, // Killifish
-  2, // Jellyfish
-  2, // Sea Bass
-  2, // Red Snapper
-  2, // Barred Knifejaw
-  2, // Arapaima
+  1, // crucian carp
+  1, // brook trout
+  2, // carp
+  2, // koi
+  2, // catfish
+  1, // small bass
+  2, // bass
+  2, // large bass
+  1, // bluegill
+  2, // giant catfish
+  2, // giant snakehead
+  2, // barbel steed
+  2, // dace
+  1, // pale chub
+  0, // bitterling
+  0, // loach
+  0, // pond smelt
+  1, // sweetfish
+  1, // cherry salmon
+  2, // large char
+  2, // rainbow trout
+  2, // stringfish
+  2, // salmon
+  0, // goldfish
+  1, // piranha
+  2, // arowana
+  1, // eel
+  1, // freshwater goby
+  1, // angelfish
+  0, // guppy
+  0, // popeyed goldfish
+  2, // coelacanth
+  1, // crawfish
+  0, // frog
+  0, // killifish
+  2, // jellyfish
+  2, // sea bass
+  2, // red snapper
+  2, // barred knifejaw
+  2, // arapaima
 };
 
 const u8 pc_ap_bug_pass[PC_AP_CRITTER_NUM] = {
-  2, // Common Butterfly
-  2, // Yellow Butterfly
-  2, // Tiger Butterfly
-  0, // Purple Butterfly
-  0, // Robust Cicada
-  0, // Walker Cicada
-  0, // Evening Cicada
-  0, // Brown Cicada
-  0, // Bee
-  4, // Common Dragonfly
-  4, // Red Dragonfly
-  4, // Darner Dragonfly
-  4, // Banded Dragonfly
-  3, // Long Locust
-  3, // Migratory Locust
-  3, // Cricket
-  3, // Grasshopper
-  3, // Bell Cricket
-  3, // Pine Cricket
-  1, // Drone Beetle
-  1, // Dynastid Beetle
-  1, // Flat Stag Beetle
-  1, // Jewel Beetle
-  1, // Longhorn Beetle
-  2, // Ladybug
-  2, // Spotted Ladybug
-  2, // Mantis
-  4, // Firefly
-  3, // Cockroach
-  1, // Saw Stag Beetle
-  1, // Mountain Beetle
-  1, // Giant Beetle
-  2, // Snail
-  3, // Mole Cricket
-  4, // Pond Skater
-  0, // Bagworm
-  3, // Pill Bug
-  0, // Spider
-  3, // Ant
-  4, // Mosquito
+  2, // common butterfly
+  2, // yellow butterfly
+  2, // tiger butterfly
+  0, // purple butterfly
+  0, // robust cicada
+  0, // walker cicada
+  0, // evening cicada
+  0, // brown cicada
+  0, // bee
+  4, // common dragonfly
+  4, // red dragonfly
+  4, // darner dragonfly
+  4, // banded dragonfly
+  3, // long locust
+  3, // migratory locust
+  3, // cricket
+  3, // grasshopper
+  3, // bell cricket
+  3, // pine cricket
+  1, // drone beetle
+  1, // dynastid beetle
+  1, // flat stag beetle
+  1, // jewel beetle
+  1, // longhorn beetle
+  2, // ladybug
+  2, // spotted ladybug
+  2, // mantis
+  4, // firefly
+  3, // cockroach
+  1, // saw stag beetle
+  1, // mountain beetle
+  1, // giant beetle
+  2, // snail
+  3, // mole cricket
+  4, // pond skater
+  0, // bagworm
+  3, // pill bug
+  0, // spider
+  3, // ant
+  4, // mosquito
 };
