@@ -220,7 +220,7 @@ static int ap_start_offline(const char * path) {
   }
 
   ap_roomplayer * rp = &g_ap_connectstate.roomplayer;
-  ap_slotdata * sd = ap_getslotdata();
+  ap_slotdata * sd = ap_slotdata_writable();
   // Hand-written file: a wrong value type (value() throws) is an error, not a crash
   try {
     rp->team = data.value("team", 0);
@@ -265,7 +265,7 @@ int ap_start(void) {
   ap_config_init(&g_ap_config);
   ap_connectstate_init(&g_ap_connectstate);
 
-  ap_slotdata * sd = ap_getslotdata();
+  ap_slotdata * sd = ap_slotdata_writable();
   ap_slotdata_init(sd);
 
   int result = load_config(AP_CONFIGNAME, &g_ap_config);
@@ -293,7 +293,7 @@ int ap_start(void) {
     }
     // Set every time. A wrong value type throws (json value()); apclientpp would only printf it
     // and we'd sit on CONNECTED with Start blocked, so refuse with a reason instead.
-    ap_slotdata * sd = ap_getslotdata();
+    ap_slotdata * sd = ap_slotdata_writable();
     try {
       nlohmann::json upgraded = slot_data;
       if (!ap_slotdata_upgrade(upgraded)) {
@@ -447,11 +447,11 @@ int ap_start(void) {
   return 0;
 }
 
-ap_config * ap_getconfig(void) {
+const ap_config * ap_getconfig(void) {
   return &g_ap_config;
 }
 
-ap_connectstate * ap_getconnectstate(void) {
+const ap_connectstate * ap_getconnectstate(void) {
   return &g_ap_connectstate;
 }
 

@@ -55,8 +55,8 @@ int pc_ap_overlay_toggle(void) {
 
 // Connection status line, bottom left. Returns the y of its text, for stacking above it
 static f32 pc_ap_draw_status(struct game_s* game) {
-  ap_config * config = ap_getconfig();
-  ap_connectstate * cstate = ap_getconnectstate();
+  const ap_config* config = ap_getconfig();
+  const ap_connectstate* cstate = ap_getconnectstate();
   char output[_APO_MAXSTRING];
 
   switch(cstate->state) {
@@ -91,7 +91,7 @@ static f32 pc_ap_draw_status(struct game_s* game) {
 
 // Seed, in its own box just above the status line (status_y = its text's y)
 static void pc_ap_draw_seed(struct game_s* game, f32 status_y) {
-  ap_roomplayer* rp = &ap_getconnectstate()->roomplayer;
+  const ap_roomplayer* rp = &ap_getconnectstate()->roomplayer;
   char output[_APO_MAXSTRING];
   if(!ap_roomplayer_valid(rp)) {
     return;
@@ -192,7 +192,7 @@ static void pc_ap_draw_toasts(struct game_s* game) {
 // Apworld version, bottom right. Green if the seed's apworld version matches this build,
 // red with (!) if not, white until slot_data arrives.
 static void pc_ap_draw_version(struct game_s* game) {
-  ap_slotdata * sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   char output[_APO_MAXSTRING];
 
   // Offline: no apworld to compare with
@@ -283,7 +283,7 @@ static void apo_append_unlocks(char* out, size_t size) {
 }
 
 static void pc_ap_draw_tracker(struct game_s* game) {
-  ap_slotdata * sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   char output[512];
   output[0] = '\0';
   if(sd->valid && pc_ap_accepting()) {

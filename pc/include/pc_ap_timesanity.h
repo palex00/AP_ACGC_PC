@@ -21,6 +21,13 @@ struct Save_s;
 #define PC_AP_ITEM_SLOT_BASE   0x10020
 
 #define PC_AP_MONTH_NUM  12
+
+// Month names for menus and item names (index 0 = January). Header-only so modules and their tests don't link
+// anything for it.
+static const char* const pc_ap_month_names[PC_AP_MONTH_NUM] = {
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+};
 #define PC_AP_SLOT_NUM   4 // Morning 4-8, Day 9-15, Evening 16-20, Night 21-3
 
 // Seconds of every clock time we set (start date, Date & Time): HH:00:16 is just past vanilla's

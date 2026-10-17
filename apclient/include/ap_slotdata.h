@@ -151,7 +151,8 @@ typedef struct {
   int valid;
 } ap_slotdata;
 
-AP_API ap_slotdata * ap_getslotdata(void);
+// Read-only for the game: only the DLL fills it (ap_slotdata_writable)
+AP_API const ap_slotdata * ap_getslotdata(void);
 AP_API void ap_slotdata_init(ap_slotdata *);
 
 #ifdef __cplusplus
@@ -163,6 +164,8 @@ AP_API void ap_slotdata_init(ap_slotdata *);
 // Old slot_data -> the current format, before ap_slotdata_fill. 0 = the seed needs a newer client.
 int ap_slotdata_upgrade(nlohmann::json& slot_data);
 void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data);
+// The slot_data the DLL fills (ap_getslotdata is the game's read-only view)
+ap_slotdata * ap_slotdata_writable(void);
 #endif
 
 #endif

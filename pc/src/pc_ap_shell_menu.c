@@ -1,15 +1,11 @@
 #include "pc_ap_shell_menu.h"
 #include "pc_ap_logic.h"
+#include "pc_ap_timesanity.h"
 #include "pc_menu_util.h"
 
 #include "game.h"
 
 #include <stdio.h>
-
-static const char* l_month_names[12] = {
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-};
 
 void pc_ap_shell_menu_enter(pc_ap_shell_menu* m) {
   pc_menu_list_set(&m->list, 12, 1, 12);
@@ -46,7 +42,7 @@ void pc_ap_shell_menu_draw(const pc_ap_shell_menu* m, struct game_s* game) {
       r = g = b = a = 255;
       pc_menu_draw_star(game, x_star, y, r, g, b, a, scale);
     }
-    snprintf(text, sizeof(text), "%s", locked ? "(Locked)" : l_month_names[month]);
+    snprintf(text, sizeof(text), "%s", locked ? "(Locked)" : pc_ap_month_names[month]);
     pc_menu_fixtext(text);
     pc_menu_draw_left(game, text, x_name, y, r, g, b, a, scale);
     if(locked) {

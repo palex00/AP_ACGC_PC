@@ -9,7 +9,11 @@
 
 static ap_slotdata g_slotdata;
 
-ap_slotdata * ap_getslotdata(void) {
+const ap_slotdata * ap_getslotdata(void) {
+  return &g_slotdata;
+}
+
+ap_slotdata * ap_slotdata_writable(void) {
   return &g_slotdata;
 }
 

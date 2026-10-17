@@ -27,7 +27,7 @@ static int pc_ap_villagers_can_live(int idx) {
 }
 
 void pc_ap_villagers_apply(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   int i;
 
   if (!l_orig_saved) {

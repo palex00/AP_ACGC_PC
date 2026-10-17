@@ -10,7 +10,7 @@
 #define PC_AP_SKIP_INTRO_TRAIN_AND_JOB 2
 
 int pc_ap_qol_skip_intro(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   return sd->valid && sd->skip_intro == PC_AP_SKIP_INTRO_TRAIN_AND_JOB;
 }
 
@@ -31,7 +31,7 @@ int pc_ap_qol_villagers_never_sleep(void) {
 }
 
 int pc_ap_qol_turnips_never_spoil(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   return sd->valid && sd->turnips_never_spoil;
 }
 
@@ -98,7 +98,7 @@ float pc_ap_qol_bee_speed_scale(void) {
 }
 
 int pc_ap_qol_shops_always_open(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   return sd->valid && sd->shops_always_open;
 }
 

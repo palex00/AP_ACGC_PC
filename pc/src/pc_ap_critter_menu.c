@@ -1,6 +1,7 @@
 #include "pc_ap_critter_menu.h"
 #include "pc_ap_critter_data.h"
 #include "pc_ap_logic.h"
+#include "pc_ap_timesanity.h"
 #include "pc_menu_util.h"
 #include "pc_text_draw.h"
 
@@ -18,10 +19,6 @@
 #define PC_AP_CRITTER_MENU_ROWS 11 // visible lines
 #define PC_AP_CRITTER_MENU_RIGHT 306.0f // right margin x: screen width 320 - 14, like x_star on the left
 
-static const char* l_month_names[12] = {
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-};
 static const char* l_slot_names[4] = { "Mn", "Dy", "Ev", "Ni" };
 // PC_AP_FISH_PASS_* / PC_AP_BUG_PASS_* order (the item names)
 static const char* l_fish_pass_names[PC_AP_FISH_PASS_NUM] = {
@@ -244,7 +241,7 @@ static void pc_ap_critter_menu_rating(struct game_s* game) {
 void pc_ap_critter_menu_draw(const pc_ap_critter_menu* m, struct game_s* game) {
   char header[32];
   char status[32];
-  snprintf(header, sizeof(header), "< %s >", l_month_names[m->month]);
+  snprintf(header, sizeof(header), "< %s >", pc_ap_month_names[m->month]);
   pc_menu_fixtext(header);
   if(m->locked) {
     pc_menu_list_draw(game, &m->list, header, "Locked", 1);

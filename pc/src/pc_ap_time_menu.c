@@ -113,10 +113,6 @@ int pc_ap_time_menu_input(pc_ap_time_menu* m, pc_menu_action act) {
   return PC_MENU_STAY;
 }
 
-static const char* l_month_names[12] = {
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-};
 static const char* l_weekday_names[lbRTC_WEEK] = {
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
 };
@@ -131,7 +127,7 @@ static void pc_ap_time_menu_format(const pc_ap_time_menu* m, int row, char* out,
       snprintf(out, size, "< %d >", t->year);
       break;
     case ROW_MONTH:
-      snprintf(out, size, "< %s >", l_month_names[(t->month - 1) % 12]);
+      snprintf(out, size, "< %s >", pc_ap_month_names[(t->month - 1) % 12]);
       break;
     case ROW_DAY:
       snprintf(out, size, "< %d >  %s", t->day, l_weekday_names[t->weekday % lbRTC_WEEK]);
@@ -213,7 +209,7 @@ static void pc_ap_time_menu_draw_page(const pc_ap_time_menu* m, struct game_s* g
 static void pc_ap_time_menu_draw_confirm(const pc_ap_time_menu* m, struct game_s* game) {
   char date[64];
 
-  snprintf(date, sizeof(date), "%s %d, %d", l_month_names[(m->pending.month - 1) % 12], m->pending.day,
+  snprintf(date, sizeof(date), "%s %d, %d", pc_ap_month_names[(m->pending.month - 1) % 12], m->pending.day,
            m->pending.year);
   pc_menu_draw_centered(game, "- Change the date? -", 80.0f, 255, 255, 255, 255, 1.0f);
   pc_menu_draw_centered(game, date, 105.0f, 230, 230, 230, 255, 1.0f);

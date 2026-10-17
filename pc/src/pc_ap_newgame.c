@@ -29,7 +29,7 @@
 #include "libultra/libultra.h" // bcopy
 
 void pc_ap_newgame_town_fruit(mActor_name_t* fruit) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
 
   // town_fruit is an mAGrw_FRUIT_* index (apworld options.py TownFruit)
   if (sd->valid) {
@@ -38,7 +38,7 @@ void pc_ap_newgame_town_fruit(mActor_name_t* fruit) {
 }
 
 void pc_ap_newgame_town(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
 
   if (!sd->valid) {
     return;
@@ -58,7 +58,7 @@ void pc_ap_newgame_town(void) {
 }
 
 void pc_ap_newgame_shirt(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
 
   // 16 is Random (Gender): keep what the game picked from the gender's list
   if (sd->valid && Now_Private != NULL && sd->starting_shirt >= 0 && sd->starting_shirt < 16) {
@@ -67,7 +67,7 @@ void pc_ap_newgame_shirt(void) {
 }
 
 // What the train asks: name, town, gender, face
-static void pc_ap_newgame_identity(ap_slotdata* sd) {
+static void pc_ap_newgame_identity(const ap_slotdata* sd) {
   pc_ap_name_to_game(Now_Private->player_ID.player_name, PLAYER_NAME_LEN, sd->player_name);
   // Blank (hand-written offline json): the game's name compares fail for an all-space name, so
   // nothing would ever be "you" (house owner, mail, pc_ap_accepting). Same default as the apworld.
@@ -193,7 +193,7 @@ static void pc_ap_newgame_goto_house(GAME_PLAY* play) {
 }
 
 void pc_ap_newgame(GAME_PLAY* play) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
 
   pc_ap_newgame_identity(sd);
   pc_ap_newgame_finalise();

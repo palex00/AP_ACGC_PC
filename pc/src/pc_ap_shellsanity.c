@@ -1,5 +1,6 @@
 #include "pc_ap_shellsanity.h"
 #include "ap_archipelago.h"
+#include "pc_ap_timesanity.h"
 
 #include <stdio.h>
 
@@ -61,15 +62,13 @@ int64_t pc_ap_shellsanity_pickup(const pc_ap_shellsanity* s, mActor_name_t item)
 }
 
 void pc_ap_shellsanity_name(mActor_name_t item, char* out, int len) {
-  static const char* months[PC_AP_MONTHS] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
   int month = item - PC_AP_BEACH_ITEM_START;
   int n;
 
   if (!pc_ap_shellsanity_is_item(item)) {
     month = 0;
   }
-  n = snprintf(out, len + 1, "AP Shell %s", months[month]);
+  n = snprintf(out, len + 1, "AP Shell %.3s", pc_ap_month_names[month]);
   for (; n < len; n++) {
     out[n] = ' ';
   }

@@ -858,7 +858,7 @@ int mCD_InitGameStart_bg(int player_no, int card_private_idx, int start_cond, s3
  * card-error states: no save just leaves the wiped common_data, and
  * decide_next_scene_no then starts a new town via mFRm_CheckSaveData(). */
 void mCD_LoadLand(void) {
-  ap_connectstate * cs = ap_getconnectstate();
+  const ap_connectstate* cs = ap_getconnectstate();
   if(ap_roomplayer_valid(&cs->roomplayer)) {
     pc_card_dir_set_root_ap(cs->roomplayer.seed, cs->roomplayer.team,
         cs->roomplayer.player);

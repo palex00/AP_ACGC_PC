@@ -30,9 +30,8 @@ typedef struct {
   char offline[AP_MAXSTRING]; // offline mode: path of the offline json, "" = connect to host
 } ap_config;
 
-// WARN: sends the ACTUAL config being used! Careful with modifications!!
-// Shouldn't ever send null
-AP_API ap_config * ap_getconfig(void);
+// The config being used (read-only for the game). Never null
+AP_API const ap_config * ap_getconfig(void);
 
 #define AP_CSTATE_UNKNOWN       0
 #define AP_CSTATE_CONNECTING    1
@@ -58,9 +57,8 @@ typedef struct {
   int connect_once; // ever connected once
 } ap_connectstate;
 
-// WARN: sends the ACTUAL connect state being tracked! Careful with modifications!
-// Shouldn't ever send null
-AP_API ap_connectstate * ap_getconnectstate(void);
+// The connect state being tracked (read-only for the game). Never null
+AP_API const ap_connectstate * ap_getconnectstate(void);
 
 // Get the ap item at ap index idx
 AP_API int64_t ap_getitem(size_t idx);

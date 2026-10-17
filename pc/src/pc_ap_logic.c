@@ -135,7 +135,7 @@ static pc_ap g_ap;
 static void pc_ap_settings_push(void);
 
 void pc_ap_init(void) {
-  ap_slotdata* sd = ap_getslotdata();
+  const ap_slotdata* sd = ap_getslotdata();
   pc_ap_loansanity_init(&g_ap.loans, sd);
   pc_ap_credit_init(&g_ap.credit, sd);
   pc_ap_favorsanity_init(&g_ap.favors, sd);
