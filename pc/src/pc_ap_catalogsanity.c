@@ -1,4 +1,5 @@
 #include "pc_ap_catalogsanity.h"
+#include "pc_ap_logic.h" // pc_ap_ftr_blocked
 #include "ap_archipelago.h"
 #include "m_shop.h"
 #include "m_name_table.h"
@@ -149,6 +150,10 @@ static int pc_ap_catalogsanity_in_season(int pos, int season) {
 
 static int pc_ap_catalogsanity_kind(const pc_ap_catalogsanity* c, int open, const pc_ap_catalog_request* r,
                                     mActor_name_t item, int pos) {
+  // Set goal pieces before their AP item: never (not pool items, the apworld keeps them out)
+  if(pc_ap_ftr_blocked(item)) {
+    return PC_AP_CATALOG_SKIP;
+  }
   int owned = mSP_CollectCheck(item);
   int i = pc_ap_catalogsanity_index(c, item);
   if(i >= 0) {
@@ -238,6 +243,9 @@ void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_a
 // Wisp without a new pool item: his lists minus pool items that aren't in the
 // catalog (with unowned_only, only things not in the catalog)
 static int pc_ap_catalogsanity_wisp_candidate(const pc_ap_catalogsanity* c, mActor_name_t item, int unowned_only) {
+  if(pc_ap_ftr_blocked(item)) {
+    return 0;
+  }
   int owned = mSP_CollectCheck(item);
   if(unowned_only && owned) {
     return 0;

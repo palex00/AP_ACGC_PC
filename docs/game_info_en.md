@@ -46,6 +46,8 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
 Filler items are Bell Credits, which pay off your current loan directly. They stop at 100 Bells owed: you pay
 the last 100 yourself at the post office, so you choose when the payoff (and its checks) happens. Credits that
 arrive between an upgrade and Nook's next loan are held, and once every loan is paid they go into your savings.
+Extra Bells (0 by default) adds real Bells on top: 10,000 and 30,000 Bell bags, mailed to you. They take filler
+slots before the Bell Credits.
 
 ## What is the goal?
 
@@ -56,6 +58,11 @@ Choose one or more (all chosen goals are required):
   items only exist with this goal).
 - **Froggy Chair:** get the froggy chair into your catalog, any way you can.
 - **Catalog:** get a percentage of the Catalogsanity items into your catalog.
+- **Furniture Set:** every piece of one furniture series (Classic, Cabin, Kiddie, ... 10 pieces; random by
+  default) placed somewhere in your house. Each piece is an item, mailed to you; nothing else gives one before
+  that. Needs the basement.
+- **Chess Set:** a full chess board somewhere in your house: 8 pawns, 2 rooks, 2 knights, 2 bishops, a queen and a
+  king per colour. One item per piece kind; order the rest from the catalog. Needs the basement.
 
 Once your goals are done, a letter arrives telling you to listen to K.K. Slider on a Saturday night
 (20:00-23:59) to finish. With Timesanity you need the Evening or Night slot for that.

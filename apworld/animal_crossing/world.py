@@ -2,7 +2,7 @@
 # (its items, locations, rules, slot_data, ids) is in its own file, named after its option:
 #   goal, intro, town_generation, loansanity, bell_credits, extra_bells, timesanity, favor_pools, shellsanity,
 #   museumsanity, fossil_availability, fish_availability, bug_availability, tools_in_pool, catalogsanity,
-#   nook_store_upgrades, quality_of_life
+#   nook_store_upgrades, furniture_sets, quality_of_life
 # Generated data: game_items, museum_data, catalog_data, villager_data. Options: options.py.
 #
 # A feature file has whichever of these it needs (plain functions taking the world):
@@ -26,7 +26,7 @@ from Options import OptionError, OptionGroup
 from worlds.AutoWorld import WebWorld, World
 
 from . import (bell_credits, bug_availability, catalogsanity, extra_bells, favor_pools, fish_availability,
-               fossil_availability, goal, intro, loansanity, museumsanity, nook_store_upgrades, options,
+               fossil_availability, furniture_sets, goal, intro, loansanity, museumsanity, nook_store_upgrades, options,
                quality_of_life, shellsanity, timesanity, tools_in_pool, town_generation)
 from .game_items import ITEM_NAME_TO_ID as GAME_ITEMS
 from .options import AnimalCrossingOptions
@@ -51,7 +51,7 @@ assert len(LOCATION_NAME_TO_ID) == sum(len(f.LOCATIONS) for f in (
     loansanity, favor_pools, shellsanity, museumsanity, catalogsanity)), "location name in two features"
 # Features with items, for create_item's classification
 ITEM_FEATURES = (loansanity, timesanity, favor_pools, catalogsanity, fossil_availability, fish_availability,
-                 bug_availability, museumsanity, tools_in_pool, nook_store_upgrades)
+                 bug_availability, museumsanity, tools_in_pool, nook_store_upgrades, furniture_sets)
 
 
 class AnimalCrossingItem(Item):
@@ -71,6 +71,7 @@ class AnimalCrossingWeb(WebWorld):
             options.Goal,
             options.MuseumGoalPercent,
             options.CatalogGoalPercent,
+            options.FurnitureSet,
         ]),
         OptionGroup("Intro", [
             options.SkipIntro,
@@ -188,6 +189,8 @@ class AnimalCrossingWorld(World):
     museum_modes: dict[int, int] = {}
     # Bell Credit tiers get_filler_item_name draws from (create_items may drop the big ones)
     filler_tiers: tuple[str, ...] = tuple(bell_credits.BELL_CREDITS)
+    # Set goal pieces (furniture_sets.setup); empty for item link groups, which skip generate_early
+    goal_pieces: tuple[str, ...] = ()
 
     # Universal Tracker regenerates the world from slot_data (no yaml needed): see ut_restore_options
     ut_can_gen_without_yaml = True
@@ -229,6 +232,7 @@ class AnimalCrossingWorld(World):
         town_generation.setup(self)
         loansanity.setup(self)
         nook_store_upgrades.setup(self)
+        furniture_sets.setup(self)  # before catalogsanity: it reads goal_pieces
         catalogsanity.setup(self)
         favor_pools.setup(self)
 
@@ -248,7 +252,8 @@ class AnimalCrossingWorld(World):
         # Non-filler items, in pool order
         return (loansanity.items(self) + timesanity.items(self) + museumsanity.items(self) + tools_in_pool.items(self)
                 + fossil_availability.items(self) + fish_availability.items(self) + bug_availability.items(self)
-                + nook_store_upgrades.items(self) + catalogsanity.items(self) + favor_pools.items(self))
+                + nook_store_upgrades.items(self) + catalogsanity.items(self) + favor_pools.items(self)
+                + furniture_sets.items(self))
 
     def create_regions(self) -> None:
         menu = Region("Menu", self.player, self.multiworld)
@@ -324,6 +329,7 @@ class AnimalCrossingWorld(World):
             **fish_availability.slot_data(self),
             **fossil_availability.slot_data(self),
             **bell_credits.slot_data(self),
+            **furniture_sets.slot_data(self),
             # From archipelago.json; the client compares it with its own build
             "world_version": ".".join(str(n) for n in self.world_version),
         }

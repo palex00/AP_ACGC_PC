@@ -15,6 +15,10 @@ extern "C" {
 #define AP_GOAL_MUSEUM  (1 << 1)
 #define AP_GOAL_FROGGY  (1 << 2) // froggy chair in the catalog
 #define AP_GOAL_CATALOG (1 << 3) // catalog_goal_count Catalogsanity items in the catalog
+#define AP_GOAL_FURNITURE_SET (1 << 4) // every furniture_set_items piece in the house
+#define AP_GOAL_CHESS_SET     (1 << 5) // a chess board's pieces in the house
+
+#define AP_FURNITURE_SET_MAX 10 // pieces in a Furniture Set (apworld FURNITURE_SETS)
 
 // Museumsanity check modes (bits, per category). 0 = no checks for that category.
 #define AP_MUSEUM_FIND   (1 << 0) // bugs/fish: catching it (journal). Fossils: digging it up (pre-appraised)
@@ -137,6 +141,8 @@ typedef struct {
   int shellsanity_item_chance;        // Shellsanity: percent of washed-up shells that are AP items
   int catalog_goal_count;            // Catalog goal: pool items to get into the catalog (apworld computes it from its % option)
   int bell_credits[AP_BELLCREDIT_NUM]; // bells per small/modest/large bell credit
+  int furniture_set_count;           // Furniture Set goal: pieces in furniture_set_items (0 without the goal)
+  unsigned short furniture_set_items[AP_FURNITURE_SET_MAX]; // game item ids of the set's pieces
   char world_version[16];            // apworld version the seed was generated with ("" if missing)
   // Whether the struct has valid data
   int valid;

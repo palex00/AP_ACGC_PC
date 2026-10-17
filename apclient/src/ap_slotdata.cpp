@@ -63,6 +63,21 @@ static void read_catalog_pools(const nlohmann::json& slot_data, ap_slotdata * sd
   }
 }
 
+// Furniture Set goal pieces: game item ids. Bad entries are skipped, past AP_FURNITURE_SET_MAX dropped
+static void read_furniture_set(const nlohmann::json& slot_data, ap_slotdata * sd) {
+  sd->furniture_set_count = 0;
+  auto it = slot_data.find("furniture_set_items");
+  if (it == slot_data.end() || !it->is_array()) { return; }
+  for (auto& v : *it) {
+    if (!v.is_number_integer() || v.get<int>() <= 0 || v.get<int>() > 0xFFFF ||
+        sd->furniture_set_count >= AP_FURNITURE_SET_MAX) {
+      APLOG_WARN("furniture_set_items: ignoring %s", v.dump().c_str());
+    } else {
+      sd->furniture_set_items[sd->furniture_set_count++] = (unsigned short)v.get<int>();
+    }
+  }
+}
+
 // Catalog Sources option set (names) -> AP_CATALOG_SOURCE_* bits; missing = none
 static int read_catalog_sources(const nlohmann::json& slot_data) {
   // Same order as the bits (apworld options.CATALOG_SOURCES)
@@ -88,6 +103,8 @@ static int read_goal(const nlohmann::json& slot_data) {
     if (g.is_string() && g.get<std::string>() == "Museum") { goal |= AP_GOAL_MUSEUM; }
     if (g.is_string() && g.get<std::string>() == "Froggy Chair") { goal |= AP_GOAL_FROGGY; }
     if (g.is_string() && g.get<std::string>() == "Catalog") { goal |= AP_GOAL_CATALOG; }
+    if (g.is_string() && g.get<std::string>() == "Furniture Set") { goal |= AP_GOAL_FURNITURE_SET; }
+    if (g.is_string() && g.get<std::string>() == "Chess Set") { goal |= AP_GOAL_CHESS_SET; }
   }
   return goal;
 }
@@ -185,6 +202,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   if (sd->new_item_chance < 0 || sd->new_item_chance > 100) { sd->new_item_chance = 0; }
   sd->catalog_sources = read_catalog_sources(slot_data);
   sd->catalog_goal_count = slot_data.value("catalog_goal_count", 0);
+  read_furniture_set(slot_data, sd);
   sd->beach_per_month = slot_data.value("shellsanity", 0) % 2 ? slot_data.value("beach_checks_per_month", 0) : 0;
   if (sd->beach_per_month < 0 || sd->beach_per_month > AP_BEACH_PER_MONTH_MAX) { sd->beach_per_month = 0; }
   sd->shellsanity_item_chance = slot_data.value("shellsanity_item_chance", 20);

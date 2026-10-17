@@ -287,11 +287,33 @@ class Goal(OptionSet):
     Museum: receive Museum Goal Percent of the museum donation items (needs Museumsanity).
     Froggy Chair: get the froggy chair into your catalog, any way you can (never a Catalogsanity item).
     Catalog: get Catalog Goal Percent of the Catalogsanity items into your catalog (needs Catalogsanity).
+    Furniture Set: every piece of the Furniture Set placed somewhere in your house. Each piece is an item,
+    mailed to you, and can't be found any other way before that.
+    Chess Set: a full chess board's pieces somewhere in your house (8 pawns, 2 rooks, 2 knights, 2 bishops, a queen
+    and a king per colour). One item per piece kind; order the rest from the catalog.
+    Both set goals need the basement built and an open shop (to order lost pieces again).
     Once all goals are done, listen to K.K. Slider on a Saturday night (20:00-23:59) to finish.
     """
     display_name = "Goal"
-    valid_keys = {"Statue", "Museum", "Froggy Chair", "Catalog"}
+    valid_keys = {"Statue", "Museum", "Froggy Chair", "Catalog", "Furniture Set", "Chess Set"}
     default = frozenset({"Statue", "Museum"})
+
+
+class FurnitureSet(Choice):
+    """Furniture Set goal only: the furniture series (10 pieces each) to collect."""
+    display_name = "Furniture Set"
+    option_exotic = 0
+    option_lovely = 1
+    option_classic = 2
+    option_ranch = 3
+    option_cabana = 4
+    option_blue = 5
+    option_modern = 6
+    option_regal = 7
+    option_green = 8
+    option_cabin = 9
+    option_kiddie = 10
+    default = "random"
 
 
 class LoanAmount(NamedRange):
@@ -1011,6 +1033,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     goal: Goal
     museum_goal_percent: MuseumGoalPercent
     catalog_goal_percent: CatalogGoalPercent
+    furniture_set: FurnitureSet
     tools_in_pool: ToolsInPool
     starting_tool: StartingTool
     shops_always_open: ShopsAlwaysOpen

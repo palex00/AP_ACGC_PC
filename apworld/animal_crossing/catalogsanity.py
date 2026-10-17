@@ -3,6 +3,7 @@
 # out new pool items. Also the Catalog goal: Catalog Goal Percent of the pool items in the catalog.
 # The eligible items are generated (catalog_data.py).
 # WARN: the client mirrors the ids and the item count (pc_ap_catalogsanity.h, AP_CATALOG_MAX)!
+# Reads: world.goal_pieces (furniture_sets.setup): the set goals' pieces are never pooled.
 import math
 import re
 from random import Random
@@ -10,7 +11,7 @@ from random import Random
 from BaseClasses import ItemClassification
 from worlds.generic.Rules import add_rule
 
-from . import timesanity
+from . import furniture_sets, timesanity
 from .catalog_data import CATALOG_ITEMS
 from .game_items import ITEM_NAME_TO_ID as GAME_ITEMS
 
@@ -33,13 +34,20 @@ LOCATIONS = {catalog_location_name(item_id): CATALOG_LOCATION_BASE_ID + item_id
 assert len(LOCATIONS) == CATALOG_ELIGIBLE, "duplicate catalog location names"
 
 
-def make_pools(random: Random, pools: int, size: int) -> list[list[int]]:
+def eligible(excluded: set[int]) -> dict[str, list[int]]:
+    # CATALOG_ITEMS minus the excluded game item ids (the set goals' pieces)
+    return {cat: [i for i in ids if i not in excluded] for cat, ids in CATALOG_ITEMS.items()}
+
+
+def make_pools(random: Random, pools: int, size: int, excluded: set[int] = frozenset()) -> list[list[int]]:
     """
-    `pools` lists of `size` game item ids, no item twice. Categories get their share of all picks by size
-    (largest remainder), and every pool gets a similar mix: picks are spread evenly over the pools.
+    `pools` lists of `size` game item ids, no item twice, none excluded. Categories get their share of all picks by
+    size (largest remainder), and every pool gets a similar mix: picks are spread evenly over the pools.
     """
+    items = eligible(excluded)
+    count = sum(len(ids) for ids in items.values())
     total = pools * size
-    shares = {cat: total * len(ids) / CATALOG_ELIGIBLE for cat, ids in CATALOG_ITEMS.items()}
+    shares = {cat: total * len(ids) / count for cat, ids in items.items()}
     counts = {cat: int(share) for cat, share in shares.items()}
     left = total - sum(counts.values())
     for cat in sorted(shares, key=lambda c: counts[c] - shares[c])[:left]:
@@ -47,7 +55,7 @@ def make_pools(random: Random, pools: int, size: int) -> list[list[int]]:
 
     # Pick j of n in a category sits at (j + 0.5) / n along the pool order, so each pool gets its part
     spread = []
-    for cat, ids in CATALOG_ITEMS.items():
+    for cat, ids in items.items():
         picks = random.sample(ids, counts[cat])
         spread += [((j + 0.5) / len(picks), random.random(), item_id) for j, item_id in enumerate(picks)]
     order = [item_id for _, _, item_id in sorted(spread)]
@@ -60,11 +68,14 @@ def setup(world) -> None:
     world.catalog_pools = []
     if o.catalogsanity:
         pools, size = o.catalog_pools.value, o.catalog_pool_size.value
-        if pools * size > CATALOG_ELIGIBLE:
+        # The set goals' pieces aren't pooled
+        excluded = furniture_sets.catalog_excluded(world)
+        most = sum(len(ids) for ids in eligible(excluded).values())
+        if pools * size > most:
             raise world.option_error(f"Catalog Pools x Catalog Pool Size is {pools * size}, at most "
-                                     f"{CATALOG_ELIGIBLE} (with {pools} pools: size at most "
-                                     f"{CATALOG_ELIGIBLE // pools}).")
-        world.catalog_pools = make_pools(world.random, pools, size)
+                                     f"{most} with these goals (with {pools} pools: size at most "
+                                     f"{most // pools}).")
+        world.catalog_pools = make_pools(world.random, pools, size, excluded)
     if world.ut is not None and "catalog_pools" in world.ut:
         world.catalog_pools = world.ut["catalog_pools"]
     total = sum(len(pool) for pool in world.catalog_pools)

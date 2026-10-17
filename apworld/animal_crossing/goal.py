@@ -1,6 +1,6 @@
 # Goal: every chosen goal is required. Each goal's rule lives with its feature; here they're checked and combined.
 # Goals are only sent when K.K. Slider plays (Saturday night), so with Timesanity a slot with his hours is needed.
-from . import catalogsanity, loansanity, museumsanity, timesanity
+from . import catalogsanity, furniture_sets, loansanity, museumsanity, timesanity
 
 
 def setup(world) -> None:
@@ -25,6 +25,8 @@ GOALS = {
     "Museum": museumsanity.museum_goal,
     "Froggy Chair": froggy_chair_goal,
     "Catalog": catalogsanity.catalog_goal,
+    furniture_sets.FURNITURE_SET_GOAL: furniture_sets.furniture_set_goal,
+    furniture_sets.CHESS_SET_GOAL: furniture_sets.chess_set_goal,
 }
 
 

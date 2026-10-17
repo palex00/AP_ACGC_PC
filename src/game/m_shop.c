@@ -550,6 +550,12 @@ extern void mSP_SelectRandomItem_New(GAME* game, mActor_name_t* goods_table, int
                                                    list_type == mSP_LIST_B || list_type == mSP_LIST_C)) {
                     list_item_count = mSP_CountElementInClothList_collect(item_list_p, &selected_idx, uncollected_only);
                 } else {
+#ifdef TARGET_PC
+                    /* AP set goals: their pieces only once received */
+                    if (pc_ap_ftr_blocking()) {
+                        list_item_count = pc_ap_ftr_count_select(item_list_p, &selected_idx, uncollected_only);
+                    } else
+#endif
                     list_item_count =
                         mSP_CountElementInCommonList_collect(item_list_p, &selected_idx, uncollected_only);
                 }
@@ -2158,7 +2164,12 @@ static int mSP_GetNonePossessionItemCount_InList(mActor_name_t* list, int catego
                 collect_idx = list_p[0] - ITM_WALL_START;
             }
 
-            if (((collect_bitfield[collect_idx >> 5] >> (collect_idx & 0x1F)) & 1) == 0) {
+            if (((collect_bitfield[collect_idx >> 5] >> (collect_idx & 0x1F)) & 1) == 0
+#ifdef TARGET_PC
+                /* AP set goals: a piece not received yet counts as owned (callers fall back) */
+                && !pc_ap_ftr_blocked(list_p[0])
+#endif
+            ) {
                 count++;
             }
         }
@@ -2188,7 +2199,11 @@ static mActor_name_t mSP_GetNonePossessionItem_InList(mActor_name_t* list, int c
                 collect_idx = list_p[0] - ITM_WALL_START;
             }
 
-            if (((collect_bitfield[collect_idx >> 5] >> (collect_idx & 0x1F)) & 1) == 0) {
+            if (((collect_bitfield[collect_idx >> 5] >> (collect_idx & 0x1F)) & 1) == 0
+#ifdef TARGET_PC
+                && !pc_ap_ftr_blocked(list_p[0])
+#endif
+            ) {
                 if (selected_idx == count) {
                     return list_p[0];
                 } else {
