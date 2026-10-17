@@ -1,6 +1,7 @@
 #include "pc_ap_ftr_menu.h"
 #include "pc_ap_logic.h"
 #include "pc_menu_util.h"
+#include "pc_text_draw.h"
 
 #include "m_font.h"
 #include "m_home_h.h"
@@ -9,6 +10,10 @@
 #include <stdio.h>
 
 #define PC_AP_FTR_MENU_ROWS 12 // all chess kinds fit
+#define PC_AP_FTR_MENU_SCALE 0.9f
+#define PC_AP_FTR_MENU_SCREEN_W 320.0f
+#define PC_AP_FTR_MENU_STAR_W 12.0f  // star / key column, then the name (as on the Bugs / Fish pages)
+#define PC_AP_FTR_MENU_COUNT_GAP 16.0f // longest name to the chess counter
 
 void pc_ap_ftr_menu_enter(pc_ap_ftr_menu* m, int chess) {
   m->chess = chess;
@@ -48,11 +53,10 @@ int pc_ap_ftr_menu_input(pc_ap_ftr_menu* m, pc_menu_action act) {
 }
 
 // [star or key] name, chess "in house / needed"; colours as on the Bugs / Fish pages
-static void pc_ap_ftr_menu_line(const pc_ap_ftr_menu* m, struct game_s* game, int i, int in_house) {
-  f32 x_star = 14.0f;
-  f32 x_name = 26.0f;
-  f32 x_count = 234.0f;
-  f32 scale = 0.9f;
+static void pc_ap_ftr_menu_line(const pc_ap_ftr_menu* m, struct game_s* game, int i, int in_house, f32 x_star,
+                                f32 x_count) {
+  f32 x_name = x_star + PC_AP_FTR_MENU_STAR_W;
+  f32 scale = PC_AP_FTR_MENU_SCALE;
   f32 y = pc_menu_list_y(&m->list, i);
   int received = pc_ap_ftr_received(m->items[i]);
   int done = in_house >= m->needed[i];
@@ -101,7 +105,25 @@ void pc_ap_ftr_menu_draw(const pc_ap_ftr_menu* m, struct game_s* game) {
   pc_menu_fixtext(header);
   pc_menu_fixtext(status);
   pc_menu_list_draw(game, &m->list, header, status, 0);
+
+  // Longest name + chess counter centered as one block; the star / key hangs left of it
+  f32 name_w = 0.0f;
+  for(int i = 0; i < m->count; i++) {
+    f32 w = pc_text_width(m->names[i]) * PC_AP_FTR_MENU_SCALE;
+    if(w > name_w) {
+      name_w = w;
+    }
+  }
+  f32 block_w = name_w;
+  if(m->chess) {
+    char widest[8] = "0 / 0";
+    pc_menu_fixtext(widest);
+    block_w += PC_AP_FTR_MENU_COUNT_GAP + pc_text_width(widest) * PC_AP_FTR_MENU_SCALE;
+  }
+  f32 x_name = (PC_AP_FTR_MENU_SCREEN_W - block_w) * 0.5f;
+  f32 x_star = x_name - PC_AP_FTR_MENU_STAR_W;
+  f32 x_count = x_name + name_w + PC_AP_FTR_MENU_COUNT_GAP;
   for(int i = pc_menu_list_first(&m->list); i < pc_menu_list_end(&m->list); i++) {
-    pc_ap_ftr_menu_line(m, game, i, in_house[i]);
+    pc_ap_ftr_menu_line(m, game, i, in_house[i], x_star, x_count);
   }
 }

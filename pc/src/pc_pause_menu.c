@@ -57,6 +57,7 @@ typedef enum {
     MAIN_SHELLS,  // AP page, Shellsanity only
     MAIN_FTR_SET, // AP page, Furniture Set goal only
     MAIN_CHESS,   // AP page, Chess Set goal only
+    MAIN_BACK,    // AP page: back to main
     MAIN_MAX,
 } MainItem;
 
@@ -122,6 +123,7 @@ static void lists_update(void) {
     if (pc_ap_ftr_chess_on()) {
         list_add(&ap_list, MAIN_CHESS);
     }
+    list_add(&ap_list, MAIN_BACK);
     ap_list.sel = list_find(&ap_list, prev_ap);
 }
 
@@ -137,6 +139,7 @@ static const char* main_label(MainItem item) {
         case MAIN_SHELLS:   return "Shells";
         case MAIN_FTR_SET:  return "Furniture Set";
         case MAIN_CHESS:    return "Chess Set";
+        case MAIN_BACK:     return "Back";
         case MAIN_SETTINGS: return "Settings";
         case MAIN_QUIT:     return "Quit Game";
         default:            return "";
@@ -226,6 +229,9 @@ static void list_activate(MainItem item) {
             } else {
                 pc_ap_overlay_toast("Shells: load your save first");
             }
+            break;
+        case MAIN_BACK: /* the main page's cursor is still on AP */
+            cur_page = PAGE_MAIN;
             break;
         case MAIN_FTR_SET: /* the house is the player's */
         case MAIN_CHESS:
