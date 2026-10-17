@@ -38,28 +38,35 @@ typedef enum {
     PAGE_CATALOG = 4,
     PAGE_CRITTERS = 5, /* Bugs or Fish */
     PAGE_SHELLS = 6,
+    PAGE_AP = 7, // list of the AP pages below
 } PauseMenuPage;
 
-// Main page entries; which ones show is decided by main_update
+// Entries of the main and AP list pages; which ones show is decided by lists_update
 typedef enum {
     MAIN_RESUME,
+    MAIN_AP,
     MAIN_TIME,
     MAIN_SAVE,
-    MAIN_CATALOG, // Catalogsanity only
-    MAIN_BUGS,
-    MAIN_FISH,
-    MAIN_SHELLS, // Shellsanity only
     MAIN_SETTINGS,
     MAIN_QUIT,
+    MAIN_CATALOG, // AP page, Catalogsanity only
+    MAIN_BUGS,    // AP page
+    MAIN_FISH,    // AP page
+    MAIN_SHELLS,  // AP page, Shellsanity only
     MAIN_MAX,
 } MainItem;
+
+typedef struct {
+    MainItem items[MAIN_MAX];
+    int count;
+    int sel; // index into items
+} MenuList;
 
 #define CONFIRM_ITEM_COUNT  2
 
 static PauseMenuPage cur_page = PAGE_MAIN;
-static MainItem main_items[MAIN_MAX];
-static int main_count = 0;
-static int main_sel = 0;    /* index into main_items */
+static MenuList main_list;
+static MenuList ap_list;
 static int confirm_sel = 0; /* 0=No (default), 1=Yes */
 
 // Page state
@@ -68,38 +75,49 @@ static pc_ap_catalog_menu catalog_menu;
 static pc_ap_critter_menu critter_menu; // Bugs or Fish
 static pc_ap_shell_menu shell_menu;
 
-// Index of item in main_items, 0 (Resume) if it isn't shown
-static int main_find(MainItem item) {
-    for (int i = 0; i < main_count; i++) {
-        if (main_items[i] == item) return i;
+// Index of item in the list, 0 if it isn't shown
+static int list_find(const MenuList* list, MainItem item) {
+    for (int i = 0; i < list->count; i++) {
+        if (list->items[i] == item) return i;
     }
     return 0;
 }
 
-// Rebuilds the main page entries (Catalogsanity can turn on while paused on the title).
+static void list_add(MenuList* list, MainItem item) {
+    list->items[list->count++] = item;
+}
+
+// Rebuilds the list entries (Catalogsanity can turn on while paused on the title).
 // The cursor stays on the same entry when others appear or disappear.
-static void main_update(void) {
-    MainItem prev = (main_sel < main_count) ? main_items[main_sel] : MAIN_RESUME;
-    main_count = 0;
-    main_items[main_count++] = MAIN_RESUME;
-    main_items[main_count++] = MAIN_TIME;
-    main_items[main_count++] = MAIN_SAVE;
+static void lists_update(void) {
+    MainItem prev_main = (main_list.sel < main_list.count) ? main_list.items[main_list.sel] : MAIN_RESUME;
+    MainItem prev_ap = (ap_list.sel < ap_list.count) ? ap_list.items[ap_list.sel] : MAIN_BUGS;
+
+    main_list.count = 0;
+    list_add(&main_list, MAIN_RESUME);
+    list_add(&main_list, MAIN_AP);
+    list_add(&main_list, MAIN_TIME);
+    list_add(&main_list, MAIN_SAVE);
+    list_add(&main_list, MAIN_SETTINGS);
+    list_add(&main_list, MAIN_QUIT);
+    main_list.sel = list_find(&main_list, prev_main);
+
+    ap_list.count = 0;
     if (pc_ap_catalog_pools_total() > 0) {
-        main_items[main_count++] = MAIN_CATALOG;
+        list_add(&ap_list, MAIN_CATALOG);
     }
-    main_items[main_count++] = MAIN_BUGS;
-    main_items[main_count++] = MAIN_FISH;
+    list_add(&ap_list, MAIN_BUGS);
+    list_add(&ap_list, MAIN_FISH);
     if (pc_ap_shells_per_month() > 0) {
-        main_items[main_count++] = MAIN_SHELLS;
+        list_add(&ap_list, MAIN_SHELLS);
     }
-    main_items[main_count++] = MAIN_SETTINGS;
-    main_items[main_count++] = MAIN_QUIT;
-    main_sel = main_find(prev);
+    ap_list.sel = list_find(&ap_list, prev_ap);
 }
 
 static const char* main_label(MainItem item) {
     switch (item) {
         case MAIN_RESUME:   return "Resume";
+        case MAIN_AP:       return "AP";
         case MAIN_TIME:     return "Date & Time";
         case MAIN_SAVE:     return "Save";
         case MAIN_CATALOG:  return "Catalog";
@@ -115,12 +133,15 @@ static const char* main_label(MainItem item) {
 // Greyed out where it can't open
 static int main_disabled(MainItem item) {
     if (item == MAIN_TIME || item == MAIN_SAVE) return !pc_ap_time_change_allowed_now();
-    if (item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS) return !pc_ap_accepting();
+    if (item == MAIN_AP || item == MAIN_CATALOG || item == MAIN_BUGS || item == MAIN_FISH || item == MAIN_SHELLS) {
+        return !pc_ap_accepting();
+    }
     return 0;
 }
 
+// The AP list is a list page like main: the overlay still shows status and tracker over it
 int pc_pause_menu_submenu_open(void) {
-    return g_pc_paused && cur_page != PAGE_MAIN;
+    return g_pc_paused && cur_page != PAGE_MAIN && cur_page != PAGE_AP;
 }
 
 void pc_pause_menu_toggle(void) {
@@ -129,7 +150,8 @@ void pc_pause_menu_toggle(void) {
     g_pc_paused = !g_pc_paused;
     if (g_pc_paused) {
         cur_page = PAGE_MAIN;
-        main_sel = 0;
+        main_list.sel = 0;
+        ap_list.sel = 0;
     } else {
         g_pc_pause_input_drain = 1;
     }
@@ -137,10 +159,18 @@ void pc_pause_menu_toggle(void) {
 
 /* Input */
 
-static void main_activate(void) {
-    switch (main_items[main_sel]) {
+// Activates an entry of the main or AP list
+static void list_activate(MainItem item) {
+    switch (item) {
         case MAIN_RESUME:
             pc_pause_menu_toggle();
+            break;
+        case MAIN_AP: /* its pages all need a loaded save */
+            if (pc_ap_accepting()) {
+                cur_page = PAGE_AP;
+            } else {
+                pc_ap_overlay_toast("AP: load your save first");
+            }
             break;
         case MAIN_TIME: /* only where the gate allows it */
             if (pc_ap_time_change_allowed_now()) {
@@ -170,10 +200,9 @@ static void main_activate(void) {
         case MAIN_FISH:
             if (pc_ap_accepting()) {
                 cur_page = PAGE_CRITTERS;
-                pc_ap_critter_menu_enter(&critter_menu, main_items[main_sel] == MAIN_FISH ? mMmd_CATEGORY_FISH : mMmd_CATEGORY_INSECT);
+                pc_ap_critter_menu_enter(&critter_menu, item == MAIN_FISH ? mMmd_CATEGORY_FISH : mMmd_CATEGORY_INSECT);
             } else {
-                pc_ap_overlay_toast(main_items[main_sel] == MAIN_FISH ? "Fish: load your save first"
-                                                                      : "Bugs: load your save first");
+                pc_ap_overlay_toast(item == MAIN_FISH ? "Fish: load your save first" : "Bugs: load your save first");
             }
             break;
         case MAIN_SHELLS:
@@ -203,7 +232,7 @@ static void confirm_activate(void) {
         g_pc_running = 0;
     } else {
         cur_page = PAGE_MAIN;
-        main_sel = main_find(MAIN_QUIT);
+        main_list.sel = list_find(&main_list, MAIN_QUIT);
     }
 }
 
@@ -235,18 +264,29 @@ static void handle_action(pc_menu_action act) {
         else if (cur_page == PAGE_SHELLS)  result = pc_ap_shell_menu_input(&shell_menu, act);
         else                               result = pc_ap_critter_menu_input(&critter_menu, act);
         if (result == PC_MENU_BACK) {
-            cur_page = PAGE_MAIN;
+            // Back to the list the page was opened from
+            cur_page = (cur_page == PAGE_TIME) ? PAGE_MAIN : PAGE_AP;
         } else if (result == PC_MENU_RESUME) {
             pc_pause_menu_toggle();
         }
         return;
     }
 
-    /* Pages owned here (Main, Quit-confirm). */
-    main_update();
+    /* Pages owned here (Main, AP, Quit-confirm). */
+    lists_update();
     {
-        int item_count = (cur_page == PAGE_MAIN) ? main_count : CONFIRM_ITEM_COUNT;
-        int* sel       = (cur_page == PAGE_MAIN) ? &main_sel : &confirm_sel;
+        int item_count;
+        int* sel;
+        if (cur_page == PAGE_MAIN) {
+            item_count = main_list.count;
+            sel = &main_list.sel;
+        } else if (cur_page == PAGE_AP) {
+            item_count = ap_list.count;
+            sel = &ap_list.sel;
+        } else {
+            item_count = CONFIRM_ITEM_COUNT;
+            sel = &confirm_sel;
+        }
 
         switch (act) {
             case PC_MENU_UP:
@@ -258,12 +298,13 @@ static void handle_action(pc_menu_action act) {
                 *sel = (*sel + 1) % item_count;
                 break;
             case PC_MENU_CONFIRM:
-                if (cur_page == PAGE_MAIN)              main_activate();
+                if (cur_page == PAGE_MAIN)              list_activate(main_list.items[main_list.sel]);
+                else if (cur_page == PAGE_AP)           list_activate(ap_list.items[ap_list.sel]);
                 else if (cur_page == PAGE_CONFIRM_QUIT) confirm_activate();
                 break;
             case PC_MENU_CANCEL:
-                if (cur_page == PAGE_CONFIRM_QUIT) cur_page = PAGE_MAIN;
-                else                               pc_pause_menu_toggle();
+                if (cur_page == PAGE_CONFIRM_QUIT || cur_page == PAGE_AP) cur_page = PAGE_MAIN;
+                else                                                      pc_pause_menu_toggle();
                 break;
             default: break;
         }
@@ -344,27 +385,28 @@ int pc_pause_menu_handle_event(const SDL_Event* e) {
 
 /* Drawing */
 
-static void draw_main_page(struct game_s* game) {
-    main_update();
+// Main and AP list pages
+static void draw_list_page(struct game_s* game, const char* title, const MenuList* list) {
+    lists_update();
     // Center title + entries vertically (y is a row's top, rows are 16 high), then up a bit:
     // the AP status and seed lines take the bottom ~25 px
     f32 line_h = 17.0f;
     f32 title_gap = 30.0f; // title top to first entry top
     f32 shift_up = 10.0f;
-    f32 block_h = title_gap + (main_count - 1) * line_h + mFont_TEX_CHAR_HEIGHT_F32;
+    f32 block_h = title_gap + (list->count - 1) * line_h + mFont_TEX_CHAR_HEIGHT_F32;
     f32 top = (SCREEN_HEIGHT_F - block_h) * 0.5f - shift_up;
-    pc_menu_draw_centered(game, "- Paused -", top, 255, 255, 255, 255, 1.0f);
+    pc_menu_draw_centered(game, title, top, 255, 255, 255, 255, 1.0f);
 
     f32 y = top + title_gap;
-    for (int i = 0; i < main_count; i++) {
+    for (int i = 0; i < list->count; i++) {
         int r, g, b, a;
-        int selected = (i == main_sel);
+        int selected = (i == list->sel);
         pc_menu_row_colors(selected, &r, &g, &b, &a);
-        if (main_disabled(main_items[i])) {
+        if (main_disabled(list->items[i])) {
             r = g = b = 120;
             a = selected ? 220 : 160;
         }
-        pc_menu_draw_centered(game, main_label(main_items[i]), y + i * line_h, r, g, b, a,
+        pc_menu_draw_centered(game, main_label(list->items[i]), y + i * line_h, r, g, b, a,
                               selected ? PC_MENU_SCALE_SELECTED : 1.0f);
     }
 }
@@ -400,7 +442,8 @@ void pc_pause_menu_draw(struct game_s* game) {
         pc_ap_shell_menu_draw(&shell_menu, game);
     } else {
         pc_menu_dim_rect(game->graph, 180);
-        if (cur_page == PAGE_MAIN)              draw_main_page(game);
+        if (cur_page == PAGE_MAIN)              draw_list_page(game, "- Paused -", &main_list);
+        else if (cur_page == PAGE_AP)           draw_list_page(game, "- AP -", &ap_list);
         else if (cur_page == PAGE_CONFIRM_QUIT) draw_confirm_page(game);
     }
 }
