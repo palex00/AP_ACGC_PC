@@ -342,7 +342,16 @@ static void aSL_JudgeRenewShop(ACTOR* actorx, GAME* game) {
         lbRTC_time_c renewal_time = Save_Get(shop).renewal_time;
 
         lbRTC_Sub_DD(&renewal_time, 2);
+#ifdef TARGET_PC
+        // Cancel only when the date went back before the day it was set. Vanilla also cancels it until the
+        // opening hour of that day (it's set again next frame): Timesanity's frozen clock at or before 9:00
+        // never gets past that, so the renovation never stuck.
+        renewal_time.hour = renewal_time.min = renewal_time.sec = 0;
+        now_time.hour = now_time.min = now_time.sec = 0;
+        if (lbRTC_IsOverTime(&renewal_time, &now_time) == lbRTC_LESS) {
+#else
         if (lbRTC_IsOverTime(&now_time, &renewal_time) == lbRTC_OVER) {
+#endif
             mEv_EventOFF(mEv_SAVED_RENEWSHOP);
             Save_Get(shop).shop_info.upgrading_today = FALSE;
             Save_Get(shop).shop_info.send_upgrade_notice = FALSE;

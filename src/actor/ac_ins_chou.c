@@ -7,6 +7,7 @@
 #include "ac_set_ovl_insect.h"
 #ifdef TARGET_PC
 #include "pc_ap_qol.h"
+#include "pc_platform.h"
 #endif
 
 enum {
@@ -625,6 +626,122 @@ static void aICH_setupAction(aINS_INSECT_ACTOR* insect, int action, GAME* game) 
     (*init_proc[action])(insect, game);
 }
 
+#ifdef TARGET_PC
+// TEMP butterfly probe (2026-10-17, remove by hand): a flying/avoiding butterfly that stays within 15 units (xz)
+// for 5 s is logged to butterfly_probe.txt next to the exe, then traced for 90 frames. Re-armed once it moves.
+// Only with --debug.
+#include <stdio.h>
+
+#define aICH_PROBE_SLOTS 16
+typedef struct {
+    ACTOR* actor;
+    f32 anchor_x, anchor_z;
+    f32 still_frames;
+    int trace_left;
+    int reported;
+} aICH_probe_slot;
+
+static aICH_probe_slot l_aICH_probe[aICH_PROBE_SLOTS];
+static FILE* l_aICH_probe_file = NULL;
+
+static aICH_probe_slot* aICH_probe_get(ACTOR* actor) {
+    int i;
+    aICH_probe_slot* free_slot = NULL;
+
+    for (i = 0; i < aICH_PROBE_SLOTS; i++) {
+        if (l_aICH_probe[i].actor == actor) {
+            return &l_aICH_probe[i];
+        }
+        if (free_slot == NULL && l_aICH_probe[i].actor == NULL) {
+            free_slot = &l_aICH_probe[i];
+        }
+    }
+    if (free_slot == NULL) { // full (dead actors never free theirs): reuse one by address
+        free_slot = &l_aICH_probe[((uintptr_t)actor >> 4) % aICH_PROBE_SLOTS];
+    }
+    free_slot->actor = actor;
+    free_slot->anchor_x = actor->world.position.x;
+    free_slot->anchor_z = actor->world.position.z;
+    free_slot->still_frames = 0.0f;
+    free_slot->trace_left = 0;
+    free_slot->reported = FALSE;
+    return free_slot;
+}
+
+static void aICH_probe_line(aINS_INSECT_ACTOR* insect, GAME* game, const char* tag) {
+    ACTOR* actor = &insect->tools_actor.actor_class;
+    static f32 ptX_table[] = { 10.0f, 10.0f, -10.0f, -10.0f };
+    static f32 ptZ_table[] = { 10.0f, -10.0f, 10.0f, -10.0f };
+    int idx = insect->s32_work0 & 3;
+    f32 wx = insect->f32_work0 + ptX_table[idx];
+    f32 wz = insect->f32_work1 + ptZ_table[idx];
+    int pos_bx = -1, pos_bz = -1;
+    f32 ground = mCoBG_GetBgY_AngleS_FromWpos(NULL, actor->world.position, 0.0f);
+    f32 plain = mCoBG_GetBgY_OnlyCenter_FromWpos(actor->world.position, 0.0f);
+
+    mFI_Wpos2BlockNum(&pos_bx, &pos_bz, actor->world.position);
+    fprintf(l_aICH_probe_file,
+            "%s f=%u a=%p type=%d act=%d idx=%d latch=%d unit=%d,%d home=%.1f,%.1f wp=%.1f,%.1f "
+            "pos=%.1f,%.1f,%.1f y-ground=%.1f y-plain=%.1f spd=%.2f tgt=%.2f step=%.2f vy=%.2f rotY=%04x angY=%04x "
+            "patience=%.1f blk=%d,%d posblk=%d,%d dt=%.3f wall=%x work2=%.1f work3=%.1f\n",
+            tag, ((GAME_PLAY*)game)->game_frame, (void*)actor, insect->type, insect->action, insect->s32_work0,
+            insect->s32_work3, insect->s32_work1, insect->s32_work2, insect->f32_work0, insect->f32_work1, wx, wz,
+            actor->world.position.x, actor->world.position.y, actor->world.position.z,
+            actor->world.position.y - ground, actor->world.position.y - plain, actor->speed, insect->target_speed,
+            insect->speed_step, actor->position_speed.y, (u16)actor->shape_info.rotation.y,
+            (u16)actor->world.angle.y, insect->patience, actor->block_x, actor->block_z, pos_bx, pos_bz,
+            game->graph->dt_num_60fps_frames, actor->bg_collision_check.result.hit_wall, insect->f32_work2,
+            insect->f32_work3);
+}
+
+static void aICH_probe(aINS_INSECT_ACTOR* insect, GAME* game) {
+    ACTOR* actor = &insect->tools_actor.actor_class;
+    aICH_probe_slot* slot;
+    f32 dx;
+    f32 dz;
+
+    if (l_aICH_probe_file == NULL) {
+        l_aICH_probe_file = fopen("butterfly_probe.txt", "a");
+        if (l_aICH_probe_file == NULL) {
+            return;
+        }
+        fprintf(l_aICH_probe_file, "== probe start\n");
+    }
+    slot = aICH_probe_get(actor);
+    if (slot->trace_left > 0) {
+        aICH_probe_line(insect, game, "  trace");
+        if (--slot->trace_left == 0) {
+            fflush(l_aICH_probe_file);
+        }
+    }
+    if (insect->action != aICH_ACTION_FLY && insect->action != aICH_ACTION_AVOID) {
+        slot->anchor_x = actor->world.position.x;
+        slot->anchor_z = actor->world.position.z;
+        slot->still_frames = 0.0f;
+        return;
+    }
+    dx = actor->world.position.x - slot->anchor_x;
+    dz = actor->world.position.z - slot->anchor_z;
+    if (dx * dx + dz * dz > 15.0f * 15.0f) {
+        if (slot->reported) {
+            aICH_probe_line(insect, game, "MOVED");
+            fflush(l_aICH_probe_file);
+        }
+        slot->anchor_x = actor->world.position.x;
+        slot->anchor_z = actor->world.position.z;
+        slot->still_frames = 0.0f;
+        slot->reported = FALSE;
+        return;
+    }
+    slot->still_frames += game->graph->dt_num_60fps_frames;
+    if (!slot->reported && slot->still_frames > 300.0f) {
+        slot->reported = TRUE;
+        slot->trace_left = 90;
+        aICH_probe_line(insect, game, "STUCK");
+    }
+}
+#endif
+
 static void aICH_actor_move(ACTOR* actor, GAME* game) {
     aINS_INSECT_ACTOR* insect = (aINS_INSECT_ACTOR*)actor;
     GAME_PLAY* play = (GAME_PLAY*)game;
@@ -642,4 +759,9 @@ static void aICH_actor_move(ACTOR* actor, GAME* game) {
         aICH_check_block_edge(actor, game);
         insect->action_proc(actor,game);
     }
+#ifdef TARGET_PC
+    if (g_pc_debug) {
+        aICH_probe(insect, game); // TEMP butterfly probe
+    }
+#endif
 }

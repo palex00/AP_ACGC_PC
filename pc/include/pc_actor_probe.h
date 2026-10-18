@@ -1,7 +1,7 @@
 #ifndef PC_ACTOR_PROBE_H
 #define PC_ACTOR_PROBE_H
 
-// Debug probe for actors that jump across the screen for a few frames (--actor-probe).
+// Debug probe for actors that jump across the screen for a few frames (--debug).
 // Writes actor_probe.txt next to the exe. Every hook is behind g_pc_actor_probe, so it costs
 // nothing when off. Checks:
 //   pos    actor's world.position moved far in one frame

@@ -1,4 +1,4 @@
-// pc_actor_probe.c - --actor-probe: logs actors that jump far in one frame (see pc_actor_probe.h)
+// pc_actor_probe.c - --debug: logs actors that jump far in one frame (see pc_actor_probe.h)
 #include "pc_actor_probe.h"
 #include "pc_platform.h"
 #include "m_actor.h"
