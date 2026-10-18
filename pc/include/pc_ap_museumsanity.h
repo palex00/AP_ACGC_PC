@@ -64,7 +64,10 @@ typedef struct {
 } pc_ap_museumsanity;
 
 // Dynamic spawns: wanted things are this many times as likely as vanilla
-#define PC_AP_SPAWN_BOOST 4
+#define PC_AP_SPAWN_BOOST 6
+// Normalized/dynamic fish: share of the spawns that lake-only fish get in the lake acre,
+// waterfall-only fish in the waterfall acre
+#define PC_AP_FISH_UNIQUE_SHARE 0.75f
 
 // Bugs and fish per category (museum index = journal index = spawn table type)
 #define PC_AP_CRITTER_NUM 40
@@ -146,6 +149,13 @@ int pc_ap_museumsanity_critter_status(const pc_ap_museumsanity* m, int cat, int 
 // x PC_AP_SPAWN_BOOST.
 void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                     aSOG_gyoei_spawn_info_weight_f_c* rows, int n);
+// Normalized/dynamic odds, after pc_ap_museumsanity_fish_spawns: in a lake (pool) or waterfall
+// acre (block_type mRF_BLOCKKIND_*) the open lake/waterfall-only rows get PC_AP_FISH_UNIQUE_SHARE
+// of the species weight that can spawn there (the rest keep their split of the remainder), so
+// they don't compete with the whole river list. Rows that can't spawn here, locked
+// unique rows and non-species rows are untouched; total kept.
+void pc_ap_museumsanity_fish_habitat(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n,
+                                     u32 block_type);
 // Fish Availability: nonzero if fish pass p is open (always unless progressive)
 int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass);
 // Fish pass of one spawn row (aGYO_TYPE_*, aSOG_SPAWN_AREA_*): river, waterfall and

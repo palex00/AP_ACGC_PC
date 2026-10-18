@@ -1744,7 +1744,7 @@ static int aSOG_gyoei_set_with_list(aSOG_set_data_c* set_data, SET_MANAGER* set_
       bcopy(keep->spawn_weights + i, copy_range + i, sizeof(aSOG_gyoei_spawn_info_weight_f_c));
     }
 #ifdef TARGET_PC
-    pc_ap_fish_spawns(copy_range, keep->possible_gyoei_num);
+    pc_ap_fish_spawns(copy_range, keep->possible_gyoei_num, block_type);
 #endif
 
     if (aSOG_gyoei_decide_gyoei(set_data, &set_manager->player_pos.next_bx, copy_range, keep->possible_gyoei_num, block_type) == TRUE) {

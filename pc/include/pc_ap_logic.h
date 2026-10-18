@@ -157,7 +157,8 @@ void pc_ap_dug_item_shown(void);
 // stored tables): fish in aSOG_gyoei_set_with_list, bugs in aSOI_ins_decide_insect
 struct gyoei_spawn_info_weight_f_s;
 struct insect_spawn_info_f_s;
-void pc_ap_fish_spawns(struct gyoei_spawn_info_weight_f_s* rows, int n);
+// block_type: the acre's mRF_BLOCKKIND_* flags
+void pc_ap_fish_spawns(struct gyoei_spawn_info_weight_f_s* rows, int n, u32 block_type);
 void pc_ap_insect_spawns(struct insect_spawn_info_f_s* rows, int n);
 // Exhibit plaques, after the game copied the donator's name into free string 0: replaces
 // it with the AP player who sent the item (8 chars). Nothing for vanilla exhibits.

@@ -1256,7 +1256,7 @@ int pc_ap_fish_pass_open(int pass) {
   return pc_ap_museumsanity_fish_pass_open(&g_ap.museum, pass);
 }
 
-void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
+void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n, u32 block_type) {
   // The journal needs a player (none on the title demo)
   if(Common_Get(now_private) == NULL) {
     return;
@@ -1268,6 +1268,7 @@ void pc_ap_fish_spawns(aSOG_gyoei_spawn_info_weight_f_c* rows, int n) {
       pc_ap_museumsanity_fish_unwant_locked(&g_ap.museum, rows, n, wanted);
     }
     pc_ap_museumsanity_fish_spawns(&g_ap.museum, wanted, rows, n);
+    pc_ap_museumsanity_fish_habitat(&g_ap.museum, rows, n, block_type);
   }
   // Fish passes: town only (island rows are tagged sea too, the island isn't part of it)
   if(!mFI_CheckInIsland()) {

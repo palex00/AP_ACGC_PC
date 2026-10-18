@@ -953,7 +953,9 @@ class CritterOdds(Choice):
     Vanilla: the game's odds.
     Normalized: every bug and fish that can spawn is equally likely.
     Dynamic: like Normalized, but bugs and fish whose check isn't sent yet (or, with no checks, that are missing
-    from the journal or the museum) are 4 times as likely.
+    from the journal or the museum) are 6 times as likely.
+    Normalized and Dynamic: in the river's lake and waterfall acres, the fish that only live there get 3/4 of
+    the spawns.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Critter Odds"
@@ -1018,7 +1020,7 @@ class FossilOdds(Choice):
     Vanilla: the game's odds (half the time one of the five single fossils, else a dinosaur part).
     Normalized: every available fossil equally likely.
     Dynamic: like Normalized, but fossils whose check isn't sent yet (or, with no checks, that are missing from
-    the museum) are 4 times as likely.
+    the museum) are 6 times as likely.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Fossil Odds"

@@ -7,6 +7,7 @@
 #include "ac_insect_h.h"
 #include "ac_set_ovl_gyoei.h"
 #include "ac_set_ovl_insect.h"
+#include "m_random_field_h.h"
 
 #include <string.h>
 
@@ -448,6 +449,67 @@ void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted
     int s = pc_ap_fish_species(rows[i].type);
     if(s >= 0) {
       rows[i].spawn_weight *= factor[s];
+    }
+  }
+}
+
+// Row only spawns in its own kind of acre (river lake, waterfall) and the acre is one
+static int pc_ap_fish_row_unique(int area, u32 block_type) {
+  if(area == aSOG_SPAWN_AREA_POOL) {
+    return (block_type & mRF_BLOCKKIND_POOL) == mRF_BLOCKKIND_POOL;
+  }
+  if(area == aSOG_SPAWN_AREA_WATERFALL) {
+    return (block_type & mRF_BLOCKKIND_WATERFALL) == mRF_BLOCKKIND_WATERFALL;
+  }
+  return 0;
+}
+
+// aSOG_gyoei_place_check (US version): picking a row that fails it rerolls
+static int pc_ap_fish_row_fits(int area, u32 block_type) {
+  switch(area) {
+    case aSOG_SPAWN_AREA_POOL:
+    case aSOG_SPAWN_AREA_WATERFALL:
+      return pc_ap_fish_row_unique(area, block_type);
+    case aSOG_SPAWN_AREA_RIVER_MOUTH:
+      return (block_type & mRF_BLOCKKIND_RIVER) == mRF_BLOCKKIND_RIVER;
+    default:
+      return 1;
+  }
+}
+
+// pc_ap_museumsanity_fish_habitat: 0 = leave the row alone, 1 = open unique row, 2 = other species row
+static int pc_ap_fish_habitat_kind(const pc_ap_museumsanity* m, const aSOG_gyoei_spawn_info_weight_f_c* row,
+                                   u32 block_type) {
+  int area = row->spawn_area;
+  if(pc_ap_fish_species(row->type) < 0 || !pc_ap_fish_row_fits(area, block_type)) {
+    return 0;
+  }
+  if(!pc_ap_fish_row_unique(area, block_type)) {
+    return 2;
+  }
+  int pass = pc_ap_museumsanity_fish_row_pass(row->type, area);
+  return pass < 0 || pc_ap_museumsanity_fish_pass_open(m, pass) ? 1 : 0;
+}
+
+void pc_ap_museumsanity_fish_habitat(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n,
+                                     u32 block_type) {
+  if(m->critter_odds == AP_CRITTER_ODDS_VANILLA) {
+    return;
+  }
+  f32 sum[3] = { 0 };
+  for(int i = 0; i < n; i++) {
+    sum[pc_ap_fish_habitat_kind(m, &rows[i], block_type)] += rows[i].spawn_weight;
+  }
+  if(sum[1] <= 0.0f || sum[2] <= 0.0f) {
+    return;
+  }
+  f32 total = sum[1] + sum[2];
+  for(int i = 0; i < n; i++) {
+    int kind = pc_ap_fish_habitat_kind(m, &rows[i], block_type);
+    if(kind == 1) {
+      rows[i].spawn_weight *= PC_AP_FISH_UNIQUE_SHARE * total / sum[1];
+    } else if(kind == 2) {
+      rows[i].spawn_weight *= (1.0f - PC_AP_FISH_UNIQUE_SHARE) * total / sum[2];
     }
   }
 }
