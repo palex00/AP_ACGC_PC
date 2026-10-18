@@ -34,7 +34,7 @@
 // Drag marking: after X marks or unmarks a slot, keep X held; once it has been held
 // PC_TG_DRAG_FRAMES, every slot the cursor moves onto (same table) gets that same state.
 // The wait keeps a single X press from spilling onto the next slot.
-#define PC_TG_DRAG_FRAMES 30
+#define PC_TG_DRAG_FRAMES 15
 static int pc_tg_drag_mode = -1; // mTG_MARK_ON / mTG_MARK_OFF, -1 = not dragging
 static int pc_tg_drag_table;
 static int pc_tg_drag_frames;
