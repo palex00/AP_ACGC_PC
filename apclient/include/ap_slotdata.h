@@ -28,6 +28,10 @@ extern "C" {
 #define AP_MUSEUM_DONATE (1 << 1) // donating it to the museum
 
 #define AP_FOSSIL_NUM 25 // museum fossils (mMmd_FOSSIL_NUM)
+#define AP_CRITTER_NUM 40 // bugs, and fish, in the museum (PC_AP_CRITTER_NUM)
+#define AP_BUG_PASS_NUM 5 // Bug Availability items (PC_AP_BUG_PASS_NUM)
+#define AP_FISH_PASS_NUM 5 // Fish Availability items (PC_AP_FISH_PASS_NUM)
+#define AP_FOSSIL_SERIES_NUM 8 // Progressive fossil series items (PC_AP_FOSSIL_SERIES_NUM)
 
 #define AP_BEACH_PER_MONTH_MAX 20 // Shellsanity: apworld BEACH_PER_MONTH_MAX
 #define AP_CATALOG_MAX 575 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
@@ -128,6 +132,12 @@ typedef struct {
   int fossil_availability;           // AP_FOSSIL_AVAIL_*
   int fossil_odds;                   // AP_FOSSIL_ODDS_*
   int fossil_seasons[AP_FOSSIL_NUM]; // per museum fossil index: 0 spring (Mar-May), 1 summer, 2 autumn, 3 winter (Dec-Feb)
+  // Which item opens what (the seed's own tables, so later apworld changes can't change a seed). -1 / 0 = nothing
+  // needed (missing key or bad entry; real seeds always send them)
+  int bug_passes[AP_CRITTER_NUM];        // per museum bug: its Bug Availability item (0..AP_BUG_PASS_NUM-1)
+  int fish_passes[AP_CRITTER_NUM];       // per museum fish: bit p = Fish Availability item p opens it (any one)
+  int fish_river_passes[AP_CRITTER_NUM]; // per museum fish: the item of its river/waterfall/river mouth spawn rows
+  int fossil_series[AP_FOSSIL_NUM];      // per museum fossil: its series item (0..AP_FOSSIL_SERIES_NUM-1)
   // Timesanity
   int timesanity;                    // nonzero: frozen clock, months and time slots are items
   int starting_month;                // 0-11

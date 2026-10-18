@@ -49,6 +49,9 @@ extern "C" {
 #define PC_AP_BUG_PASS_FLYING         4 // dragonflies, Mosquito, Firefly, Pond Skater
 #define PC_AP_BUG_PASS_NUM            5
 
+// Bugs and fish per category (museum index = journal index = spawn table type)
+#define PC_AP_CRITTER_NUM 40
+
 typedef struct {
   // Config (slot_data); all 0 when museumsanity is off or offline
   int checks[mMmd_CATEGORY_NUM]; // AP_MUSEUM_* bits per category, 0 = vanilla
@@ -61,6 +64,11 @@ typedef struct {
   int fossil_availability;                 // AP_FOSSIL_AVAIL_* (progressive without fossil checks = all)
   int fossil_odds;                         // AP_FOSSIL_ODDS_* (Settings > AP)
   int fossil_seasons[mMmd_FOSSIL_NUM];     // season per fossil (0 spring .. 3 winter)
+  // Which item opens what: the seed's tables (ap_slotdata.h), -1 / 0 = nothing needed
+  int bug_pass[PC_AP_CRITTER_NUM];         // per bug: PC_AP_BUG_PASS_*
+  int fish_passes[PC_AP_CRITTER_NUM];      // per fish: bit p = PC_AP_FISH_PASS_* p opens it (any one)
+  int fish_river_pass[PC_AP_CRITTER_NUM];  // per fish: pass of its river / waterfall / river mouth rows
+  int fossil_series[mMmd_FOSSIL_NUM];      // per fossil: PC_AP_FOSSIL_SERIES_*
 } pc_ap_museumsanity;
 
 // Dynamic spawns: wanted things are this many times as likely as vanilla
@@ -71,8 +79,6 @@ typedef struct {
 // Normalized/dynamic bugs: a spawn list totals at least this (of 100; vanilla winter is 17)
 #define PC_AP_BUG_MIN_TOTAL 50.0f
 
-// Bugs and fish per category (museum index = journal index = spawn table type)
-#define PC_AP_CRITTER_NUM 40
 
 void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd);
 
@@ -118,7 +124,8 @@ int pc_ap_museumsanity_instant_fossils(const pc_ap_museumsanity* m);
 // is unsent (fossils active), else while it isn't on display in info
 void pc_ap_museumsanity_fossil_wanted(const pc_ap_museumsanity* m, const mMmd_info_c* info,
                                       u8 wanted[mMmd_FOSSIL_NUM]);
-// Progressive fossils: series (0-7) of a fossil (museum index), -1 if out of range
+// The game's fossil groups (0-7, museum index; -1 if out of range): three per dinosaur, Mammoth two, then the
+// singles. For the vanilla odds; Progressive fossils use the seed's fossil_series.
 int pc_ap_museumsanity_fossil_series(int idx);
 // Nonzero if a fossil can come out: always, unless progressive and its
 // series item isn't received
@@ -158,12 +165,12 @@ void pc_ap_museumsanity_fish_spawns(const pc_ap_museumsanity* m, const u8 wanted
 // unique rows and non-species rows are untouched; total kept.
 void pc_ap_museumsanity_fish_habitat(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_info_weight_f_c* rows, int n,
                                      u32 block_type);
-// Fish Availability: nonzero if fish pass p is open (always unless progressive)
+// Fish Availability: nonzero if fish pass p is open (always unless progressive; p < 0 = nothing needed)
 int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass);
 // Fish pass of one spawn row (aGYO_TYPE_*, aSOG_SPAWN_AREA_*): river, waterfall and
-// river mouth by the fish's size, lake and ponds = pond, sea = sea. -1 for rows that
-// aren't a museum fish or are left alone (whale, offing, trash)
-int pc_ap_museumsanity_fish_row_pass(int type, int area);
+// river mouth = the fish's fish_river_pass (by size), lake and ponds = pond, sea = sea. -1 for rows
+// that aren't a museum fish or are left alone (whale, offing, trash)
+int pc_ap_museumsanity_fish_row_pass(const pc_ap_museumsanity* m, int type, int area);
 // Fish Availability on the spawn list (after the odds): a row whose pass is closed keeps
 // its weight but gets an invalid spawn area, so picking it spawns nothing (the others
 // keep vanilla odds). Not for the island (its rows are tagged sea too).
@@ -182,7 +189,7 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
 // slot s) the player has: Timesanity's owned ones, or 0xFFF / 0xF without it. Weather and the
 // logic's special cases are ignored (as on the Bugs/Fish pages).
 int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat, int months, int slots);
-// Bug Availability: nonzero if bug pass p is open (always unless progressive)
+// Bug Availability: nonzero if bug pass p is open (always unless progressive; p < 0 = nothing needed)
 int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass);
 // Bug Availability on the spawn list (after the odds): a bug whose pass is closed keeps
 // its weight but gets spawn area "nothing", so picking it spawns nothing (the others

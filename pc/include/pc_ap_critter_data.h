@@ -26,13 +26,8 @@ typedef struct {
 extern const pc_ap_critter_data pc_ap_bug_data[PC_AP_CRITTER_NUM];
 extern const pc_ap_critter_data pc_ap_fish_data[PC_AP_CRITTER_NUM];
 
-// Fish passes (Fish Availability), museum index order. pc_ap_fish_passes: bit p = pass p
-// (PC_AP_FISH_PASS_*) can open it (any one is enough). pc_ap_fish_river_pass: the pass of its
-// river, waterfall and river mouth rows, by shadow size.
-extern const u8 pc_ap_fish_passes[PC_AP_CRITTER_NUM];
-extern const u8 pc_ap_fish_river_pass[PC_AP_CRITTER_NUM];
-// Bug passes (Bug Availability), museum index order: the pass (PC_AP_BUG_PASS_*) that opens it.
-extern const u8 pc_ap_bug_pass[PC_AP_CRITTER_NUM];
+// Bug / fish passes aren't here: they come with the seed (slot_data bug_passes, fish_passes,
+// fish_river_passes from the apworld's museum_data.py), see ap_slotdata.h
 
 #ifdef __cplusplus
 }

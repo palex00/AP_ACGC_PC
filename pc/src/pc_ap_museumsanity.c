@@ -25,6 +25,12 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   m->fossil_odds = sd->fossil_odds;
   for(int i = 0; i < mMmd_FOSSIL_NUM; i++) {
     m->fossil_seasons[i] = sd->fossil_seasons[i];
+    m->fossil_series[i] = sd->fossil_series[i];
+  }
+  for(int i = 0; i < PC_AP_CRITTER_NUM; i++) {
+    m->bug_pass[i] = sd->bug_passes[i];
+    m->fish_passes[i] = sd->fish_passes[i];
+    m->fish_river_pass[i] = sd->fish_river_passes[i];
   }
   if(sd->museumsanity) {
     m->checks[mMmd_CATEGORY_FOSSIL] = sd->fossil_checks;
@@ -297,7 +303,7 @@ int pc_ap_museumsanity_fossil_open(const pc_ap_museumsanity* m, int idx) {
   if(m->fossil_availability != AP_FOSSIL_AVAIL_PROGRESSIVE) {
     return 1;
   }
-  int series = pc_ap_museumsanity_fossil_series(idx);
+  int series = idx >= 0 && idx < mMmd_FOSSIL_NUM ? m->fossil_series[idx] : -1;
   return series < 0 || ap_item_count(PC_AP_ITEM_FOSSIL_SERIES_BASE + series) > 0;
 }
 
@@ -487,7 +493,7 @@ static int pc_ap_fish_habitat_kind(const pc_ap_museumsanity* m, const aSOG_gyoei
   if(!pc_ap_fish_row_unique(area, block_type)) {
     return 2;
   }
-  int pass = pc_ap_museumsanity_fish_row_pass(row->type, area);
+  int pass = pc_ap_museumsanity_fish_row_pass(m, row->type, area);
   return pass < 0 || pc_ap_museumsanity_fish_pass_open(m, pass) ? 1 : 0;
 }
 
@@ -515,13 +521,13 @@ void pc_ap_museumsanity_fish_habitat(const pc_ap_museumsanity* m, aSOG_gyoei_spa
 }
 
 int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass) {
-  if(m->fish_availability != AP_FISH_AVAIL_PROGRESSIVE) {
+  if(m->fish_availability != AP_FISH_AVAIL_PROGRESSIVE || pass < 0) {
     return 1;
   }
   return ap_item_count(PC_AP_ITEM_FISH_PASS_BASE + pass) > 0;
 }
 
-int pc_ap_museumsanity_fish_row_pass(int type, int area) {
+int pc_ap_museumsanity_fish_row_pass(const pc_ap_museumsanity* m, int type, int area) {
   int s = pc_ap_fish_species(type);
   if(s < 0) {
     return -1;
@@ -530,7 +536,7 @@ int pc_ap_museumsanity_fish_row_pass(int type, int area) {
     case aSOG_SPAWN_AREA_RIVER:
     case aSOG_SPAWN_AREA_RIVER_MOUTH:
     case aSOG_SPAWN_AREA_WATERFALL:
-      return pc_ap_fish_river_pass[s];
+      return m->fish_river_pass[s];
     case aSOG_SPAWN_AREA_POOL:
     case aSOG_SPAWN_AREA_POND:
       return PC_AP_FISH_PASS_POND;
@@ -546,7 +552,7 @@ void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_
     return;
   }
   for(int i = 0; i < n; i++) {
-    int pass = pc_ap_museumsanity_fish_row_pass(rows[i].type, rows[i].spawn_area);
+    int pass = pc_ap_museumsanity_fish_row_pass(m, rows[i].type, rows[i].spawn_area);
     if(pass >= 0 && !pc_ap_museumsanity_fish_pass_open(m, pass)) {
       rows[i].spawn_area = aSOG_SPAWN_AREA_NUM; // aSOG_gyoei_decide_gyoei: no fish
     }
@@ -561,7 +567,7 @@ void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aS
   u8 open[PC_AP_CRITTER_NUM] = { 0 };
   for(int i = 0; i < n; i++) {
     int s = pc_ap_fish_species(rows[i].type);
-    int pass = pc_ap_museumsanity_fish_row_pass(rows[i].type, rows[i].spawn_area);
+    int pass = pc_ap_museumsanity_fish_row_pass(m, rows[i].type, rows[i].spawn_area);
     if(s >= 0 && (pass < 0 || pc_ap_museumsanity_fish_pass_open(m, pass))) {
       open[s] = 1;
     }
@@ -640,11 +646,12 @@ int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat, i
     int open = 0;
     const pc_ap_critter_data* d;
     if(cat == mMmd_CATEGORY_INSECT) {
-      open = pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[idx]);
+      open = pc_ap_museumsanity_bug_pass_open(m, m->bug_pass[idx]);
       d = &pc_ap_bug_data[idx];
     } else {
+      open = m->fish_passes[idx] == 0; // nothing needed
       for(int pass = 0; pass < PC_AP_FISH_PASS_NUM; pass++) {
-        if((pc_ap_fish_passes[idx] & (1 << pass)) && pc_ap_museumsanity_fish_pass_open(m, pass)) {
+        if((m->fish_passes[idx] & (1 << pass)) && pc_ap_museumsanity_fish_pass_open(m, pass)) {
           open = 1;
         }
       }
@@ -658,7 +665,7 @@ int pc_ap_museumsanity_critter_available(const pc_ap_museumsanity* m, int cat, i
 }
 
 int pc_ap_museumsanity_bug_pass_open(const pc_ap_museumsanity* m, int pass) {
-  if(m->bug_availability != AP_BUG_AVAIL_PROGRESSIVE) {
+  if(m->bug_availability != AP_BUG_AVAIL_PROGRESSIVE || pass < 0) {
     return 1;
   }
   return ap_item_count(PC_AP_ITEM_BUG_PASS_BASE + pass) > 0;
@@ -670,7 +677,7 @@ void pc_ap_museumsanity_bug_lock(const pc_ap_museumsanity* m, aSOI_insect_spawn_
   }
   for(int i = 0; i < n; i++) {
     int s = pc_ap_insect_species(rows[i].type);
-    if(s >= 0 && !pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[s])) {
+    if(s >= 0 && !pc_ap_museumsanity_bug_pass_open(m, m->bug_pass[s])) {
       rows[i].spawn_area = aSOI_SPAWN_AREA_NOTHING; // aSOI_ins_decide_insect: no bug
     }
   }
@@ -678,7 +685,7 @@ void pc_ap_museumsanity_bug_lock(const pc_ap_museumsanity* m, aSOI_insect_spawn_
 
 void pc_ap_museumsanity_bug_unwant_locked(const pc_ap_museumsanity* m, u8 wanted[PC_AP_CRITTER_NUM]) {
   for(int s = 0; s < PC_AP_CRITTER_NUM; s++) {
-    if(!pc_ap_museumsanity_bug_pass_open(m, pc_ap_bug_pass[s])) {
+    if(!pc_ap_museumsanity_bug_pass_open(m, m->bug_pass[s])) {
       wanted[s] = 0;
     }
   }

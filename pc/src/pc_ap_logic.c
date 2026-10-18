@@ -1299,12 +1299,23 @@ int pc_ap_bug_passes_on(void) {
   return g_ap.museum.bug_availability == AP_BUG_AVAIL_PROGRESSIVE;
 }
 
+int pc_ap_critter_passes(int cat, int idx) {
+  if(idx < 0 || idx >= PC_AP_CRITTER_NUM) {
+    return 0;
+  }
+  if(cat == mMmd_CATEGORY_FISH) {
+    return g_ap.museum.fish_passes[idx];
+  }
+  int pass = g_ap.museum.bug_pass[idx];
+  return pass >= 0 ? 1 << pass : 0;
+}
+
 int pc_ap_bug_pass_open(int pass) {
   return pc_ap_museumsanity_bug_pass_open(&g_ap.museum, pass);
 }
 
 int pc_ap_bee_trees_allowed(void) {
-  return pc_ap_museumsanity_bug_pass_open(&g_ap.museum, pc_ap_bug_pass[aINS_INSECT_TYPE_BEE]);
+  return pc_ap_museumsanity_bug_pass_open(&g_ap.museum, g_ap.museum.bug_pass[aINS_INSECT_TYPE_BEE]);
 }
 
 void pc_ap_museum_plaque_name(mActor_name_t item) {

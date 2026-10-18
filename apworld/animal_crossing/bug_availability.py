@@ -2,6 +2,8 @@
 # split by where bugs live, trees split into cicadas & co. and beetles); no bee trees before Tree Bugs. Only with
 # bug checks, else the client spawns every bug. Island bugs are untouched.
 # WARN: the client mirrors the order and ids (PC_AP_BUG_PASS_*, PC_AP_ITEM_BUG_PASS_BASE)!
+# The table goes to the client in slot_data (bug_passes): the seed's own table is what counts, so a later change
+# to BUG_PASSES can't change a generated seed (Universal Tracker reads it back from the seed).
 # Reads: world.museum_modes (museumsanity.setup).
 from BaseClasses import ItemClassification
 
@@ -12,11 +14,11 @@ from .museumsanity import MUSEUM_BUG, add_museum_rule
 BUG_PASS_ITEMS = ["Tree Bugs", "Beetles", "Flower Bugs", "Ground Bugs", "Flying Bugs"]
 BUG_PASS_ID_BASE = 0x10050  # pass p = base + p
 ITEMS = {name: BUG_PASS_ID_BASE + p for p, name in enumerate(BUG_PASS_ITEMS)}
-# museum bug name -> its item name
-BUG_PASS_OF = {name: BUG_PASS_ITEMS[p] for (name, _), p in zip(BUGS, BUG_PASSES)}
 
 
 def setup(world) -> None:
+    # Pass index per bug (BUGS order)
+    world.bug_passes = list((world.ut or {}).get("bug_passes", BUG_PASSES))
     world.bug_pass_items = []
     if (world.options.bug_availability == options.BugAvailability.option_progressive
             and world.museum_modes[MUSEUM_BUG]):
@@ -34,9 +36,10 @@ def classify(world, name: str):
 def rules(world) -> None:
     # A bug (catch and donate) needs its item
     if world.bug_pass_items:
-        for name, item in BUG_PASS_OF.items():
+        for (name, _), p in zip(BUGS, world.bug_passes):
+            item = BUG_PASS_ITEMS[p]
             add_museum_rule(world, MUSEUM_BUG, name, lambda state, item=item: state.has(item, world.player))
 
 
 def slot_data(world) -> dict:
-    return {"bug_availability": world.options.bug_availability.value}
+    return {"bug_availability": world.options.bug_availability.value, "bug_passes": world.bug_passes}

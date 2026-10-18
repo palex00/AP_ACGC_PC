@@ -61,6 +61,41 @@ static void read_int_array(const nlohmann::json& slot_data, const char * key,
   }
 }
 
+// Per-thing item indices (bug_passes, fossil_series, fish_river_passes): out[i] in [0, num), -1 for a missing key,
+// a short list or a bad entry (= nothing needed)
+static void read_pass_array(const nlohmann::json& slot_data, const char * key, int * out, int n, int num) {
+  for (int i = 0; i < n; i++) { out[i] = -1; }
+  auto it = slot_data.find(key);
+  if (it == slot_data.end() || !it->is_array()) { return; }
+  for (int i = 0; i < n && i < (int)it->size(); i++) {
+    const nlohmann::json& v = (*it)[i];
+    if (v.is_number_integer() && v.get<long long>() >= 0 && v.get<long long>() < num) {
+      out[i] = v.get<int>();
+    } else {
+      APLOG_WARN("%s[%d]: ignoring %s", key, i, v.dump().c_str());
+    }
+  }
+}
+
+// fish_passes: per fish a list of item indices -> bit mask; 0 (nothing needed) for a missing key, a short list,
+// or an entry without one valid index
+static void read_fish_passes(const nlohmann::json& slot_data, int * out) {
+  for (int i = 0; i < AP_CRITTER_NUM; i++) { out[i] = 0; }
+  auto it = slot_data.find("fish_passes");
+  if (it == slot_data.end() || !it->is_array()) { return; }
+  for (int i = 0; i < AP_CRITTER_NUM && i < (int)it->size(); i++) {
+    const nlohmann::json& passes = (*it)[i];
+    if (!passes.is_array()) { APLOG_WARN("fish_passes[%d]: ignoring %s", i, passes.dump().c_str()); continue; }
+    for (auto& v : passes) {
+      if (v.is_number_integer() && v.get<long long>() >= 0 && v.get<long long>() < AP_FISH_PASS_NUM) {
+        out[i] |= 1 << v.get<int>();
+      } else {
+        APLOG_WARN("fish_passes[%d]: ignoring %s", i, v.dump().c_str());
+      }
+    }
+  }
+}
+
 // npc indices from the apworld; bad entries are skipped (apworld/client mismatch)
 static void read_npc_list(const nlohmann::json& slot_data, const char * key, unsigned char * out) {
   memset(out, 0, AP_NPC_NUM);
@@ -229,6 +264,10 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   };
   read_int_array(slot_data, "fossil_seasons", sd->fossil_seasons, default_fossil_seasons, AP_FOSSIL_NUM);
   for (int i = 0; i < AP_FOSSIL_NUM; i++) { sd->fossil_seasons[i] &= 3; }
+  read_pass_array(slot_data, "bug_passes", sd->bug_passes, AP_CRITTER_NUM, AP_BUG_PASS_NUM);
+  read_fish_passes(slot_data, sd->fish_passes);
+  read_pass_array(slot_data, "fish_river_passes", sd->fish_river_passes, AP_CRITTER_NUM, AP_FISH_PASS_NUM);
+  read_pass_array(slot_data, "fossil_series", sd->fossil_series, AP_FOSSIL_NUM, AP_FOSSIL_SERIES_NUM);
   sd->timesanity = read_bool(slot_data, "timesanity", 0);
   sd->starting_month = read_int(slot_data, "starting_month", 0, 0, 11);
   sd->starting_time = read_int(slot_data, "starting_time", 0, 0, 3);

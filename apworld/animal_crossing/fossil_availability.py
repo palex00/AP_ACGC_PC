@@ -1,8 +1,9 @@
 # Fossil Availability: which fossils can be dug up. All / Season Locked (each fossil only in its season, logic
 # needs a month of it under Timesanity) / Progressive (one item per dinosaur series, "Single Fossils" for the
 # rest; nothing is buried before the first). Progressive only with fossil checks, else the client buries all.
-# WARN: the client mirrors the series order and ids (pc_ap_museumsanity_fossil_series, PC_AP_ITEM_FOSSIL_SERIES_BASE)
-# and has a copy of the seasons for offline play (ap_slotdata.cpp default_fossil_seasons)!
+# WARN: the client mirrors the series order and ids (PC_AP_FOSSIL_SERIES_*, PC_AP_ITEM_FOSSIL_SERIES_BASE) and has a
+# copy of the seasons for offline play (ap_slotdata.cpp default_fossil_seasons)! Seasons and series per fossil go to
+# the client in slot_data: the seed's own tables count (Universal Tracker reads them back from the seed).
 # Reads: world.museum_modes (museumsanity.setup).
 from BaseClasses import ItemClassification
 
@@ -44,9 +45,14 @@ for _name in FOSSILS:
     # Game names are lowercase ("tricera skull", but "T-rex skull"); the series items are capitalized
     _series = [s for s in FOSSIL_SERIES if s.lower() == _name.split(" ")[0].lower()]
     FOSSIL_SERIES_OF.append(fossil_series_item_name(_series[0] if _series else "Single"))
+FOSSIL_SERIES_INDEX = [FOSSIL_SERIES_ITEMS.index(item) for item in FOSSIL_SERIES_OF]  # museum fossil index -> series
 
 
 def setup(world) -> None:
+    # Per fossil (museum order): season 0-3, series index into FOSSIL_SERIES
+    ut = world.ut or {}
+    world.fossil_seasons = list(ut.get("fossil_seasons", FOSSIL_SEASONS))
+    world.fossil_series = list(ut.get("fossil_series", FOSSIL_SERIES_INDEX))
     world.fossil_series_items = []
     if (world.options.fossil_availability == options.FossilAvailability.option_progressive
             and world.museum_modes[MUSEUM_FOSSIL]):
@@ -64,18 +70,20 @@ def classify(world, name: str):
 def rules(world) -> None:
     # Season Locked (dig up and donate): a month of its season
     if world.options.fossil_availability == options.FossilAvailability.option_season_locked:
-        for name, season in zip(FOSSILS, FOSSIL_SEASONS):
+        for name, season in zip(FOSSILS, world.fossil_seasons):
             months = timesanity.month_rule(world, [MONTHS[m] for m in SEASON_MONTHS[season]])
             if months:
                 add_museum_rule(world, MUSEUM_FOSSIL, name, months)
     # Progressive: a fossil needs its series item
     if world.fossil_series_items:
-        for name, item in zip(FOSSILS, FOSSIL_SERIES_OF):
+        for name, s in zip(FOSSILS, world.fossil_series):
+            item = FOSSIL_SERIES_ITEMS[s]
             add_museum_rule(world, MUSEUM_FOSSIL, name, lambda state, item=item: state.has(item, world.player))
 
 
 def slot_data(world) -> dict:
     return {
         "fossil_availability": world.options.fossil_availability.value,
-        "fossil_seasons": FOSSIL_SEASONS,
+        "fossil_seasons": world.fossil_seasons,
+        "fossil_series": world.fossil_series,
     }

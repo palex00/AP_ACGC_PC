@@ -175,6 +175,9 @@ int pc_ap_fish_pass_open(int pass);
 int pc_ap_bug_passes_on(void);
 // Bug pass p (PC_AP_BUG_PASS_*) received, or passes off
 int pc_ap_bug_pass_open(int pass);
+// Bugs/Fish pages: the passes of bug or fish (cat mMmd_CATEGORY_*, museum idx) in the seed, bit p = pass p
+// opens it (any one); 0 = nothing needed
+int pc_ap_critter_passes(int cat, int idx);
 // mAGrw_SetHoneycombTree (daily grow): 0 = no new bee trees (the Bee's pass is closed)
 int pc_ap_bee_trees_allowed(void);
 

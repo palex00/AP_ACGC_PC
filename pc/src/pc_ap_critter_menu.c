@@ -62,7 +62,7 @@ static int pc_ap_critter_menu_pass_num(const pc_ap_critter_menu* m) {
 }
 
 static int pc_ap_critter_menu_species_passes(const pc_ap_critter_menu* m, int idx) {
-  return m->cat == mMmd_CATEGORY_FISH ? pc_ap_fish_passes[idx] : 1 << pc_ap_bug_pass[idx];
+  return pc_ap_critter_passes(m->cat, idx);
 }
 
 static int pc_ap_critter_menu_pass_open(const pc_ap_critter_menu* m, int pass) {
