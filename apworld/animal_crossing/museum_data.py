@@ -134,48 +134,61 @@ FISH = [
     ('arapaima', {6: (0, 2, 3), 7: (0, 2, 3), 8: (0, 2, 3)}),
 ]
 
-# Fish passes per fish (FISH order): indices into museum.FISH_PASS_ITEMS, any one opens it
-FISH_PASSES = [
-    (1,),  # crucian carp
-    (3,),  # brook trout
-    (2,),  # carp
-    (2,),  # koi
-    (2,),  # catfish
-    (1,),  # small bass
-    (2,),  # bass
-    (2,),  # large bass
-    (1,),  # bluegill
-    (3,),  # giant catfish
-    (3,),  # giant snakehead
-    (2,),  # barbel steed
-    (2,),  # dace
-    (1,),  # pale chub
-    (0,),  # bitterling
-    (0,),  # loach
-    (0,),  # pond smelt
-    (1,),  # sweetfish
-    (1,),  # cherry salmon
-    (2,),  # large char
-    (2,),  # rainbow trout
-    (2,),  # stringfish
-    (2,),  # salmon
-    (0,),  # goldfish
-    (1,),  # piranha
-    (2,),  # arowana
-    (1,),  # eel
-    (1,),  # freshwater goby
-    (1,),  # angelfish
-    (0,),  # guppy
-    (0,),  # popeyed goldfish
-    (4,),  # coelacanth
-    (3,),  # crawfish
-    (3,),  # frog
-    (0, 3),  # killifish
-    (4,),  # jellyfish
-    (4,),  # sea bass
-    (4,),  # red snapper
-    (4,),  # barred knifejaw
-    (2,),  # arapaima
+# Fish passes: per pass (index into fish_availability.FISH_PASS_ITEMS), the fish it opens as [fish index
+# (FISH order), area]; area "" = everywhere the fish spawns, else only there (river, waterfall, river_mouth,
+# lake, pond, sea). A fish needs any pass that lists it.
+FISH_PASS_TABLE = [
+    [  # Small River Fish
+        [14, ""],  # bitterling
+        [15, ""],  # loach
+        [16, ""],  # pond smelt
+        [23, ""],  # goldfish
+        [29, ""],  # guppy
+        [30, ""],  # popeyed goldfish
+        [34, "river"],  # killifish
+    ],
+    [  # Medium River Fish
+        [0, ""],  # crucian carp
+        [5, ""],  # small bass
+        [8, ""],  # bluegill
+        [13, ""],  # pale chub
+        [17, ""],  # sweetfish
+        [18, ""],  # cherry salmon
+        [24, ""],  # piranha
+        [26, ""],  # eel
+        [27, ""],  # freshwater goby
+        [28, ""],  # angelfish
+    ],
+    [  # Large River Fish
+        [2, ""],  # carp
+        [3, ""],  # koi
+        [4, ""],  # catfish
+        [6, ""],  # bass
+        [7, ""],  # large bass
+        [11, ""],  # barbel steed
+        [12, ""],  # dace
+        [19, ""],  # large char
+        [20, ""],  # rainbow trout
+        [21, ""],  # stringfish
+        [22, ""],  # salmon
+        [25, ""],  # arowana
+        [39, ""],  # arapaima
+    ],
+    [  # Pond Fish
+        [1, ""],  # brook trout
+        [9, ""],  # giant catfish
+        [10, ""],  # giant snakehead
+        [32, ""],  # crawfish
+        [33, ""],  # frog
+        [34, "pond"],  # killifish
+    ],
+    [  # Sea Fish
+        [31, ""],  # coelacanth
+        [35, ""],  # jellyfish
+        [36, ""],  # sea bass
+        [37, ""],  # red snapper
+        [38, ""],  # barred knifejaw
+    ],
 ]
 
 # Bug passes per bug (BUGS order): index into museum.BUG_PASS_ITEMS

@@ -12,7 +12,7 @@ from .museum_data import BUG_PASSES, BUGS
 from .museumsanity import MUSEUM_BUG, add_museum_rule
 
 BUG_PASS_ITEMS = ["Tree Bugs", "Beetles", "Flower Bugs", "Ground Bugs", "Flying Bugs"]
-BUG_PASS_ID_BASE = 0x10050  # pass p = base + p
+BUG_PASS_ID_BASE = 0x10280  # pass p = base + p; 64 ids reserved (0x10280-0x102BF)
 ITEMS = {name: BUG_PASS_ID_BASE + p for p, name in enumerate(BUG_PASS_ITEMS)}
 
 

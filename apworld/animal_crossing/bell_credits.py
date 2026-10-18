@@ -6,7 +6,8 @@
 SMALL_BELL_CREDIT = "Small Bell Credit"
 MODEST_BELL_CREDIT = "Modest Bell Credit"
 LARGE_BELL_CREDIT = "Large Bell Credit"
-ITEMS = {SMALL_BELL_CREDIT: 0x10001, MODEST_BELL_CREDIT: 0x10002, LARGE_BELL_CREDIT: 0x10003}
+BELL_CREDIT_ID_BASE = 0x10300  # tier t = base + t; 64 ids reserved (0x10300-0x1033F)
+ITEMS = {name: BELL_CREDIT_ID_BASE + t for t, name in enumerate([SMALL_BELL_CREDIT, MODEST_BELL_CREDIT, LARGE_BELL_CREDIT])}
 
 # (value ratio, pool weight), small to large. The Bells per ratio unit are computed per seed.
 BELL_CREDITS = {

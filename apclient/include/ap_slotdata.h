@@ -32,6 +32,15 @@ extern "C" {
 #define AP_BUG_PASS_NUM 5 // Bug Availability items (PC_AP_BUG_PASS_NUM)
 #define AP_FISH_PASS_NUM 5 // Fish Availability items (PC_AP_FISH_PASS_NUM)
 #define AP_FOSSIL_SERIES_NUM 8 // Progressive fossil series items (PC_AP_FOSSIL_SERIES_NUM)
+// Fish spawn areas of the fish_passes table (slot_data names "river", "waterfall", "river_mouth", "lake", "pond",
+// "sea"; "" = all). The client maps the game's aSOG_SPAWN_AREA_* onto these.
+#define AP_FISH_AREA_RIVER       0
+#define AP_FISH_AREA_WATERFALL   1
+#define AP_FISH_AREA_RIVER_MOUTH 2
+#define AP_FISH_AREA_LAKE        3
+#define AP_FISH_AREA_POND        4
+#define AP_FISH_AREA_SEA         5
+#define AP_FISH_AREA_NUM         6
 
 #define AP_BEACH_PER_MONTH_MAX 20 // Shellsanity: apworld BEACH_PER_MONTH_MAX
 #define AP_CATALOG_MAX 575 // Catalogsanity: eligible catalog items (apworld CATALOG_ELIGIBLE)
@@ -135,7 +144,9 @@ typedef struct {
   // Which item opens what (the seed's own tables, so later apworld changes can't change a seed). -1 / 0 = nothing
   // needed (missing key or bad entry; real seeds always send them)
   int bug_passes[AP_CRITTER_NUM];        // per museum bug: its Bug Availability item (0..AP_BUG_PASS_NUM-1)
-  int fish_passes[AP_CRITTER_NUM];       // per museum fish: bit p = Fish Availability item p opens it (any one)
+  // per museum fish and area: bit p = Fish Availability item p opens its spawn rows there (any one). A fish with
+  // no bit anywhere isn't gated; a gated fish with no bit in an area never spawns there
+  int fish_area_passes[AP_CRITTER_NUM][AP_FISH_AREA_NUM];
   int fossil_series[AP_FOSSIL_NUM];      // per museum fossil: its series item (0..AP_FOSSIL_SERIES_NUM-1)
   // Timesanity
   int timesanity;                    // nonzero: frozen clock, months and time slots are items

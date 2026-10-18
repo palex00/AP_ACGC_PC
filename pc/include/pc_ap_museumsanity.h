@@ -27,12 +27,12 @@ extern "C" {
 // WARN: keep in sync with apworld fossil_availability.py FOSSIL_SERIES! Progressive fossil
 // spawns: "<series> Fossils" = base + series (Tricera, T-rex, Apato, Stego,
 // Ptera, Plesio, Mammoth, Single)
-#define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10030
+#define PC_AP_ITEM_FOSSIL_SERIES_BASE 0x10200 // 64 ids reserved (0x10200-0x1023F)
 #define PC_AP_FOSSIL_SERIES_NUM       8
 #define PC_AP_FOSSIL_SERIES_SINGLE    7 // Amber, Dinosaur Track, Ammonite, Dinosaur Egg, Trilobite
 // WARN: keep in sync with apworld fish_availability.py FISH_PASS_ITEMS! Fish Availability
 // "Progressive": pass p item = base + p
-#define PC_AP_ITEM_FISH_PASS_BASE     0x10040
+#define PC_AP_ITEM_FISH_PASS_BASE     0x10240 // 64 ids reserved (0x10240-0x1027F)
 #define PC_AP_FISH_PASS_SMALL_RIVER   0
 #define PC_AP_FISH_PASS_MEDIUM_RIVER  1
 #define PC_AP_FISH_PASS_LARGE_RIVER   2
@@ -41,7 +41,7 @@ extern "C" {
 #define PC_AP_FISH_PASS_NUM           5
 // WARN: keep in sync with apworld bug_availability.py BUG_PASS_ITEMS! Bug Availability
 // "Progressive": pass p item = base + p (bug -> pass: pc_ap_bug_pass, generated)
-#define PC_AP_ITEM_BUG_PASS_BASE      0x10050
+#define PC_AP_ITEM_BUG_PASS_BASE      0x10280 // 64 ids reserved (0x10280-0x102BF)
 #define PC_AP_BUG_PASS_TREE           0 // cicadas, Bagworm, Spider, Purple Butterfly, Bee
 #define PC_AP_BUG_PASS_BEETLE         1
 #define PC_AP_BUG_PASS_FLOWER         2
@@ -66,9 +66,9 @@ typedef struct {
   int fossil_seasons[mMmd_FOSSIL_NUM];     // season per fossil (0 spring .. 3 winter)
   // Which item opens what: the seed's tables (ap_slotdata.h), -1 / 0 = nothing needed
   int bug_pass[PC_AP_CRITTER_NUM];         // per bug: PC_AP_BUG_PASS_*
-  int fish_passes[PC_AP_CRITTER_NUM];      // per fish: bit p = PC_AP_FISH_PASS_* p opens it (any one)
-  int fish_river_pass[PC_AP_CRITTER_NUM];  // per fish: pass of its river / waterfall / river mouth rows: its one
-                                           // river item in fish_passes (by size), -1 = none (no river rows)
+  int fish_area_passes[PC_AP_CRITTER_NUM][AP_FISH_AREA_NUM]; // per fish + AP_FISH_AREA_*: bit p = pass p opens
+                                                             // its rows there (ap_slotdata.h)
+  int fish_passes[PC_AP_CRITTER_NUM];      // per fish: all its areas' bits (opens it somewhere; 0 = not gated)
   int fossil_series[mMmd_FOSSIL_NUM];      // per fossil: PC_AP_FOSSIL_SERIES_*
 } pc_ap_museumsanity;
 
@@ -168,10 +168,10 @@ void pc_ap_museumsanity_fish_habitat(const pc_ap_museumsanity* m, aSOG_gyoei_spa
                                      u32 block_type);
 // Fish Availability: nonzero if fish pass p is open (always unless progressive; p < 0 = nothing needed)
 int pc_ap_museumsanity_fish_pass_open(const pc_ap_museumsanity* m, int pass);
-// Fish pass of one spawn row (aGYO_TYPE_*, aSOG_SPAWN_AREA_*): river, waterfall and
-// river mouth = the fish's fish_river_pass (by size), lake and ponds = pond, sea = sea. -1 for rows
-// that aren't a museum fish or are left alone (whale, offing, trash)
-int pc_ap_museumsanity_fish_row_pass(const pc_ap_museumsanity* m, int type, int area);
+// Fish Availability: nonzero if a spawn row (aGYO_TYPE_*, aSOG_SPAWN_AREA_*) may spawn: not progressive, not a
+// museum fish or left alone (whale, offing, trash), a fish the seed doesn't gate, or one of the passes the seed
+// lists for that fish in that area is received. A gated fish with no pass for that area never spawns there.
+int pc_ap_museumsanity_fish_row_open(const pc_ap_museumsanity* m, int type, int area);
 // Fish Availability on the spawn list (after the odds): a row whose pass is closed keeps
 // its weight but gets an invalid spawn area, so picking it spawns nothing (the others
 // keep vanilla odds). Not for the island (its rows are tagged sea too).

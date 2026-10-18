@@ -30,7 +30,7 @@ FOSSIL_SEASONS = [_SEASON_OF_FOSSIL[name] for name in FOSSILS]  # museum fossil 
 # Progressive: one item per series opens its fossils; "Single Fossils" opens the rest (Amber, Dinosaur Track,
 # Ammonite, Dinosaur Egg, Trilobite).
 FOSSIL_SERIES = ["Tricera", "T-rex", "Apato", "Stego", "Ptera", "Plesio", "Mammoth", "Single"]
-FOSSIL_SERIES_ID_BASE = 0x10030  # series s = base + s
+FOSSIL_SERIES_ID_BASE = 0x10200  # series s = base + s; 64 ids reserved (0x10200-0x1023F)
 
 
 def fossil_series_item_name(series: str) -> str:
