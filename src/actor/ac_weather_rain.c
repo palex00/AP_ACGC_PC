@@ -183,6 +183,13 @@ void aWeatherRain_draw(aWeather_Priv* priv, GAME* game) {
         graph = play->game.graph;
 
         disp = disp >> 1;
+#ifdef TARGET_PC
+        // The port's float timer can end a splash's life a hair above 0 (dt not exactly 1): 8 - timer rounds
+        // to 8 and the index to 4, one past the table, drawing whatever comes after it (Linux -O2: Nook's stall)
+        if (disp > 3) {
+            disp = 3;
+        }
+#endif
 
         Matrix_translate(pos.x, pos.y, pos.z, MTX_LOAD);
         Matrix_mult(&play->billboard_matrix, MTX_MULT);
