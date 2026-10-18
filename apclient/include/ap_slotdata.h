@@ -136,7 +136,6 @@ typedef struct {
   // needed (missing key or bad entry; real seeds always send them)
   int bug_passes[AP_CRITTER_NUM];        // per museum bug: its Bug Availability item (0..AP_BUG_PASS_NUM-1)
   int fish_passes[AP_CRITTER_NUM];       // per museum fish: bit p = Fish Availability item p opens it (any one)
-  int fish_river_passes[AP_CRITTER_NUM]; // per museum fish: the item of its river/waterfall/river mouth spawn rows
   int fossil_series[AP_FOSSIL_NUM];      // per museum fossil: its series item (0..AP_FOSSIL_SERIES_NUM-1)
   // Timesanity
   int timesanity;                    // nonzero: frozen clock, months and time slots are items

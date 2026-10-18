@@ -178,51 +178,6 @@ FISH_PASSES = [
     (2,),  # arapaima
 ]
 
-# River pass per fish (FISH order): the pass of its river, waterfall and river mouth spawn rows, by
-# shadow size (lake and pond rows: Pond Fish, sea rows: Sea Fish)
-FISH_RIVER_PASSES = [
-    1,  # crucian carp
-    1,  # brook trout
-    2,  # carp
-    2,  # koi
-    2,  # catfish
-    1,  # small bass
-    2,  # bass
-    2,  # large bass
-    1,  # bluegill
-    2,  # giant catfish
-    2,  # giant snakehead
-    2,  # barbel steed
-    2,  # dace
-    1,  # pale chub
-    0,  # bitterling
-    0,  # loach
-    0,  # pond smelt
-    1,  # sweetfish
-    1,  # cherry salmon
-    2,  # large char
-    2,  # rainbow trout
-    2,  # stringfish
-    2,  # salmon
-    0,  # goldfish
-    1,  # piranha
-    2,  # arowana
-    1,  # eel
-    1,  # freshwater goby
-    1,  # angelfish
-    0,  # guppy
-    0,  # popeyed goldfish
-    2,  # coelacanth
-    1,  # crawfish
-    0,  # frog
-    0,  # killifish
-    2,  # jellyfish
-    2,  # sea bass
-    2,  # red snapper
-    2,  # barred knifejaw
-    2,  # arapaima
-]
-
 # Bug passes per bug (BUGS order): index into museum.BUG_PASS_ITEMS
 BUG_PASSES = [
     2,  # common butterfly

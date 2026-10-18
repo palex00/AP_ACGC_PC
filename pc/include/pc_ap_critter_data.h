@@ -26,8 +26,8 @@ typedef struct {
 extern const pc_ap_critter_data pc_ap_bug_data[PC_AP_CRITTER_NUM];
 extern const pc_ap_critter_data pc_ap_fish_data[PC_AP_CRITTER_NUM];
 
-// Bug / fish passes aren't here: they come with the seed (slot_data bug_passes, fish_passes,
-// fish_river_passes from the apworld's museum_data.py), see ap_slotdata.h
+// Bug / fish passes aren't here: they come with the seed (slot_data bug_passes, fish_passes
+// from the apworld's museum_data.py), see ap_slotdata.h
 
 #ifdef __cplusplus
 }

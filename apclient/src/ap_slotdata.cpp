@@ -61,7 +61,7 @@ static void read_int_array(const nlohmann::json& slot_data, const char * key,
   }
 }
 
-// Per-thing item indices (bug_passes, fossil_series, fish_river_passes): out[i] in [0, num), -1 for a missing key,
+// Per-thing item indices (bug_passes, fossil_series): out[i] in [0, num), -1 for a missing key,
 // a short list or a bad entry (= nothing needed)
 static void read_pass_array(const nlohmann::json& slot_data, const char * key, int * out, int n, int num) {
   for (int i = 0; i < n; i++) { out[i] = -1; }
@@ -266,7 +266,6 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   for (int i = 0; i < AP_FOSSIL_NUM; i++) { sd->fossil_seasons[i] &= 3; }
   read_pass_array(slot_data, "bug_passes", sd->bug_passes, AP_CRITTER_NUM, AP_BUG_PASS_NUM);
   read_fish_passes(slot_data, sd->fish_passes);
-  read_pass_array(slot_data, "fish_river_passes", sd->fish_river_passes, AP_CRITTER_NUM, AP_FISH_PASS_NUM);
   read_pass_array(slot_data, "fossil_series", sd->fossil_series, AP_FOSSIL_NUM, AP_FOSSIL_SERIES_NUM);
   sd->timesanity = read_bool(slot_data, "timesanity", 0);
   sd->starting_month = read_int(slot_data, "starting_month", 0, 0, 11);

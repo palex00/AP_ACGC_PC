@@ -67,7 +67,8 @@ typedef struct {
   // Which item opens what: the seed's tables (ap_slotdata.h), -1 / 0 = nothing needed
   int bug_pass[PC_AP_CRITTER_NUM];         // per bug: PC_AP_BUG_PASS_*
   int fish_passes[PC_AP_CRITTER_NUM];      // per fish: bit p = PC_AP_FISH_PASS_* p opens it (any one)
-  int fish_river_pass[PC_AP_CRITTER_NUM];  // per fish: pass of its river / waterfall / river mouth rows
+  int fish_river_pass[PC_AP_CRITTER_NUM];  // per fish: pass of its river / waterfall / river mouth rows: its one
+                                           // river item in fish_passes (by size), -1 = none (no river rows)
   int fossil_series[mMmd_FOSSIL_NUM];      // per fossil: PC_AP_FOSSIL_SERIES_*
 } pc_ap_museumsanity;
 

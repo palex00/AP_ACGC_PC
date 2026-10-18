@@ -30,7 +30,12 @@ void pc_ap_museumsanity_init(pc_ap_museumsanity* m, const ap_slotdata* sd) {
   for(int i = 0; i < PC_AP_CRITTER_NUM; i++) {
     m->bug_pass[i] = sd->bug_passes[i];
     m->fish_passes[i] = sd->fish_passes[i];
-    m->fish_river_pass[i] = sd->fish_river_passes[i];
+    m->fish_river_pass[i] = -1;
+    for(int p = PC_AP_FISH_PASS_LARGE_RIVER; p >= PC_AP_FISH_PASS_SMALL_RIVER; p--) {
+      if(sd->fish_passes[i] & (1 << p)) {
+        m->fish_river_pass[i] = p;
+      }
+    }
   }
   if(sd->museumsanity) {
     m->checks[mMmd_CATEGORY_FOSSIL] = sd->fossil_checks;
