@@ -15,9 +15,9 @@ PCSettings g_pc_settings = {
     .render_scale  = PC_RENDER_SCALE_AUTO,
     .texture_filtering = 1,
     .preload_textures = 0,
-    .disable_resetti = 0,
+    .disable_resetti = 1,
     .disable_shop_visitor_req = 0,
-    .borderless_acres = 1,
+    .borderless_acres = 0,
     .nes_aspect = 1,
     .master_volume = 100,
     .stick_deadzone = 12,
@@ -61,13 +61,13 @@ static const char* DEFAULT_SETTINGS =
     "\n"
     "[Gameplay]\n"
     "# Disable Mr. Resetti: 0 = normal, 1 = disable\n"
-    "disable_resetti = 0\n"
+    "disable_resetti = 1\n"
     "\n"
     "# Shop upgrade visitor requirement (Nookington's needs a shopper from another town): 0 = required, 1 = not required\n"
     "disable_shop_visitor_req = 0\n"
     "\n"
     "# Borderless acres: 0 = original acre transitions (faster, draws less), 1 = continuous movement/camera\n"
-    "borderless_acres = 1\n"
+    "borderless_acres = 0\n"
     "\n"
     "# NES emulator aspect ratio: 0 = stretch to fullscreen, 1 = 4:3 pillarbox\n"
     "nes_aspect = 1\n"

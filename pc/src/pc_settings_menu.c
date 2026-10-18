@@ -84,7 +84,7 @@ static const Item tab_ap_items[] = {
     AP_ITEM("Villagers awake",   PC_AP_SET_VILLAGERS_NEVER_SLEEP),
     AP_ITEM("No falling stalks", PC_AP_SET_NO_FALLING_STALKS),
     AP_ITEM("No fishing trash",  PC_AP_SET_NO_FISHING_TRASH),
-    AP_ITEM("Easier catching",   PC_AP_SET_EASIER_CRITTER_CATCH),
+    AP_ITEM("Easier critters",   PC_AP_SET_EASIER_CRITTER_CATCH),
     AP_ITEM("Hidden bug hints",  PC_AP_SET_HIDDEN_BUG_HINTS),
     AP_ITEM("Hidden item hints", PC_AP_SET_HIDDEN_ITEM_HINTS),
     AP_ITEM("Skip HRA talk",     PC_AP_SET_SKIP_HRA_TALK),
