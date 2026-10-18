@@ -715,7 +715,8 @@ class ShopNeverSellsOut(Toggle):
 class EasierCritterCatch(DefaultOnToggle):
     """
     Fish give you one more second to press A once the bobber goes under, and
-    running near them no longer scares them (tools and the bobber still do).
+    running near them no longer scares them (tools and the bobber still do). Sea fish
+    face the beach instead of out to sea.
     Bugs take twice as long to notice you moving near them. Shaking a tree or
     swinging the net next to a bug still scares it. Bees chase you at half speed.
     Purple butterflies fly as low as the other butterflies instead of high above the trees.

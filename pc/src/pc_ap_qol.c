@@ -97,6 +97,10 @@ int pc_ap_qol_fish_run_scare(void) {
   return !pc_ap_qol_easier_critter_catch();
 }
 
+int pc_ap_qol_sea_fish_face_shore(void) {
+  return pc_ap_qol_easier_critter_catch();
+}
+
 float pc_ap_qol_bee_speed_scale(void) {
   return pc_ap_qol_easier_critter_catch() ? PC_AP_QOL_BEE_SPEED_SCALE : 1.0f;
 }

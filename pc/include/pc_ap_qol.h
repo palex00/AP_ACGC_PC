@@ -81,6 +81,10 @@ float pc_ap_qol_bug_stress_scale(void);
 // Nonzero when running near a fish (110 units) scares it, 0 when Easier Critter Catch is on;
 // hooked in aGTT_player_near and aGKK_player_near. Tool hits and the bobber still scare it.
 int pc_ap_qol_fish_run_scare(void);
+// Nonzero when sea fish face the beach instead of out to sea (Easier Critter Catch): their spawn and
+// idle facing is against the water flow, which in the sea points at the beach. Hooked in
+// aGTT_Get_flow_angle_rv and aGKK_Get_flow_angle_rv; rivers unchanged.
+int pc_ap_qol_sea_fish_face_shore(void);
 // Nonzero when purple butterflies fly at the other butterflies' height over the ground (Easier Critter
 // Catch). Vanilla they keep their height over the tree's collision column (up to 80 high), out of net
 // reach; hooked in aICH_jump_ctrl.

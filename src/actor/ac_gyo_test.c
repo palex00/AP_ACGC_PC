@@ -283,6 +283,11 @@ static s16 aGTT_Get_flow_angle(ACTOR* actorx) {
 }
 
 static s16 aGTT_Get_flow_angle_rv(ACTOR* actorx) {
+#ifdef TARGET_PC
+    if (pc_ap_qol_sea_fish_face_shore() && actorx->bg_collision_check.result.unit_attribute == mCoBG_ATTRIBUTE_SEA) {
+        return aGTT_Get_flow_angle(actorx); // the sea flows toward the beach
+    }
+#endif
     return aGTT_Get_flow_angle(actorx) + DEG2SHORT_ANGLE2(180.0f);
 }
 
