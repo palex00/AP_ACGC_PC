@@ -407,7 +407,7 @@ class ExtraBells(Range):
     display_name = "Extra Bells (x10,000)"
     range_start = 0
     range_end = 100
-    default = 0
+    default = 5
 
 
 class Favorsanity(DefaultOnToggle):
@@ -708,6 +708,7 @@ class EasierCritterCatch(DefaultOnToggle):
     running near them no longer scares them (tools and the bobber still do).
     Bugs take twice as long to notice you moving near them. Shaking a tree or
     swinging the net next to a bug still scares it. Bees chase you at half speed.
+    Purple butterflies fly as low as the other butterflies instead of high above the trees.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Easier Critter Catch"

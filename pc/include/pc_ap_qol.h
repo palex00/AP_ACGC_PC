@@ -81,6 +81,10 @@ float pc_ap_qol_bug_stress_scale(void);
 // Nonzero when running near a fish (110 units) scares it, 0 when Easier Critter Catch is on;
 // hooked in aGTT_player_near and aGKK_player_near. Tool hits and the bobber still scare it.
 int pc_ap_qol_fish_run_scare(void);
+// Nonzero when purple butterflies fly at the other butterflies' height over the ground (Easier Critter
+// Catch). Vanilla they keep their height over the tree's collision column (up to 80 high), out of net
+// reach; hooked in aICH_jump_ctrl.
+int pc_ap_qol_purple_butterfly_low(void);
 // Multiplier on a chasing bee's speed, 1 when off; hooked in aBEE_fly_move_common. The sting
 // distance is unchanged.
 float pc_ap_qol_bee_speed_scale(void);

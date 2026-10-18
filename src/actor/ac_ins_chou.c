@@ -5,6 +5,9 @@
 #include "m_common_data.h"
 #include "m_player_lib.h"
 #include "ac_set_ovl_insect.h"
+#ifdef TARGET_PC
+#include "pc_ap_qol.h"
+#endif
 
 enum {
     aICH_ACTION_AVOID,
@@ -85,6 +88,14 @@ static void aICH_jump_ctrl(aINS_INSECT_ACTOR* insect, f32 base) {
     angle = mCoBG_GetWaterHeight_File(insect->tools_actor.actor_class.world.position, "ac_ins_chou.c", 265);
     if (angle == -100.0f) {
         angle = mCoBG_GetBgY_AngleS_FromWpos(NULL, insect->tools_actor.actor_class.world.position, 0.0f);
+#ifdef TARGET_PC
+        // Easier Critter Catch: ground without the tree column, and the other butterflies' heights
+        // (fly -50 -> -30, avoid -100 -> -60)
+        if (insect->type == aINS_INSECT_TYPE_PURPLE_BUTTERFLY && pc_ap_qol_purple_butterfly_low()) {
+            angle = mCoBG_GetBgY_OnlyCenter_FromWpos(insect->tools_actor.actor_class.world.position, 0.0f);
+            base *= 0.6f;
+        }
+#endif
     }
     angle -= base;
     if (insect->tools_actor.actor_class.world.position.y < angle) {
