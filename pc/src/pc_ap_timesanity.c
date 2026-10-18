@@ -14,7 +14,8 @@ void pc_ap_timesanity_init(pc_ap_timesanity* t, const ap_slotdata* sd) {
   t->normalized = sd->normalized_time_travel;
 }
 
-// First hour of Morning, Day, Evening, Night
+// First hour of Morning, Day, Evening, Night. Frozen: 0.5.0 seeds' critter logic used them (dump_museum.py
+// SLOT_HOURS, sync-checked)
 static const int l_slot_first_hour[PC_AP_SLOT_NUM] = { 4, 9, 16, 21 };
 
 int pc_ap_timesanity_slot_first_hour(int slot) {

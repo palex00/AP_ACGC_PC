@@ -344,12 +344,15 @@ int pc_ap_museumsanity_fossil_available(const pc_ap_museumsanity* m) {
   return count;
 }
 
+// Season Locked: season of each month (0 spring Mar-May .. 3 winter Dec-Feb). Frozen: 0.5.0 seeds' logic used it
+// (apworld fossil_availability.SEASON_MONTHS, sync-checked)
+static const int l_season_of_month[12] = { 3, 3, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3 };
+
 int pc_ap_museumsanity_pick_fossil(const pc_ap_museumsanity* m, const u8 wanted[mMmd_FOSSIL_NUM], int month,
                                    f32 r) {
   int weight[mMmd_FOSSIL_NUM];
   int total = 0;
-  // March-May = 0 (spring) ... December-February = 3 (winter)
-  int season = (month + 10) % 12 / 3;
+  int season = l_season_of_month[month >= 0 && month < 12 ? month : 0];
   for(int idx = 0; idx < mMmd_FOSSIL_NUM; idx++) {
     // Odds. Vanilla (mMsm_GetFossil): a coin flip between the 5 single fossils and
     // the 20 dinosaur parts, so a single is 4 times as likely as a part.
