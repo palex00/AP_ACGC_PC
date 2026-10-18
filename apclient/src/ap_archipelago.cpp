@@ -3,6 +3,7 @@
 
 #include <apclient.hpp>
 #include <apuuid.hpp>
+#include <cstdarg>
 #include <deque>
 #include <memory>
 #include <fstream>
@@ -134,38 +135,78 @@ void ap_send_goal(void) {
   g_ap_goal = 1;
 }
 
-// Attempt to load config at given path. If it does not exist or
-// some other error occurs, returns non-zero
+// Bad or unfilled config: no client, the overlay shows "EDIT ap_config.ini: <reason>"
+static void ap_bad_config(const char * fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(g_ap_connectstate.last_refuse_reason, sizeof(g_ap_connectstate.last_refuse_reason), fmt, args);
+  va_end(args);
+  g_ap_connectstate.state = AP_CSTATE_BADCONFIG;
+  APLOG_WARN("Bad AP config: %s", g_ap_connectstate.last_refuse_reason);
+}
+
+// Written when there's no config, so a first run just says what to fill in
+static const char AP_CONFIG_TEMPLATE[] =
+  "; Archipelago connection: fill in host and slotname, then restart the game.\n"
+  "; Example: host = archipelago.gg:38281 (use ws:// for a local server: host = ws://localhost:38281)\n"
+  "host = \n"
+  "slotname = \n"
+  "password = \n"
+  "; Offline play instead (no server): remove the ; below and edit the json\n"
+  ";offline = offline_example.json\n";
+
+// ini_find_property, but ignoring spaces after the name: ini.h keeps them ("host = x" is "host ")
+static int ap_ini_find(ini_t * ini, const char * name) {
+  size_t len = strlen(name);
+  int count = ini_property_count(ini, INI_GLOBAL_SECTION);
+  for (int i = 0; i < count; i++) {
+    const char * other = ini_property_name(ini, INI_GLOBAL_SECTION, i);
+    size_t other_len = strlen(other);
+    while (other_len > 0 && other[other_len - 1] <= ' ') { other_len--; }
+    if (other_len == len && INI_STRNICMP(name, other, len) == 0) { return i; }
+  }
+  return INI_NOT_FOUND;
+}
+
+// Load the config at path; a missing one is created from AP_CONFIG_TEMPLATE.
+// Non-zero (state set by ap_bad_config) when there's nothing to connect to
 static int load_config(const char * path, ap_config * out) {
   APLOG_DEBUG("Loading AP config file %s", path);
   // Reading files in c++ is weird... I'm used to c. sorry if this is weird?
   std::ifstream f(path, std::ios::binary);
   if(!f) {
-    APLOG_WARN("Can't find AP config file at %s", path);
-    return -1;
+    std::ofstream w(path, std::ios::binary);
+    w << AP_CONFIG_TEMPLATE;
+    if (!w) {
+      ap_bad_config("can't create it next to the game");
+      return 1;
+    }
+    APLOG_INFO("Created AP config file %s", path);
+    ap_bad_config("fill in host and slotname");
+    return 1;
   }
   std::stringstream ss;
   ss << f.rdbuf();
   std::string data = ss.str();
 
   ini_t* ini = ini_load(data.c_str(), NULL); // null for normal malloc?
-  int hostp = ini_find_property(ini, INI_GLOBAL_SECTION, "host", 0);
-  int slotp = ini_find_property(ini, INI_GLOBAL_SECTION, "slotname", 0);
-  int passwordp = ini_find_property(ini, INI_GLOBAL_SECTION, "password", 0);
-  int offlinep = ini_find_property(ini, INI_GLOBAL_SECTION, "offline", 0);
+  int hostp = ap_ini_find(ini, "host");
+  int slotp = ap_ini_find(ini, "slotname");
+  int passwordp = ap_ini_find(ini, "password");
+  int offlinep = ap_ini_find(ini, "offline");
   // offline mode doesn't need a server
   if (offlinep != INI_NOT_FOUND) {
     snprintf(out->offline, sizeof(out->offline), "%s", ini_property_value(ini, INI_GLOBAL_SECTION, offlinep));
     ini_destroy(ini);
     if (!out->offline[0]) {
-      APLOG_WARN("Malformed AP config file at %s (offline is empty)", path);
+      ap_bad_config("offline: empty");
       return 1;
     }
     return 0;
   }
   if (hostp == INI_NOT_FOUND || slotp == INI_NOT_FOUND) {
-    APLOG_WARN("Malformed AP config file at %s (needs host and slotname, or offline)", path);
     ini_destroy(ini);
+    ap_bad_config("needs host and slotname, or offline");
     return 1;
   }
   snprintf(out->host, sizeof(out->host), "%s", ini_property_value(ini, INI_GLOBAL_SECTION, hostp));
@@ -173,8 +214,12 @@ static int load_config(const char * path, ap_config * out) {
   // password is optional
   snprintf(out->password, sizeof(out->password), "%s",
            passwordp == INI_NOT_FOUND ? "" : ini_property_value(ini, INI_GLOBAL_SECTION, passwordp));
-
   ini_destroy(ini);
+
+  if (!out->host[0] || !out->slotname[0]) {
+    ap_bad_config("fill in host and slotname");
+    return 1;
+  }
   return 0;
 }
 
@@ -210,12 +255,14 @@ static int ap_start_offline(const char * path) {
   std::ifstream f(path, std::ios::binary);
   if (!f) {
     APLOG_WARN("Can't find offline file at %s", path);
-    return -1;
+    ap_bad_config("offline: file not found");
+    return 1;
   }
   nlohmann::json data = nlohmann::json::parse(f, nullptr, false);
   if (!data.is_object() || !data.contains("seed") || !data["seed"].is_string() ||
       data["seed"].get<std::string>().empty()) {
     APLOG_WARN("Malformed offline file at %s (needs a json object with a seed)", path);
+    ap_bad_config("offline: bad json or no seed");
     return 1;
   }
 
@@ -228,12 +275,14 @@ static int ap_start_offline(const char * path) {
     if (!ap_slotdata_upgrade(data)) {
       APLOG_WARN("Offline file at %s is for a newer client (slot_data_version %d, client reads up to %d)", path,
           data.value("slot_data_version", 1), AP_SLOTDATA_VERSION);
+      ap_bad_config("offline: needs a newer client");
       ap_roomplayer_init(rp);
       return 1;
     }
     ap_slotdata_fill(sd, data);
   } catch (const nlohmann::json::exception& e) {
     APLOG_WARN("Malformed offline file at %s: %s", path, e.what());
+    ap_bad_config("offline: value of the wrong type");
     ap_slotdata_init(sd);
     ap_roomplayer_init(rp);
     return 1;
@@ -258,8 +307,7 @@ static int ap_start_offline(const char * path) {
   return 0;
 }
 
-int ap_start(void) {
-                 
+void ap_start(void) {
   APLOG_INFO("Starting AP system");
 
   ap_config_init(&g_ap_config);
@@ -268,9 +316,11 @@ int ap_start(void) {
   ap_slotdata * sd = ap_slotdata_writable();
   ap_slotdata_init(sd);
 
-  int result = load_config(AP_CONFIGNAME, &g_ap_config);
-  if (result) { return result; }
-  if (g_ap_config.offline[0]) { return ap_start_offline(g_ap_config.offline); }
+  if (load_config(AP_CONFIGNAME, &g_ap_config)) { return; }
+  if (g_ap_config.offline[0]) {
+    ap_start_offline(g_ap_config.offline);
+    return;
+  }
 
   std::string uuid = ap_get_uuid("uuid");          // persists a uuid in a file
   std::string pw = g_ap_config.password, name = g_ap_config.slotname;
@@ -443,8 +493,6 @@ int ap_start(void) {
       g_ap_toast.pop_front(); // drop the oldest
     }
   });
-
-  return 0;
 }
 
 const ap_config * ap_getconfig(void) {

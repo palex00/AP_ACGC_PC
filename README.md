@@ -88,8 +88,8 @@ Graphics settings are stored in `settings.ini` and can be edited manually or thr
 
 Archipelago connection settings, such as the host, slotname, and password, go into a separate
 `ap_config.ini` file next to the exe. There is no in-game way to set these values (to keep
-things simple; Animal Crossing does not have a robust text entry builtin), so you must set
-these values for the game to function. See [docs/setup_en.md](docs/setup_en.md)
+things simple; Animal Crossing does not have a robust text entry builtin). The game creates the
+file on first run; fill it in and restart. See [docs/setup_en.md](docs/setup_en.md)
 
 ## Texture Packs
 

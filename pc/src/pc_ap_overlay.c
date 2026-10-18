@@ -76,6 +76,9 @@ static f32 pc_ap_draw_status(struct game_s* game) {
     case AP_CSTATE_OFFLINE:
       snprintf(output, sizeof(output), "OFFLINE");
       break;
+    case AP_CSTATE_BADCONFIG:
+      snprintf(output, sizeof(output), AP_CTRL_YELLOW "EDIT " AP_CONFIGNAME ": %s", cstate->last_refuse_reason);
+      break;
     case AP_CSTATE_SLOTREFUSED:
       snprintf(output, sizeof(output), AP_CTRL_RED "ERROR: %s@%s (%s)", config->slotname, config->host,
           cstate->last_refuse_reason);

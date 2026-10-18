@@ -10,8 +10,9 @@ extern "C" {
 #endif
 
 // Begin an AP client handler. The apclientpp library works off events, so you
-// setup the connection to begin with and then poll every frame.
-AP_API int ap_start(void);
+// setup the connection to begin with and then poll every frame. A missing
+// ap_config.ini is created; config problems end in AP_CSTATE_BADCONFIG.
+AP_API void ap_start(void);
 // Poll every frame
 AP_API void ap_poll(void);
 // Call on shutdown
@@ -39,6 +40,7 @@ AP_API const ap_config * ap_getconfig(void);
 #define AP_CSTATE_CONNECTED     3
 #define AP_CSTATE_RECONNECTING  4
 #define AP_CSTATE_OFFLINE       5 // no server: slot_data and the session id come from the offline json
+#define AP_CSTATE_BADCONFIG     6 // ap_config.ini (or its offline json) unfilled or bad, reason in last_refuse_reason
 #define AP_CSTATE_SLOTREFUSED   -1
 
 typedef struct {
@@ -50,7 +52,7 @@ typedef struct {
 AP_API int ap_roomplayer_valid(const ap_roomplayer * rp);
 
 typedef struct {
-  char last_refuse_reason[AP_MAXSTRING];
+  char last_refuse_reason[AP_MAXSTRING]; // also the config problem for AP_CSTATE_BADCONFIG
   char last_connect_error[AP_MAXSTRING];
   ap_roomplayer roomplayer; // only set once!!
   int state;

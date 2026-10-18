@@ -463,14 +463,7 @@ int main(int argc, char* argv[]) {
     pc_settings_load();
     // read settings off disk rather than use UI 
     // (this won't work well for non-PC systems...)
-    if(ap_start()) { // unfortunately, I use non-zero returns for error :)
-        const char* msg =
-            "Can't start: invalid AP config.\n\n"
-            "Look for '"AP_CONFIGNAME"' next to the executable.";
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                 "Animal Crossing - Invalid AP config", msg, g_pc_window);
-        return 1;
-    }
+    ap_start(); // config problems show on the overlay status line
     pc_keybindings_load();
     pc_platform_init();
     pc_crash_init_info();

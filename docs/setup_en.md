@@ -49,12 +49,13 @@ the host, or put it in your `Archipelago/Players` folder for a local generation.
 
 ## Connecting
 
-Create a file named `ap_config.ini` next to `AnimalCrossing.exe` (Linux: `AnimalCrossing`):
+The first time the game runs it creates `ap_config.ini` next to `AnimalCrossing.exe` (Linux: `AnimalCrossing`), and
+the title screen says `EDIT ap_config.ini: fill in host and slotname`. Fill it in and restart the game:
 
 ```ini
-host=archipelago.gg:12345
-slotname=YourSlotName
-password=
+host = archipelago.gg:12345
+slotname = YourSlotName
+password =
 ```
 
 - `host`: the server address and port. Use `ws://` for a local server (e.g. `ws://localhost:38281`).
@@ -62,7 +63,8 @@ password=
 - `password`: leave empty if the room has none.
 
 Then run the game. It connects on startup and shows its connection status
-on screen.
+on screen. If something in the file is wrong, the status line says what (`EDIT ap_config.ini: ...`) and Start
+Game stays blocked until it's fixed and the game restarted. Lines starting with `;` are comments.
 
 ### Text Client
 
