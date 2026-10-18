@@ -11,6 +11,7 @@
 #include "pc_ap_qol.h"
 #include "ef_effect_control.h"
 #include "sys_math.h"
+#include "m_room_type.h"
 #endif
 
 static void Shop_Goods_Actor_ct(ACTOR* actorx, GAME* game);
@@ -423,7 +424,7 @@ static void Shop_Goods_Actor_dt(ACTOR* actorx, GAME* game) {
 #ifdef TARGET_PC
 // Hidden Item Hints: a small sparkle (as over the money rock) every second over each good on the floor or
 // the shelves that would send a Catalogsanity check. Spread over frames by its unit, like the tree hints.
-// Furniture bigger than one unit sparkles at its first unit.
+// Furniture bigger than one unit sparkles anywhere over the units it covers.
 static void aSG_pc_catalog_hints(SHOP_GOODS_ACTOR* shop_goods, GAME* game) {
     GAME_PLAY* play = (GAME_PLAY*)game;
     int layer;
@@ -442,23 +443,44 @@ static void aSG_pc_catalog_hints(SHOP_GOODS_ACTOR* shop_goods, GAME* game) {
         }
 
         for (ut = 0; ut < UT_TOTAL_NUM; ut++) {
+            mRmTp_FtrPlaceInfoOne_t place[mRmTp_FTR_UNIT_MAX];
+            int ux = ut % UT_X_NUM;
+            int uz = ut / UT_X_NUM;
+            int x0 = ux;
+            int x1 = ux;
+            int z0 = uz;
+            int z1 = uz;
             xyz_t pos;
+            int i;
 
             if ((play->game_frame + ut * 7 + layer * 29) % PC_AP_QOL_SPARKLE_PERIOD != 0 ||
                 !pc_ap_catalog_is_check(fg_p[ut])) {
                 continue;
             }
 
-            // Same spot as aSG_DrawGoods; it drifts down and is gone at the ground
-            mFI_BkandUtNum2CenterWpos(&pos, shop_goods->bx, shop_goods->bz, ut % UT_X_NUM, ut / UT_X_NUM);
+            // Units the furniture covers (rotation included), as a box
+            if (mRmTp_GetFurnitureData(fg_p[ut], ux, uz, place) != mRmTp_FTRSIZE_NUM) {
+                for (i = 0; i < mRmTp_FTR_UNIT_MAX; i++) {
+                    if (place[i].exists) {
+                        x0 = place[i].ut_x < x0 ? place[i].ut_x : x0;
+                        x1 = place[i].ut_x > x1 ? place[i].ut_x : x1;
+                        z0 = place[i].ut_z < z0 ? place[i].ut_z : z0;
+                        z1 = place[i].ut_z > z1 ? place[i].ut_z : z1;
+                    }
+                }
+            }
+
+            // Anywhere between the box's first and last unit centers, plus a little; it drifts down and is
+            // gone at the ground. Height as aSG_DrawGoods.
+            mFI_BkandUtNum2CenterWpos(&pos, shop_goods->bx, shop_goods->bz, x0, z0);
+            pos.x += RANDOM_F((x1 - x0) * mFI_UT_WORLDSIZE_X_F) + RANDOM2_F(15.0f);
+            pos.z += RANDOM_F((z1 - z0) * mFI_UT_WORLDSIZE_Z_F) + RANDOM2_F(15.0f);
             if (layer == mCoBG_LAYER0) {
                 pos.y = mCoBG_GetBgY_OnlyCenter_FromWpos2(pos, 0.0f);
             } else {
                 pos.y = mCoBG_GetBgY_AngleS_FromWpos(NULL, pos, 0.0f);
             }
-            pos.x += RANDOM2_F(15.0f);
             pos.y += 25.0f + RANDOM_F(15.0f);
-            pos.z += RANDOM2_F(15.0f);
             eEC_CLIP->effect_make_proc(eEC_EFFECT_MAKE_HEM_KIRA, pos, 2, 0, game, RSV_NO, 0, 0);
         }
     }
