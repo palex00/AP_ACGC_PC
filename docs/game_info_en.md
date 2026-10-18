@@ -16,7 +16,9 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
   and found, ...) until you receive it, and then it's mailed to you. Fishing and bug-catching contests
   need the rod or net. The axe works as usual.
 - **House upgrades (Loansanity):** each upgrade needs a Progressive House item. Paying off loans
-  sends checks. Loans are much smaller than in vanilla by default.
+  sends checks. Loans are much smaller than in vanilla by default. With Fossil Loans (on by default),
+  logic expects the shovel and one dinosaur fossil item before the loans after the first (and the Statue
+  goal), so you can dig up fossils to sell.
 - **Museum (Museumsanity):** catching bugs and fish, digging up fossils and/or donating them sends
   checks (set per category). With the Museum goal, donation items fill the museum, not your own
   donations, each exhibit shows who sent it, and Blathers only takes a donation while its check is
@@ -46,7 +48,7 @@ Animal Crossing has no dungeons or keys, so the randomizer locks parts of everyd
 Filler items are Bell Credits, which pay off your current loan directly. They stop at 100 Bells owed: you pay
 the last 100 yourself at the post office, so you choose when the payoff (and its checks) happens. Credits that
 arrive between an upgrade and Nook's next loan are held, and once every loan is paid they go into your savings.
-Extra Bells (0 by default) adds real Bells on top: 10,000 and 30,000 Bell bags, mailed to you. They take filler
+Extra Bells (60,000 by default) adds real Bells on top: 10,000 and 30,000 Bell bags, mailed to you. They take filler
 slots before the Bell Credits.
 
 ## What is the goal?
@@ -72,9 +74,10 @@ Once your goals are done, a letter arrives telling you to listen to K.K. Slider 
 - Each seed gets its own save folder; existing towns can't be imported. You can't make new players:
   the game loads your player straight away.
 - The island is closed (Kapp'n won't take you) for now.
-- Pause menu pages: Date & Time, Catalog (your unlocked pools), Shells (beach checks per month), and
-  Bugs / Fish (what's around each month, which time slots, weather, what you already have, and your
-  town's spawn rate).
+- Pause menu: Date & Time and Save, plus an "AP" page (right under Resume) with Catalog (your unlocked
+  pools), Bugs / Fish (what's around each month, which time slots, weather, what you already have, and your
+  town's spawn rate), Shells (beach checks per month) and, with their goal, Furniture Set / Chess Set (every
+  piece: received, and in your house).
 - Checks made while disconnected are sent when you reconnect. If you quit before that, catches, digs
   and donations are lost; loans, favors and catalog checks are sent again next time.
 
@@ -88,9 +91,12 @@ Quality-of-life options, mostly on by default:
   move-outs from jumping around.
 - Bugs, fish and fossils can spawn evenly, or favor ones you still need.
 - No cockroaches, no weeds, more favors from villagers, shops always open, turnips never spoil.
-- Easier critter catch (longer bite window, slower bug meter, fish don't flee from running, slower bees).
-- Hidden bug hints: buried mole crickets, pill bug rocks, bagworm/spider trees and the money rock give
-  small visual hints when you're near.
+- Easier critter catch (longer bite window, fish don't flee from running, sea fish face the beach, bugs
+  notice you half as fast, slower bees, purple butterflies fly low).
+- Hidden bug hints: buried mole crickets, pill bug rocks and bagworm/spider trees give small visual hints
+  when you're near.
+- Hidden item hints: a sparkle now and then over the money rock and over trees with furniture, a present or
+  the golden shovel in them.
 - Coconuts sometimes wash up on the town beach.
 - Each date always has the same weather (vanilla odds), and the Date & Time page of the pause
   menu shows it for the date you pick. Event days and Nook's job can still override it. It always
@@ -101,6 +107,11 @@ Quality-of-life options, mostly on by default:
 
 Cosmetic options: town fruit, grass shape, train station, Town Day, starting shirt, starting
 villagers and a villager blacklist, and the stationery, signature and text of letters from Archipelago.
+
+## Updating
+
+Seeds, options files and saves from 0.5.0 on keep working with newer versions of the game and apworld. A seed
+made with a newer apworld than your game is refused on the title screen ("Seed needs a newer client").
 
 ## Fossil seasons
 

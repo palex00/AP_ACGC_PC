@@ -72,16 +72,22 @@ SDL2 game controllers are supported with automatic hotplug detection. Button map
 | `--verbose` | Enable diagnostic logging |
 | `--no-framelimit` | Disable frame limiter (unlocked FPS) |
 | `--model-viewer [index]` | Launch debug model viewer (structures, NPCs, fish) |
-| `--time HOUR` | Override in-game hour (0-23) |
+| `--sound-test` | Launch the sound test (songs, loops, effects) instead of the game |
+| `--crash-test` | Crash on purpose after startup, to check the crash report |
+| `--help` | List every option |
+
+Debug only (they bypass Timesanity and the other time rules): `--time H[:M[:S]]` and `--date M/D[/Y]` override
+the in-game time and date.
 
 ## Settings
 
 Graphics settings are stored in `settings.ini` and can be edited manually or through the in-game options menu:
 
-- Resolution (up to 4K)
-- Fullscreen toggle
+- Render scale (Auto by default, 1x-6x, or Window): the game draws at a multiple of 480 lines and is scaled
+  down to the window. This is the quality setting.
+- Fullscreen (desktop resolution), Borderless or Windowed (remembers the size you drag the window to)
 - VSync
-- MSAA (anti-aliasing)
+- MSAA (anti-aliasing; off by default, applies right away)
 - Texture Loading/Caching (No need to enable if you aren't using a texture pack)
 
 ### AP settings
@@ -113,8 +119,8 @@ for a specific session.
 Normally, you cannot start a game until you connect to Archipelago. This is required to get
 information from the server for your save file. However, if you are finished with your
 multiworld but still want to play on your old save file, you can do this with "offline mode".
-
-More info to come.
+It also lets you play with only the quality-of-life options, without a multiworld. See
+[Playing Without a Server](docs/setup_en.md#playing-without-a-server) in the setup guide.
 
 ## AI Notice
 
