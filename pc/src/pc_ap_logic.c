@@ -239,6 +239,10 @@ static void pc_ap_time_reload_update(void);
 void pc_ap_update(void) {
   if(!g_ap.initialized && pc_ap_start_allowed()) {
     pc_ap_init();
+    // The save folder is known now: its AP settings can be changed from the title screen
+    const ap_connectstate* cs = ap_getconnectstate();
+    pc_card_dir_set_root_ap(cs->roomplayer.seed, cs->roomplayer.team, cs->roomplayer.player);
+    pc_ap_settings_open();
   }
   pc_ap_time_reload_update();
 }

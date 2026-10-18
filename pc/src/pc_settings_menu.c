@@ -133,11 +133,12 @@ static const Tab s_tabs[] = {
     { "Audio",    TAB_ITEMS(tab_audio_items) },
     { "Controls", TAB_ITEMS(tab_controls_items) },
     { "Gameplay", TAB_ITEMS(tab_gameplay_items) },
-    { "AP",       TAB_ITEMS(tab_ap_items) }, /* last: hidden until a save is loaded */
+    { "AP",       TAB_ITEMS(tab_ap_items) }, // last: grayed out and skipped until available
 };
 #define TAB_COUNT ((int)(sizeof(s_tabs) / sizeof(s_tabs[0])))
 
-/* Tabs shown now: the AP tab only once a save's AP settings are loaded */
+// Tabs the cursor can reach: the AP tab only once the slot's AP settings are loaded
+// (slot connected / offline json read, pc_ap_update)
 static int tab_count(void) {
     return pc_ap_settings_available() ? TAB_COUNT : TAB_COUNT - 1;
 }
@@ -163,6 +164,8 @@ static int        s_pending_dirty = 0;
 /* Same for the AP tab (pc_ap_settings_apply) */
 static pc_ap_settings s_ap_pending;
 static pc_ap_settings s_ap_current;
+// The AP settings were loaded when the snapshot was taken (else s_ap_* are retaken once they are)
+static int s_ap_snapshot_available;
 
 /* The current tab's rows (scrolls when it has more than SETTINGS_VISIBLE) */
 static pc_menu_list s_list;
@@ -332,6 +335,7 @@ static void snapshot(void) {
     s_pending = g_pc_settings;
     pc_ap_settings_get(&s_ap_current);
     s_ap_pending = s_ap_current;
+    s_ap_snapshot_available = pc_ap_settings_available();
     s_pending_dirty = 0;
 }
 
@@ -681,6 +685,12 @@ static int nav_horizontal(int dir) {
         /* Tab row: clamp at the ends, no wrap. */
         if (dir < 0) { if (s_tab > 0) s_tab--; }
         else         { if (s_tab < tab_count() - 1) s_tab++; }
+        // The slot connected while the menu was open: take its AP settings, not the slot-less ones
+        if (!s_ap_snapshot_available && pc_ap_settings_available()) {
+            pc_ap_settings_get(&s_ap_current);
+            s_ap_pending = s_ap_current;
+            s_ap_snapshot_available = 1;
+        }
         list_reset();
     } else if (s_sel < cur_item_count()) {
         item_cycle(s_tabs[s_tab].items[s_sel].id, dir);
@@ -848,7 +858,8 @@ static void draw_tab_row(struct game_s* game, f32 y) {
     int on_tab_row = (s_sel == -1);
 
     /* Pre-measure widths and total horizontal extent so we can centre. */
-    int count = tab_count();
+    int count = TAB_COUNT; // all drawn; the unreachable AP tab darker
+    int reachable = tab_count();
     int widths[TAB_COUNT];
     int total = 0;
     const int gap_px = 18;
@@ -865,7 +876,8 @@ static void draw_tab_row(struct game_s* game, f32 y) {
         int r, g, b, a;
         if (active && on_tab_row) { r = 255; g = 235; b = 120; a = 255; }
         else if (active)          { r = 255; g = 255; b = 255; a = 230; }
-        else                      { r = 160; g = 160; b = 160; a = 180; }
+        else if (t < reachable)   { r = 160; g = 160; b = 160; a = 180; }
+        else                      { r = 90;  g = 90;  b = 90;  a = 150; }
 
         /* Active tab + cursor-on-tab-row gets the full bump; active but
          * cursor-off-tab-row stays normal size (the white color already
