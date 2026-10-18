@@ -84,6 +84,8 @@ void pc_ap_catalogsanity_pick(const pc_ap_catalogsanity* c, int open, const pc_a
 // the current player's catalog (all items with catalogsanity off). Furniture
 // counts in any facing, stationery in any stack size.
 int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item);
+// Nonzero if item is in one of the first open pools and not in the catalog yet (a check)
+int pc_ap_catalogsanity_unregistered(const pc_ap_catalogsanity* c, int open, mActor_name_t item);
 
 // Wisp's reward from his lists (the game's table, EMPTY_NO-terminated each).
 // As a source with a new open-pool item left: a random one (any category).

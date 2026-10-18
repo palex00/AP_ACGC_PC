@@ -785,6 +785,13 @@ int pc_ap_catalog_pick(mActor_name_t* out, int n, const mActor_name_t* exist, in
   return 1;
 }
 
+int pc_ap_catalog_is_check(mActor_name_t item) {
+  if(g_ap.catalog.count == 0 || Common_Get(now_private) == NULL) {
+    return 0;
+  }
+  return pc_ap_catalogsanity_unregistered(&g_ap.catalog, pc_ap_catalogsanity_open_pools(&g_ap.catalog), item);
+}
+
 int pc_ap_catalog_item_allowed(mActor_name_t item) {
   if(pc_ap_ftr_blocked(item)) {
     return 0;

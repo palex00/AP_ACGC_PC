@@ -94,7 +94,8 @@ float pc_ap_qol_bee_speed_scale(void);
 // (aIMN_hide) and a hive drawn in bee trees (bg_item_common.c_inc).
 int pc_ap_qol_hidden_bug_hints(void);
 // Nonzero when hidden items give hints: a sparkle over the money rock and in trees holding furniture,
-// a present or the golden shovel (bg_item_common.c_inc bIT_pc_item_hints)
+// a present or the golden shovel (bg_item_common.c_inc bIT_pc_item_hints), and over Nook's goods that
+// would send a Catalogsanity check (ac_shop_goods.c aSG_pc_catalog_hints)
 int pc_ap_qol_hidden_item_hints(void);
 
 // Hidden Bug Hints: frames between wiggles of a bagworm's / spider's tree (aIMN_pc_hint)

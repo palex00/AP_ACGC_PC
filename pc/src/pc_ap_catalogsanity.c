@@ -135,6 +135,11 @@ int pc_ap_catalogsanity_allowed(const pc_ap_catalogsanity* c, mActor_name_t item
   return pc_ap_catalogsanity_index(c, item) < 0 || mSP_CollectCheck(item);
 }
 
+int pc_ap_catalogsanity_unregistered(const pc_ap_catalogsanity* c, int open, mActor_name_t item) {
+  int i = pc_ap_catalogsanity_index(c, item);
+  return i >= 0 && c->pool[i] < open && !mSP_CollectCheck(item);
+}
+
 // Clothes lists are blocks: any season, then spring, summer, autumn, winter
 // (cloth_season_cnt). pos is the index in one of the A/B/C lists.
 static int pc_ap_catalogsanity_in_season(int pos, int season) {

@@ -6,6 +6,12 @@
 #include "sys_matrix.h"
 #include "ac_my_room.h"
 #include "m_malloc.h"
+#ifdef TARGET_PC
+#include "pc_ap_logic.h"
+#include "pc_ap_qol.h"
+#include "ef_effect_control.h"
+#include "sys_math.h"
+#endif
 
 static void Shop_Goods_Actor_ct(ACTOR* actorx, GAME* game);
 static void Shop_Goods_Actor_dt(ACTOR* actorx, GAME* game);
@@ -414,10 +420,58 @@ static void Shop_Goods_Actor_dt(ACTOR* actorx, GAME* game) {
     }
 }
 
+#ifdef TARGET_PC
+// Hidden Item Hints: a small sparkle (as over the money rock) every second over each good on the floor or
+// the shelves that would send a Catalogsanity check. Spread over frames by its unit, like the tree hints.
+// Furniture bigger than one unit sparkles at its first unit.
+static void aSG_pc_catalog_hints(SHOP_GOODS_ACTOR* shop_goods, GAME* game) {
+    GAME_PLAY* play = (GAME_PLAY*)game;
+    int layer;
+    int ut;
+
+    if (!pc_ap_qol_hidden_item_hints()) {
+        return;
+    }
+
+    for (layer = mCoBG_LAYER0; layer <= mCoBG_LAYER1; layer++) {
+        mActor_name_t* fg_p = mFI_BkNum2UtFGTop_layer(shop_goods->bx, shop_goods->bz, layer);
+
+        // Shelves are only drawn in mode 1 (aSG_DrawGoodsPicture)
+        if (fg_p == NULL || (layer == mCoBG_LAYER1 && shop_goods->mode != 1)) {
+            continue;
+        }
+
+        for (ut = 0; ut < UT_TOTAL_NUM; ut++) {
+            xyz_t pos;
+
+            if ((play->game_frame + ut * 7 + layer * 29) % PC_AP_QOL_SPARKLE_PERIOD != 0 ||
+                !pc_ap_catalog_is_check(fg_p[ut])) {
+                continue;
+            }
+
+            // Same spot as aSG_DrawGoods; it drifts down and is gone at the ground
+            mFI_BkandUtNum2CenterWpos(&pos, shop_goods->bx, shop_goods->bz, ut % UT_X_NUM, ut / UT_X_NUM);
+            if (layer == mCoBG_LAYER0) {
+                pos.y = mCoBG_GetBgY_OnlyCenter_FromWpos2(pos, 0.0f);
+            } else {
+                pos.y = mCoBG_GetBgY_AngleS_FromWpos(NULL, pos, 0.0f);
+            }
+            pos.x += RANDOM2_F(15.0f);
+            pos.y += 25.0f + RANDOM_F(15.0f);
+            pos.z += RANDOM2_F(15.0f);
+            eEC_CLIP->effect_make_proc(eEC_EFFECT_MAKE_HEM_KIRA, pos, 2, 0, game, RSV_NO, 0, 0);
+        }
+    }
+}
+#endif
+
 static void Shop_Goods_Actor_move(ACTOR* actorx, GAME* game) {
     SHOP_GOODS_ACTOR* shop_goods = (SHOP_GOODS_ACTOR*)actorx;
 
     Shop_Goods_Actor_drop_move(shop_goods);
+#ifdef TARGET_PC
+    aSG_pc_catalog_hints(shop_goods, game);
+#endif
 }
 
 static void aSG_DrawGoods(GRAPH* graph, Global_light* glight, SHOP_GOODS_ACTOR* shop_goods, int bx, int bz, int ux,

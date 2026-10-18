@@ -211,6 +211,8 @@ int pc_ap_catalog_goal(void);
 int pc_ap_catalog_pool_items(int pool, mActor_name_t* out, int max);
 // Catalog page: first open pool with an item not in the current player's catalog, 0 if none
 int pc_ap_catalog_first_unfinished_pool(void);
+// Shop sparkle (ac_shop_goods.c): nonzero for an open-pool item not in the current player's catalog
+int pc_ap_catalog_is_check(mActor_name_t item);
 
 // Who is asking for random catalog items now (PC_AP_CATALOG_SOURCE_NOOK or an
 // AP_CATALOG_SOURCE_* bit; PC_AP_CATALOG_SOURCE_NONE = nobody): set around a

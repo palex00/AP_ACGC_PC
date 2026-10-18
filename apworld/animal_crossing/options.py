@@ -678,6 +678,7 @@ class HiddenItemHints(DefaultOnToggle):
     """
     A little sparkle now and then over the rock that gives Bells when you hit it, and in
     trees with furniture, a present or the golden shovel in them (not the ones with 100 Bells).
+    With Catalogsanity, goods in Nook's shop that would send a catalog check sparkle too.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Hidden Item Hints"
