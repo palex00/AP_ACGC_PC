@@ -180,6 +180,7 @@ void ap_slotdata_fill(ap_slotdata * sd, const nlohmann::json& slot_data) {
   sd->no_fishing_trash = read_bool(slot_data, "no_fishing_trash", 1);
   sd->easier_critter_catch = read_bool(slot_data, "easier_critter_catch", 1);
   sd->hidden_bug_hints = read_bool(slot_data, "hidden_bug_hints", 1);
+  sd->hidden_item_hints = read_bool(slot_data, "hidden_item_hints", 1);
   sd->skip_hra_talk = read_bool(slot_data, "skip_hra_talk", 1);
   sd->short_shop_talk = read_bool(slot_data, "short_shop_talk", 0);
   sd->shop_never_sells_out = read_bool(slot_data, "shop_never_sells_out", 0);

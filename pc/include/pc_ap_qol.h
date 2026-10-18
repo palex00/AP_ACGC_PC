@@ -91,12 +91,17 @@ float pc_ap_qol_bee_speed_scale(void);
 
 // Nonzero when hidden bugs give hints: a dirt clod over a buried mole cricket (aIKR_hide) or in
 // front of a pill bug's rock (aIDG_hide), a small wiggle of the tree a bagworm or spider hides in
-// (aIMN_hide), a hive drawn in bee trees and a sparkle over the money rock (bg_item_common.c_inc).
+// (aIMN_hide) and a hive drawn in bee trees (bg_item_common.c_inc).
 int pc_ap_qol_hidden_bug_hints(void);
+// Nonzero when hidden items give hints: a sparkle over the money rock and in trees holding furniture,
+// a present or the golden shovel (bg_item_common.c_inc bIT_pc_item_hints)
+int pc_ap_qol_hidden_item_hints(void);
 
+// Hidden Bug Hints: frames between wiggles of a bagworm's / spider's tree (aIMN_pc_hint)
+#define PC_AP_QOL_WIGGLE_PERIOD 80
 // Hidden Bug Hints: frames between dirt clods (mole cricket, pill bug)
 #define PC_AP_QOL_CLOD_PERIOD 75
-// Hidden Bug Hints: frames between sparkles over the money rock (bg_item_common.c_inc)
+// Hidden Item Hints: frames between sparkles over the money rock / an item tree (bg_item_common.c_inc)
 #define PC_AP_QOL_SPARKLE_PERIOD 60
 
 #ifdef __cplusplus

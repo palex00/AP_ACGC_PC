@@ -15,6 +15,7 @@ def slot_data(world) -> dict:
         "no_fishing_trash": o.no_fishing_trash.value,
         "easier_critter_catch": o.easier_critter_catch.value,
         "hidden_bug_hints": o.hidden_bug_hints.value,
+        "hidden_item_hints": o.hidden_item_hints.value,
         "skip_hra_talk": o.skip_hra_talk.value,
         "short_shop_talk": o.short_shop_talk.value,
         "shop_never_sells_out": o.shop_never_sells_out.value,

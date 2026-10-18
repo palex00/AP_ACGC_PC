@@ -98,6 +98,7 @@ typedef struct {
   int no_fishing_trash;       // fish never turn into a can, boot or tire
   int easier_critter_catch;   // longer fish hook window, bugs notice you slower
   int hidden_bug_hints;       // dirt pops up over mole crickets / by pill bug rocks, bagworm/spider trees wiggle
+  int hidden_item_hints;      // sparkles over the money rock and trees with furniture / a present / the golden shovel
   int skip_hra_talk;          // Nook never gives the Happy Room Academy talk
   int short_shop_talk;        // Nook's buy talk shortened (no filler, no raffle ticket talk)
   int shop_never_sells_out;   // bought shop items stay on the shelf (not grab bags)

@@ -296,7 +296,7 @@ static void aIMN_pc_hint(ACTOR* actorx, GAME* game) {
     if (!pc_ap_qol_hidden_bug_hints() || actorx->player_distance_xz > 400.0f) {
         return;
     }
-    if ((((GAME_PLAY*)game)->game_frame + ut_x * 7 + ut_z * 13) % 150 != 0) {
+    if ((((GAME_PLAY*)game)->game_frame + ut_x * 7 + ut_z * 13) % PC_AP_QOL_WIGGLE_PERIOD != 0) {
         return;
     }
     fg = mFI_GetUnitFG(actorx->home.position);

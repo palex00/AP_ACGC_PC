@@ -161,6 +161,7 @@ class AnimalCrossingWeb(WebWorld):
             options.NoFishingTrash,
             options.EasierCritterCatch,
             options.HiddenBugHints,
+            options.HiddenItemHints,
             options.SkipHRATalk,
             options.ShortShopTalk,
             options.ShopNeverSellsOut,

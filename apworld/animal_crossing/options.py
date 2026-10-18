@@ -407,7 +407,7 @@ class ExtraBells(Range):
     display_name = "Extra Bells (x10,000)"
     range_start = 0
     range_end = 100
-    default = 5
+    default = 6
 
 
 class Favorsanity(DefaultOnToggle):
@@ -672,6 +672,15 @@ class HiddenBugHints(DefaultOnToggle):
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Hidden Bug Hints"
+
+
+class HiddenItemHints(DefaultOnToggle):
+    """
+    A little sparkle now and then over the rock that gives Bells when you hit it, and in
+    trees with furniture, a present or the golden shovel in them (not the ones with 100 Bells).
+    Starting value only: change it in game in Settings > AP (kept per save).
+    """
+    display_name = "Hidden Item Hints"
 
 
 class SkipHRATalk(DefaultOnToggle):
@@ -1110,6 +1119,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     no_fishing_trash: NoFishingTrash
     easier_critter_catch: EasierCritterCatch
     hidden_bug_hints: HiddenBugHints
+    hidden_item_hints: HiddenItemHints
     skip_hra_talk: SkipHRATalk
     short_shop_talk: ShortShopTalk
     shop_never_sells_out: ShopNeverSellsOut

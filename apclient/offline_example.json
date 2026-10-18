@@ -45,6 +45,7 @@
   "short_shop_talk": 0,
   "shop_never_sells_out": 0,
   "hidden_bug_hints": 1,
+  "hidden_item_hints": 1,
   "coconuts_wash_up": 1,
   "normalized_time_travel": 1,
   "critter_odds": 2,

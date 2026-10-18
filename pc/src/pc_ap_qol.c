@@ -51,6 +51,10 @@ int pc_ap_qol_hidden_bug_hints(void) {
   return pc_ap_setting(PC_AP_SET_HIDDEN_BUG_HINTS);
 }
 
+int pc_ap_qol_hidden_item_hints(void) {
+  return pc_ap_setting(PC_AP_SET_HIDDEN_ITEM_HINTS);
+}
+
 int pc_ap_qol_short_shop_talk(void) {
   return pc_ap_setting(PC_AP_SET_SHORT_SHOP_TALK);
 }
