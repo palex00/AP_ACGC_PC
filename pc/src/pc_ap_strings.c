@@ -163,6 +163,27 @@ static int pc_ap_msg_short_shop_talk(int index, u8* buf, int len) {
     case 4250: // "No...? You're sure? Well, no matter! Feel free to keep browsing, hm?"
       len = pc_msg_cut(buf, len, "No", "Well, no matter!");
       return pc_msg_cut(buf, len, " Feel free", "\xCD" "\x7F"); // up to the final newline + end code
+    // Catalog orders: one page per message where it says something, then the menu
+    case 4262: // "This is your own personal catalog, X." [page] "Just specify ... all right? It's quite simple!"
+      len = pc_msg_cut(buf, len, "This is your own", "Just specify");
+      return pc_msg_cut(buf, len, "\x7F\x03\x06" "\xCD" "It's quite", "\x7F\x0E");
+    case 4263: // "Ho ho! That's X. Very fine, yes?" [page] price [page] "Would you care to order it?"
+      len = pc_msg_cut(buf, len, "Ho ho!", "That's ");
+      return pc_msg_cut(buf, len, "\x7F\x03\x06" "\xCD" "Very fine", "\x7F\x04" "\xCD" "\x7F\x02" "Including");
+    case 4264: // can't order: "No. That's not..." + 2 pages of apologies, "But... perhaps"
+      len = pc_msg_cut(buf, len, "\x7F\x03\x06" " No.", "\x7F\x04" "\xCD" "\x7F\x02" "How can");
+      len = pc_msg_cut(buf, len, "How can I put", "But...");
+      return pc_replace_msg_text(buf, len, "But...\x7F\x03\x08" "perhaps", "Perhaps");
+    case 4265: // "You don't want to place an order. Fine..." page
+      return pc_msg_cut(buf, len, "You don't want", "Is there anything");
+    case 4266: // ordered: "I'll bet you can't wait! Mail order is so fun..." page
+      return pc_msg_cut(buf, len, "I'll bet you", "So,");
+    case 4267: // not enough Bells: "I'm afraid I can't accept..." and "pay in advance" pages
+      return pc_msg_cut(buf, len, "I'm afraid", "So,");
+    case 4268: // order sheet full: 2 more sorry pages
+      return pc_msg_cut(buf, len, "I just can't", "Is there something");
+    case 4269: // furniture only: country and "no catalog" pages
+      return pc_msg_cut(buf, len, "You can only order", "Is there anything");
   }
   return len;
 }

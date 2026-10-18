@@ -697,7 +697,7 @@ class ShortShopTalk(Toggle):
     """
     Tom Nook keeps it short when you buy something in his shop: just the item, the
     price and "would you like it?". He still gives you raffle tickets, he just
-    doesn't talk about them.
+    doesn't talk about them. Catalog orders skip the small talk too.
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Short Shop Talk"
