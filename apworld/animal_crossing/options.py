@@ -956,6 +956,8 @@ class CritterOdds(Choice):
     from the journal or the museum) are 6 times as likely.
     Normalized and Dynamic: in the river's lake and waterfall acres, the fish that only live there get 3/4 of
     the spawns.
+    Normalized and Dynamic: sparse bug times (winter, spring nights) spawn a bug at least half the time an
+    acre rolls one (vanilla: as little as 17%).
     Starting value only: change it in game in Settings > AP (kept per save).
     """
     display_name = "Critter Odds"

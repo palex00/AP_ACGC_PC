@@ -68,6 +68,8 @@ typedef struct {
 // Normalized/dynamic fish: share of the spawns that lake-only fish get in the lake acre,
 // waterfall-only fish in the waterfall acre
 #define PC_AP_FISH_UNIQUE_SHARE 0.75f
+// Normalized/dynamic bugs: a spawn list totals at least this (of 100; vanilla winter is 17)
+#define PC_AP_BUG_MIN_TOTAL 50.0f
 
 // Bugs and fish per category (museum index = journal index = spawn table type)
 #define PC_AP_CRITTER_NUM 40
@@ -170,6 +172,8 @@ void pc_ap_museumsanity_fish_lock(const pc_ap_museumsanity* m, aSOG_gyoei_spawn_
 // (no boost for fish that can't spawn). Call before the odds; not for the island.
 void pc_ap_museumsanity_fish_unwant_locked(const pc_ap_museumsanity* m, const aSOG_gyoei_spawn_info_weight_f_c* rows,
                                            int n, u8 wanted[PC_AP_CRITTER_NUM]);
+// Bugs: as pc_ap_museumsanity_fish_spawns, then (normalized/dynamic) a list totalling less than
+// PC_AP_BUG_MIN_TOTAL gets its species rows raised to that total (fewer acres without a bug)
 void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 wanted[PC_AP_CRITTER_NUM],
                                       aSOI_insect_spawn_info_f_c* rows, int n);
 // Bug/Fish Availability (cat bugs or fish): find and donate checks of the open bugs or fish

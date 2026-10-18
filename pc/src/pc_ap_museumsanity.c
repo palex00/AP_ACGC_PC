@@ -589,10 +589,25 @@ void pc_ap_museumsanity_insect_spawns(const pc_ap_museumsanity* m, const u8 want
     }
   }
   pc_ap_spawn_factors(m->critter_odds, sum, wanted, factor);
+  f32 bugs = 0.0f;  // species rows, after the odds
+  f32 other = 0.0f; // spirit, island "nothing"
   for(int i = 0; i < n; i++) {
     int s = pc_ap_insect_species(rows[i].type);
     if(s >= 0) {
       rows[i].weight *= factor[s];
+      bugs += rows[i].weight;
+    } else {
+      other += rows[i].weight;
+    }
+  }
+  // aSOI_ins_get_idx rolls over 100 when the total is lower (the rest spawns nothing):
+  // raise the bugs so the list totals at least PC_AP_BUG_MIN_TOTAL
+  if(m->critter_odds != AP_CRITTER_ODDS_VANILLA && bugs > 0.0f && bugs + other < PC_AP_BUG_MIN_TOTAL) {
+    f32 scale = (PC_AP_BUG_MIN_TOTAL - other) / bugs;
+    for(int i = 0; i < n; i++) {
+      if(pc_ap_insect_species(rows[i].type) >= 0) {
+        rows[i].weight *= scale;
+      }
     }
   }
 }
