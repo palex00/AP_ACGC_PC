@@ -22,8 +22,10 @@
 // Single implementation of the vendored ini.h (pc/lib/ini) for the exe
 #define INI_IMPLEMENTATION
 #include "ini.h"
-#ifndef _WIN32
-#include <unistd.h> // chdir
+#ifdef _WIN32
+#include <io.h> // dup2
+#else
+#include <unistd.h> // chdir, dup2
 #endif
 
 /* prefer discrete GPU on laptops */
@@ -344,7 +346,8 @@ int main(int argc, char* argv[]) {
             printf("  --uber-shader       Disable shader specialization (single uber shader)\n");
             printf("  --crash-test        Crash on purpose after startup, to check the crash report\n");
             printf("  --debug             Debug probes: actors that jump far in one frame (actor_probe.txt),\n");
-            printf("                      butterflies stuck in place (butterfly_probe.txt)\n");
+            printf("                      butterflies stuck in place (butterfly_probe.txt); the log goes to\n");
+            printf("                      debug_log.txt (unless --verbose); \"DEBUG\" next to the version\n");
             printf("  --help, -h          Show this help message\n");
             return 0;
         } else if (strcmp(argv[i], "--framelimit") == 0) {
@@ -415,7 +418,14 @@ int main(int argc, char* argv[]) {
 
     /* Redirect stdout/stderr to NUL unless verbose — unbuffered terminal writes
      * are extremely slow on Windows and tank FPS. */
-    if (!g_pc_verbose && !g_pc_profile_enabled) {
+    if (g_pc_debug && !g_pc_verbose && !g_pc_profile_enabled) {
+        // --debug without a console: both into debug_log.txt next to the exe, buffered (no frame rate cost;
+        // the last lines before a crash can be missing)
+        if (freopen("debug_log.txt", "w", stdout) != NULL) {
+            dup2(fileno(stdout), fileno(stderr));
+            setvbuf(stderr, NULL, _IOFBF, 4096);
+        }
+    } else if (!g_pc_verbose && !g_pc_profile_enabled) {
 #ifdef _WIN32
         freopen("NUL", "w", stdout);
         freopen("NUL", "w", stderr);
@@ -426,6 +436,10 @@ int main(int argc, char* argv[]) {
     } else {
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
+    }
+    if (g_pc_debug) {
+        printf("[PC] debug mode (--debug): actor_probe.txt, butterfly_probe.txt%s\n",
+               g_pc_verbose || g_pc_profile_enabled ? "" : ", this log (debug_log.txt)");
     }
     pc_actor_probe_init();
 

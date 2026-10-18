@@ -9,6 +9,7 @@
 #include "pc_settings.h"
 #include "pc_settings_menu.h"
 #include "pc_pause_menu.h" // to get some of those juicy externs
+#include "pc_platform.h" // g_pc_debug
 #include "m_font.h"
 #include "m_museum_display.h"
 #include "m_common_data.h" // clip.animal_logo_clip
@@ -207,6 +208,10 @@ static void pc_ap_draw_version(struct game_s* game) {
     snprintf(output, sizeof(output), AP_CTRL_RED "v%s (!)", PC_AP_VERSION);
   } else {
     snprintf(output, sizeof(output), "v%s", PC_AP_VERSION);
+  }
+  if(g_pc_debug) {
+    size_t len = strlen(output);
+    snprintf(output + len, sizeof(output) - len, AP_CTRL_YELLOW " DEBUG");
   }
   pc_span_boxtext(game, output, _APO_RIGHT(output), _APO_BOTTOM(output), _APO_SCALE);
 }

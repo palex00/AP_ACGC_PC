@@ -701,7 +701,7 @@ static void aICH_probe(aINS_INSECT_ACTOR* insect, GAME* game) {
     f32 dz;
 
     if (l_aICH_probe_file == NULL) {
-        l_aICH_probe_file = fopen("butterfly_probe.txt", "a");
+        l_aICH_probe_file = fopen("butterfly_probe.txt", "w");
         if (l_aICH_probe_file == NULL) {
             return;
         }
