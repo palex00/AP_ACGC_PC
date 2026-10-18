@@ -117,6 +117,7 @@ class AnimalCrossingWeb(WebWorld):
         ]),
         OptionGroup("Loansanity", [
             options.Loansanity,
+            options.FossilLoans,
             options.TotalLoanChecks,
         ]),
         OptionGroup("Timesanity", [

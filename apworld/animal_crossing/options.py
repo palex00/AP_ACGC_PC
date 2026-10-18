@@ -365,6 +365,15 @@ class Loansanity(DefaultOnToggle):
     display_name = "Loansanity"
 
 
+class FossilLoans(DefaultOnToggle):
+    """
+    The loans after the first (and the Statue goal) also expect the shovel (with Tools in Pool) and one
+    dinosaur fossil item (with Progressive fossil availability), so you can dig up fossils to sell.
+    Off: only the Progressive House items.
+    """
+    display_name = "Fossil Loans"
+
+
 class TotalLoanChecks(Range):
     """
     Number of checks spread over the five loans, split by each loan's share of the total debt
@@ -1067,6 +1076,7 @@ class AnimalCrossingOptions(PerGameCommonOptions):
     shellsanity: Shellsanity
     beach_checks_per_month: BeachChecksPerMonth
     loansanity: Loansanity
+    fossil_loans: FossilLoans
     total_loan_checks: TotalLoanChecks
     timesanity: Timesanity
     starting_month: StartingMonth

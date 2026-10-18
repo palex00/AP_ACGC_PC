@@ -39,9 +39,12 @@ def precollected(world) -> list[str]:
 def classify(world, name: str):
     if name not in TOOLS:
         return None
-    # Progression when a museum category with checks needs it (only with Tools in Pool); bugs need the shovel too
+    # Progression when a museum category with checks needs it (only with Tools in Pool); bugs need the shovel too,
+    # and so do the loans after the first (loansanity.fossil_money_rule)
     categories = [c for c, tool in CATEGORY_TOOLS.items() if tool == name] + ([MUSEUM_BUG] if name == SHOVEL else [])
-    needed = world.options.tools_in_pool and any(world.museum_modes.get(c) for c in categories)
+    later_loans = world.options.loansanity and world.options.fossil_loans
+    needed = any(world.museum_modes.get(c) for c in categories) or (name == SHOVEL and later_loans)
+    needed = world.options.tools_in_pool and needed
     return ItemClassification.progression if needed else ItemClassification.useful
 
 

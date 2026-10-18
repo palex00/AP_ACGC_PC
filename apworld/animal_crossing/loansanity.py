@@ -1,10 +1,15 @@
 # Loansanity: paying off each loan sends checks (split by debt), and every house upgrade needs a Progressive
 # House. The loan amounts are patched even with Loansanity off. The Statue goal comes after the last loan.
+# Fossil Loans: loans after the first also need the shovel and a dinosaur fossil item (fossils to sell), so big
+# loans aren't left to early Bells alone.
+# Reads: world.fossil_series_items (fossil_availability.setup; rules only).
 # WARN: the client mirrors the ids (PC_AP_ITEM_PROGRESSIVE_HOUSE, PC_AP_LOC_LOAN_BASE in pc_ap_loansanity.h)!
 from BaseClasses import ItemClassification
 from worlds.generic.Rules import add_rule
 
 from . import timesanity
+from .fossil_availability import fossil_series_item_name
+from .tools_in_pool import SHOVEL
 
 PROGRESSIVE_HOUSE = "Progressive House"
 ITEMS = {PROGRESSIVE_HOUSE: 0x10000}
@@ -66,27 +71,58 @@ def classify(world, name: str):
     return ItemClassification.progression if name == PROGRESSIVE_HOUSE else None
 
 
+def fossil_money_rule(world):
+    # Fossil Loans, loans after the first: digging fossils to sell. The shovel only when it's an item (else Nook
+    # sells it), any dinosaur series item only when they exist (Progressive fossils, else every fossil can be dug
+    # up; "Single Fossils" doesn't count). None = no rule
+    if not world.options.fossil_loans:
+        return None
+    need_shovel = bool(world.options.tools_in_pool)
+    fossil_items = [name for name in world.fossil_series_items if name != fossil_series_item_name("Single")]
+    if not need_shovel and not fossil_items:
+        return None
+
+    def rule(state) -> bool:
+        if need_shovel and not state.has(SHOVEL, world.player):
+            return False
+        if fossil_items and not state.has_any(fossil_items, world.player):
+            return False
+        return True
+    return rule
+
+
 def rules(world) -> None:
     # Loan k only exists after k house upgrades (Progressive House x k); paying needs Bells, so selling needs an
     # open shop. Without Loansanity there are no loan checks (loan_checks is all 0).
     shop = timesanity.shop_open_rule(world)
+    fossil_money = fossil_money_rule(world)
     for k in range(len(LOANS)):
         for j in range(1, world.loan_checks[k] + 1):
             location = world.get_location(loan_location_name(k, j))
             if k > 0:
                 add_rule(location, lambda state, k=k: state.has(PROGRESSIVE_HOUSE, world.player, k))
+                if fossil_money:
+                    add_rule(location, fossil_money)
             if shop:
                 add_rule(location, shop)
 
 
 def statue_goal(world):
-    # The statue comes after the last loan, which needs every house upgrade
-    return lambda state: state.has(PROGRESSIVE_HOUSE, world.player, len(LOANS) - 1)
+    # The statue comes after the last loan, which needs every house upgrade and the fossil money rule
+    fossil_money = fossil_money_rule(world)
+
+    def goal(state) -> bool:
+        if not state.has(PROGRESSIVE_HOUSE, world.player, len(LOANS) - 1):
+            return False
+        return fossil_money is None or fossil_money(state)
+    return goal
 
 
 def slot_data(world) -> dict:
     return {
         "loans": world.loans,
         "loansanity": world.options.loansanity.value,
+        # Logic only (the client doesn't read it); for Universal Tracker
+        "fossil_loans": world.options.fossil_loans.value,
         "loan_checks": world.loan_checks,
     }
